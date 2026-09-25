@@ -3,6 +3,7 @@ package dev.samson.s24root
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
@@ -61,7 +62,14 @@ internal fun stageVerified(
     expectedSha256: String,
     label: String,
 ): File {
-    val temporary = File(destination.parentFile, "${destination.name}.part")
+    // createTempFile silently stages into java.io.tmpdir when the directory is
+    // null, which would make the move below cross-device and quietly give up
+    // the atomicity it documents. A bare relative File has no parent.
+    val directory = requireNotNull(destination.parentFile) { "destination must have a parent directory" }
+    // A unique scratch name, not a fixed one: a leftover file from an
+    // interrupted run, or a concurrent writer, would otherwise be renamed into
+    // the destination by whichever process finished last.
+    val temporary = File.createTempFile("${destination.name}.", ".part", directory)
     try {
         var total = 0L
         source.use { input ->
@@ -81,7 +89,7 @@ internal fun stageVerified(
         if (sha256OrNull(temporary) != expectedSha256) {
             throw PayloadIntegrityException(PayloadFailure.DigestMismatch, label)
         }
-        publish(temporary, destination, label)
+        publish(temporary, destination, expectedSha256, label)
     } finally {
         // A failed or abandoned copy must not leave its scratch file behind to
         // be mistaken for a staged payload on the next run.
@@ -90,7 +98,12 @@ internal fun stageVerified(
     return destination
 }
 
-private fun publish(temporary: File, destination: File, label: String) {
+private fun publish(
+    temporary: File,
+    destination: File,
+    expectedSha256: String,
+    label: String,
+) {
     try {
         Files.move(
             temporary.toPath(),
@@ -98,6 +111,16 @@ private fun publish(temporary: File, destination: File, label: String) {
             StandardCopyOption.REPLACE_EXISTING,
             StandardCopyOption.ATOMIC_MOVE,
         )
+    } catch (error: AtomicMoveNotSupportedException) {
+        // Some filesystems cannot rename atomically. Fall back to a plain
+        // replace, then re-verify what actually landed, so the destination is
+        // still only ever the verified bytes.
+        if (!runCatching {
+            Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            true
+        }.getOrDefault(false) || sha256OrNull(destination) != expectedSha256) {
+            throw PayloadIntegrityException(PayloadFailure.FinalizeFailed, label).also { it.initCause(error) }
+        }
     } catch (error: Throwable) {
         throw PayloadIntegrityException(PayloadFailure.FinalizeFailed, label).also { it.initCause(error) }
     }

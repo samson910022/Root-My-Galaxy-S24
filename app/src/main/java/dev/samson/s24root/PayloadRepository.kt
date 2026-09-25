@@ -8,6 +8,9 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.nio.file.AtomicMoveNotSupportedException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -95,6 +98,10 @@ class PayloadRepository(
             context.getString(R.string.artifact_kernelsu),
             onProgress,
         )
+        // Read-only is not load-bearing — the app owns these files and can
+        // always re-chmod them. Os.chmod is a void native call that throws on
+        // failure, so a bad mode surfaces here rather than silently leaving the
+        // file group- or world-writable.
         Os.chmod(exploit.absolutePath, PAYLOAD_MODE)
         Os.chmod(kernelSu.absolutePath, PAYLOAD_MODE)
         return VerifiedPayloads(profile, exploit, kernelSu)
@@ -191,7 +198,27 @@ class PayloadRepository(
         onProgress: (String) -> Unit,
     ): File {
         onProgress(context.getString(R.string.repo_downloading, label))
-        val temporary = File(destination.parentFile, "${destination.name}.part")
+        // Unique per call, and in the destination's own directory, so two runs
+        // cannot share one scratch file and the publish below can be a rename
+        // on the same filesystem.
+        val temporary = File.createTempFile("${destination.name}.", ".part", requireNotNull(destination.parentFile))
+        try {
+            downloadInto(artifact, destination, temporary, label, onProgress)
+        } finally {
+            // The scratch name is unique per attempt, so without this every
+            // failed download would strand another file in filesDir forever.
+            temporary.delete()
+        }
+        return destination
+    }
+
+    private fun downloadInto(
+        artifact: RemoteArtifact,
+        destination: File,
+        temporary: File,
+        label: String,
+        onProgress: (String) -> Unit,
+    ) {
         val connection = open(artifact.url)
         require(connection.contentLengthLong == -1L || connection.contentLengthLong == artifact.size) {
             context.getString(R.string.repo_size_mismatch, label)
@@ -214,12 +241,25 @@ class PayloadRepository(
         }
         connection.disconnect()
         require(total == artifact.size) { context.getString(R.string.repo_incomplete, label) }
-        if (destination.exists()) destination.delete()
-        require(temporary.renameTo(destination)) {
-            context.getString(R.string.repo_finalize_failed, label)
+        // Rename rather than delete-then-rename: the delete left a window in
+        // which the destination did not exist, so a concurrent reader could see
+        // no staged artifact at all. replaceExisting falls back to a copy where
+        // a rename is not possible.
+        val published = try {
+            Files.move(
+                temporary.toPath(),
+                destination.toPath(),
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.ATOMIC_MOVE,
+            )
+            true
+        } catch (_: AtomicMoveNotSupportedException) {
+            runCatching {
+                Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }.isSuccess
         }
+        require(published) { context.getString(R.string.repo_finalize_failed, label) }
         onProgress(context.getString(R.string.repo_verified, label))
-        return destination
     }
 
     private fun resolveMainCommit(): String {

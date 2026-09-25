@@ -56,7 +56,7 @@
     <string name="step_ksu_detail">Late-load 模組並驗證控制通道</string>
     <string name="phase_checking">正在檢查支援的裝置與韌體</string>
     <string name="phase_ready">可以開始安裝</string>
-    <string name="phase_exploiting">可能需要 10 分鐘或更長時間，裝置可能會發燙或停止回應。</string>
+    <string name="phase_exploiting">可能需要 10 分鐘或更長時間；若裝置需要多次嘗試，最長約 50 分鐘。裝置可能會發燙或停止回應。</string>
     <string name="phase_loading_ksu">正在使用 bootstrap root 載入 KernelSU</string>
     <string name="phase_installed">KernelSU 模組與控制通道已驗證</string>
     <string name="phase_failed">請在下方日誌中查看失敗位置</string>
@@ -77,8 +77,8 @@
     <string name="log_ksu_staged">[+] KernelSU 暫存完成</string>
     <string name="log_ksu_control_verified">[+] KernelSU 控制通道已驗證</string>
     <string name="error_helper_unavailable">無法執行 bootstrap helper</string>
-    <string name="error_exploit_stalled">Exploit 日誌已 90 秒未更新</string>
-    <string name="error_exploit_timeout">Exploit 超過 15 分鐘限制</string>
+    <string name="error_exploit_stalled">helper 已停止，但 payload 以分離狀態執行，可能仍在寫入核心。請讓應用程式保持前景執行，並在重試前檢查裝置。</string>
+    <string name="error_exploit_timeout">helper 已停止，但 payload 以分離狀態執行，可能仍在寫入核心。請讓應用程式保持前景執行，並在重試前檢查裝置。</string>
     <string name="error_payload_exit">Payload 執行錯誤：%1$d%2$s</string>
     <string name="error_success_marker">未找到 exploit 成功標記</string>
     <string name="error_ksu_stage">KernelSU 暫存失敗：%1$s</string>
@@ -155,4 +155,5 @@
         <item quantity="other">這些執行紀錄及其日誌將被永久刪除。</item>
     </plurals>
     <string name="history_delete">刪除</string>
+    <string name="install_already_running">已有一個安裝工作正在進行中，請等待其結束。</string>
 </resources>

@@ -80,7 +80,7 @@
     <string name="step_ksu_detail">Modulni kechiktirib yuklash va boshqaruv kanalini tekshirish</string>
     <string name="phase_checking">Mos keladigan qurilma va proshivka tekshirilmoqda</string>
     <string name="phase_ready">O\'rnatishga tayyor</string>
-    <string name="phase_exploiting">Bu jarayon 10 daqiqa yoki undan ko\'proq vaqt olishi mumkin. Qurilmangiz qizib ketishi yoki qotib qolishi mumkin.</string>
+    <string name="phase_exploiting">Bu jarayon 10 daqiqa yoki undan ko\'proq vaqt olishi mumkin, bir necha urinish talab qilinsa taxminan 50 daqiqagacha. Qurilmangiz qizib ketishi yoki qotib qolishi mumkin.</string>
     <string name="phase_loading_ksu">Olingan boshlang\'ich root orqali KernelSU yuklanmoqda</string>
     <string name="phase_installed">KernelSU moduli va boshqaruv kanali muvaffaqiyatli tekshirildi</string>
     <string name="phase_failed">Xatolik sababini quyidagi jurnalda (logda) ko\'rib chiqing</string>
@@ -98,8 +98,8 @@
     <string name="log_ksu_staged">[+] KernelSU tayyorgarligi yakunlandi</string>
     <string name="log_ksu_control_verified">[+] KernelSU boshqaruv kanali tekshirildi</string>
     <string name="error_helper_unavailable">Bootstrap yordamchisini ishga tushirib bo\'lmaydi</string>
-    <string name="error_exploit_stalled">Eksployt jurnali 90 soniya davomida yangilanmadi</string>
-    <string name="error_exploit_timeout">Eksployt 15 daqiqalik vaqt chegarasidan oshib ketdi</string>
+    <string name="error_exploit_stalled">Yordamchi to\'xtatildi, lekin payload alohida ishlayapti va yadroga hali ham yozishi mumkin. Qayta urinishdan oldin ilovani oldinga suring va qurilmani tekshiring.</string>
+    <string name="error_exploit_timeout">Yordamchi to\'xtatildi, lekin payload alohida ishlayapti va yadroga hali ham yozishi mumkin. Qayta urinishdan oldin ilovani oldinga suring va qurilmani tekshiring.</string>
     <string name="error_payload_exit">Paketni ishga tushirishda xatolik yuz berdi: %1$d%2$s</string>
     <string name="error_success_marker">Eksployt muvaffaqiyatli yakunlanganligi haqida belgilar topilmadi</string>
     <string name="error_ksu_stage">KernelSU tayyorgarligida xatolik yuz berdi: %1$s</string>
@@ -153,4 +153,5 @@
         <item quantity="other">Bu jarayonlar va ularning jurnallari butunlay o\'chiriladi.</item>
     </plurals>
     <string name="history_delete">O\'chirish</string>
+    <string name="install_already_running">O\'rnatish allaqachon davom etmoqda. Tugashini kutib turing.</string>
 </resources>

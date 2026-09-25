@@ -91,8 +91,10 @@ data class TargetProfile(
      */
     fun passesFirmwareGate(snapshot: DeviceSnapshot): Boolean = !bundled || matches(snapshot)
 
-    fun matchesDevice(snapshot: DeviceSnapshot): Boolean =
-        models.any { it.equals(snapshot.model, ignoreCase = true) }
+    fun matchesDevice(snapshot: DeviceSnapshot): Boolean {
+        val model = snapshot.model.trim()
+        return models.any { it.trim().equals(model, ignoreCase = true) }
+    }
 
     fun matchesKernelVersion(snapshot: DeviceSnapshot): Boolean =
         snapshot.kernelVersion in kernelVersions

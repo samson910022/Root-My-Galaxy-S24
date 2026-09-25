@@ -86,7 +86,7 @@
     <string name="phase_checking">Checking the supported device and firmware</string>
     <string name="phase_ready">Ready to install</string>
     <string name="phase_downloading">Acquiring payloads</string>
-    <string name="phase_exploiting">This may take 10 minutes or longer. Your device may become hot or stop responding.</string>
+    <string name="phase_exploiting">This may take 10 minutes or longer, and up to about 50 minutes if the device needs repeated attempts. Your device may become hot or stop responding.</string>
     <string name="phase_loading_ksu">Loading KernelSU with the acquired bootstrap root</string>
     <string name="phase_installed">KernelSU module and control channel verified</string>
     <string name="phase_failed">Review the failure point in the log below</string>
@@ -107,8 +107,8 @@
     <string name="log_ksu_staged">[+] KernelSU staging complete</string>
     <string name="log_ksu_control_verified">[+] KernelSU control channel verified</string>
     <string name="error_helper_unavailable">The bootstrap helper is not executable</string>
-    <string name="error_exploit_stalled">The exploit log did not advance for 90 seconds</string>
-    <string name="error_exploit_timeout">The exploit exceeded the 15-minute limit</string>
+    <string name="error_exploit_stalled">No exploit output for a long time. The helper was stopped, but the payload runs detached and may still be writing to the kernel. Leave the app in the foreground and check the device before retrying.</string>
+    <string name="error_exploit_timeout">The exploit exceeded its time budget. The helper was stopped, but the payload runs detached and may still be writing to the kernel. Leave the app in the foreground and check the device before retrying.</string>
     <string name="error_payload_exit">Payload execution failed: %1$d%2$s</string>
     <string name="error_success_marker">Exploit success markers were not found</string>
     <string name="error_ksu_stage">KernelSU staging failed: %1$s</string>
@@ -169,4 +169,5 @@
         <item quantity="one">This run and its log will be permanently removed.</item>
         <item quantity="other">These runs and their logs will be permanently removed.</item>
     </plurals>
+    <string name="install_already_running">An install is already running. Wait for it to finish.</string>
 </resources>

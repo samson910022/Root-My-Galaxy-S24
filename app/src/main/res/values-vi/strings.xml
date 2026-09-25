@@ -56,7 +56,7 @@
     <string name="step_ksu_detail">Nạp mô-đun muộn và xác minh kênh điều khiển</string>
     <string name="phase_checking">Đang kiểm tra thiết bị và firmware được hỗ trợ</string>
     <string name="phase_ready">Sẵn sàng cài đặt</string>
-    <string name="phase_exploiting">Việc này có thể mất từ 10 phút trở lên. Thiết bị của bạn có thể nóng hoặc ngừng phản hồi.</string>
+    <string name="phase_exploiting">Việc này có thể mất từ 10 phút trở lên, và khoảng 50 phút nếu thiết bị cần thử lại nhiều lần. Thiết bị của bạn có thể nóng hoặc ngừng phản hồi.</string>
     <string name="phase_loading_ksu">Đang nạp KernelSU với quyền root khởi tạo đã giành được</string>
     <string name="phase_installed">Đã xác minh mô-đun KernelSU và kênh điều khiển</string>
     <string name="phase_failed">Xem lại điểm lỗi trong nhật ký bên dưới</string>
@@ -74,8 +74,8 @@
     <string name="log_ksu_staged">[+] Đã chuẩn bị KernelSU</string>
     <string name="log_ksu_control_verified">[+] Đã xác minh kênh điều khiển KernelSU</string>
     <string name="error_helper_unavailable">Không thể chạy trình trợ giúp khởi tạo</string>
-    <string name="error_exploit_stalled">Nhật ký khai thác không cập nhật trong 90 giây</string>
-    <string name="error_exploit_timeout">Khai thác vượt quá giới hạn 15 phút</string>
+    <string name="error_exploit_stalled">Trình trợ giúp đã dừng, nhưng payload chạy tách rời và vẫn có thể đang ghi vào kernel. Hãy để ứng dụng ở chế độ nền trước và kiểm tra thiết bị trước khi thử lại.</string>
+    <string name="error_exploit_timeout">Trình trợ giúp đã dừng, nhưng payload chạy tách rời và vẫn có thể đang ghi vào kernel. Hãy để ứng dụng ở chế độ nền trước và kiểm tra thiết bị trước khi thử lại.</string>
     <string name="error_payload_exit">Lỗi thực thi payload: %1$d%2$s</string>
     <string name="error_success_marker">Không tìm thấy dấu hiệu thành công của khai thác</string>
     <string name="error_ksu_stage">Chuẩn bị KernelSU thất bại: %1$s</string>
@@ -142,4 +142,5 @@
         <item quantity="other">Các lần chạy này và nhật ký của chúng sẽ bị xóa vĩnh viễn.</item>
     </plurals>
     <string name="history_delete">Xóa</string>
+    <string name="install_already_running">Đã có tiến trình cài đặt đang chạy. Hãy đợi nó kết thúc.</string>
 </resources>

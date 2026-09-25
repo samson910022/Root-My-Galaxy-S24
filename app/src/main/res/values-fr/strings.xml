@@ -62,7 +62,7 @@
     <string name="step_ksu_detail">Charger le module tardivement et vérifier le canal de contrôle</string>
     <string name="phase_checking">Vérification de l\'appareil et du firmware pris en charge</string>
     <string name="phase_ready">Prêt à installer</string>
-    <string name="phase_exploiting">Cela peut prendre 10 minutes ou plus. Votre appareil peut chauffer ou ne plus répondre.</string>
+    <string name="phase_exploiting">Cela peut prendre 10 minutes ou plus, jusqu\'à environ 50 minutes si l\'appareil doit réessayer. Votre appareil peut chauffer ou ne plus répondre.</string>
     <string name="phase_loading_ksu">Chargement de KernelSU avec les droits root de base acquis</string>
     <string name="phase_installed">Module KernelSU et canal de contrôle vérifiés</string>
     <string name="phase_failed">Vérifiez le point d\'échec dans le journal ci-dessous</string>
@@ -80,8 +80,8 @@
     <string name="log_ksu_staged">[+] Préparation de KernelSU terminée</string>
     <string name="log_ksu_control_verified">[+] Canal de contrôle KernelSU vérifié</string>
     <string name="error_helper_unavailable">L\'assistant de démarrage n\'est pas exécutable</string>
-    <string name="error_exploit_stalled">Le journal de l\'exploit n\'a pas avancé depuis 90 secondes</string>
-    <string name="error_exploit_timeout">L\'exploit a dépassé la limite de 15 minutes</string>
+    <string name="error_exploit_stalled">Le helper a été arrêté, mais la charge utile s\'exécute de façon détachée et écrit peut-être encore dans le noyau. Laissez l\'application au premier plan et vérifiez l\'appareil avant de réessayer.</string>
+    <string name="error_exploit_timeout">Le helper a été arrêté, mais la charge utile s\'exécute de façon détachée et écrit peut-être encore dans le noyau. Laissez l\'application au premier plan et vérifiez l\'appareil avant de réessayer.</string>
     <string name="error_payload_exit">L\'exécution de la charge utile a échoué : %1$d%2$s</string>
     <string name="error_success_marker">Les marqueurs de succès de l\'exploit n\'ont pas été trouvés</string>
     <string name="error_ksu_stage">La préparation de KernelSU a échoué : %1$s</string>
@@ -148,4 +148,5 @@
         <item quantity="other">Ces exécutions et leurs journaux seront définitivement supprimés.</item>
     </plurals>
     <string name="history_delete">Supprimer</string>
+    <string name="install_already_running">Une installation est déjà en cours. Attendez qu\'elle se termine.</string>
 </resources>

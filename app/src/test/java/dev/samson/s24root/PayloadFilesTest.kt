@@ -91,7 +91,7 @@ class PayloadFilesTest {
             val digest = stageVerified("payload".byteInputStream(), destination, 7, shaOf("payload"), "exploit")
             assertEquals(destination, digest)
             assertEquals("payload", destination.readText())
-            assertFalse("the .part file must not survive", File(directory, "cve.so.part").exists())
+            assertNoScratchLeft(directory)
         }
     }
 
@@ -160,9 +160,7 @@ class PayloadFilesTest {
     fun stageVerifiedCleansUpTheScratchFileWhenVerificationFails() {
         withDirectory { directory ->
             val destination = File(directory, "cve.so")
-            val scratch = File(directory, "cve.so.part")
             for (expected in listOf(PayloadFailure.Incomplete, PayloadFailure.DigestMismatch)) {
-                scratch.writeText("leftover from an earlier run")
                 val failure = failureOf {
                     stageVerified(
                         if (expected == PayloadFailure.Incomplete) "ab".byteInputStream() else "xyz".byteInputStream(),
@@ -173,18 +171,17 @@ class PayloadFilesTest {
                     )
                 }
                 assertEquals(expected, failure)
-                assertFalse("scratch file survived $expected", scratch.exists())
+                assertNoScratchLeft(directory)
             }
             // The over-limit path aborts mid-stream, which is the case most
             // likely to leave a large scratch file behind.
-            scratch.writeText("leftover from an earlier run")
             assertEquals(
                 PayloadFailure.SizeExceeded,
                 failureOf {
                     stageVerified(ByteArray(4096) { 0x5A }.inputStream(), destination, 8, shaOf("payload"), "exploit")
                 },
             )
-            assertFalse("scratch file survived SizeExceeded", scratch.exists())
+            assertNoScratchLeft(directory)
         }
     }
 
@@ -211,6 +208,12 @@ class PayloadFilesTest {
         }
     }
 
+    /** No scratch file may remain, whatever it ended up being called. */
+    private fun assertNoScratchLeft(directory: File) {
+        val leftovers = directory.listFiles()?.filter { it.name.endsWith(".part") }.orEmpty()
+        assertTrue("scratch files left behind: ${leftovers.map(File::getName)}", leftovers.isEmpty())
+    }
+
     private fun shaOf(value: String): String = sha256(value.byteInputStream())
 
     private fun failureOf(block: () -> Unit): PayloadFailure {
@@ -227,4 +230,54 @@ class PayloadFilesTest {
             directory.deleteRecursively()
         }
     }
+
+    /**
+     * The property the unique scratch name exists for. This calls the production
+     * [stageVerified] from two threads at once: if they shared a scratch file
+     * their writes would interleave and the published file could be a mixture
+     * that neither run's digest ever matched. The two payloads differ, so the
+     * destination must end up as exactly one of them.
+     */
+    @Test
+    fun concurrentStagingsPublishOnlyWholeVerifiedPayloads() {
+        val directory = Files.createTempDirectory("s24root-race").toFile()
+        try {
+            val destination = File(directory, "payload.bin")
+            val first = "A".repeat(64 * 1024)
+            val second = "B".repeat(64 * 1024)
+            val start = java.util.concurrent.CyclicBarrier(2)
+            val failures = java.util.Collections.synchronizedList(mutableListOf<Throwable>())
+
+            val workers = listOf(first, second).map { payload ->
+                Thread {
+                    try {
+                        start.await(10, java.util.concurrent.TimeUnit.SECONDS)
+                        stageVerified(
+                            payload.byteInputStream(),
+                            destination,
+                            payload.length.toLong(),
+                            shaOf(payload),
+                            "payload",
+                        )
+                    } catch (error: Throwable) {
+                        failures += error
+                    }
+                }
+            }
+            workers.forEach { it.start() }
+            workers.forEach { it.join(30_000) }
+            assertTrue("a staging worker threw: $failures", failures.isEmpty())
+
+            val published = destination.readText()
+            assertTrue(
+                "the destination holds neither whole payload, so writes interleaved",
+                published == first || published == second,
+            )
+            assertEquals("the destination holds a payload no run verified", shaOf(published), sha256OrNull(destination))
+            assertNoScratchLeft(directory)
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
 }

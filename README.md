@@ -20,10 +20,12 @@ unchanged.
 | --- | ---: | --- |
 | `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | 104128 | `2dc137cc…e9b4059` |
 | `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4895088 | `67b49cad…ee542` |
-| `app/src/main/jniLibs/arm64-v8a/libcve43499root.so` | 27088 | `f6da8c44…52661a0` |
+| `app/src/main/jniLibs/arm64-v8a/libcve43499root.so` | 26040 | `b6395159…94b5bb1f` |
 
-All three come from `BuSung-dev/Root-My-Galaxy-Payloads` at commit
-`a311cb88c28204c3902af9450ae4077199e4d71d`. Full provenance, including the
+The two payload files are byte-identical to `BuSung-dev/Root-My-Galaxy-Payloads`
+at commit `a311cb88c28204c3902af9450ae4077199e4d71d`. The helper is not a copied
+artifact: it is compiled from that commit's `src/su_daemon.c` and then patched,
+as described below. Full provenance, including the
 exact build command and the behaviour the helper rebuild changes, is recorded
 in
 [`libcve43499root.provenance.json`](app/src/main/jniLibs/arm64-v8a/libcve43499root.provenance.json)
@@ -37,7 +39,11 @@ embedded module, so the `.ko` exists upstream for auditing only.
 1. `app/src/main/assets/builtin-targets.json` is read from the APK. This costs
    no network, so the target device resolves with the radio off.
 2. A bundled profile matches only if the model, the numeric kernel version, and
-   the **exact** `uname -r` string all match. The offsets and the P0 fingerprint
+   the **exact** `uname -r` string all match. This is a kernel-release gate, not
+   an AP/PDA-build or fingerprint check: a firmware change that left the kernel
+   release string identical would not be rejected. The release string embeds the
+   firmware id (`…-abS9210ZHS6DZG1`), which is what makes it useful here. The
+   offsets and the P0 fingerprint
    table come from one firmware image, and `SM-S9210` and `SM-S9280` both report
    `6.1.145` while differing in exactly those values, so the numeric version
    alone is not enough. A firmware update locks the bundled payload out rather
@@ -47,12 +53,15 @@ embedded module, so the `.ko` exists upstream for auditing only.
    manifest is missing or malformed, the app refuses rather than falling back to
    an unverified online payload for the same model.
 4. Bundled bytes are published to `filesDir` only when both the length and the
-   SHA-256 match the manifest, through an atomic replace. Length alone is not
-   enough: ten of the twenty profiles in the upstream feed are all exactly
-   104128 bytes.
+   SHA-256 match the manifest, through an atomic replace, falling back to a
+   non-atomic replace plus a re-check where the filesystem cannot rename
+   atomically. Length alone is not enough: ten of the twenty profiles in the
+   current payloads `main` feed are all exactly 104128 bytes.
 
-The online path verifies length only, as it always has. It cannot check a
-digest because the upstream manifest does not publish one.
+The online path verifies length only, as it always has, and matches on model
+plus numeric kernel version with no exact-release gate, because the upstream
+manifest publishes neither a digest nor a release field. Only the bundled path
+is digest-checked and release-gated.
 
 ## Build
 
@@ -100,6 +109,26 @@ refusing any content that does not match the recorded digests.
 ## Known limitations
 
 - Root is RAM-only. A reboot removes it.
+- The default transport is the standalone one, which was **not** the transport
+  the porting record validated: those runs mirrored the Shizuku-mode
+  `LD_PRELOAD` invocation. Prefer Shizuku mode. The standalone path also hands
+  the kernel's `call_usermodehelper` a binary from the app's private `/data/app`
+  directory, the class of location the porting record warns gets a DEFEX kill.
+- The app no longer carries a KASLR slide across runs. Upstream scraped `slide=`
+  out of the exploit log and re-injected it as `SLIDE_P0_OFFSET`, which makes
+  the payload take its `forced` slide source. That flips
+  `data_addr_canonical` to false, so every kernel address it writes is computed
+  by a different formula than the tracefs path this device was validated on, and
+  the P0 oracle's verification is skipped. The payload already retains a
+  discovered offset within a single run, so the app injects nothing and the
+  cross-run cache is gone. Whether that in-run branch was taken in the
+  validation runs is not established; see the note on `requiresFreshP0Session`
+  below.
+- The stall and total timeouts are derived from the payload's own budget: 150s
+  against its 120s longest silent gap, and 3200s against its 3115s worst case.
+  If either fires the helper is stopped, but the payload's children are
+  detached and may still be writing, so the message says so in every language.
+  Do not retry immediately.
 - Force-stopping the app after the exploit can panic the device, by releasing
   retained kernel pages. Leave the app in the foreground until it reports
   success.
@@ -113,17 +142,23 @@ refusing any content that does not match the recorded digests.
   ever report failure. `SELF_UPDATE_ENABLED` in `app/build.gradle.kts` turns the
   feature back on once a token-free distribution endpoint exists.
 - Translations are partial. The S24 branding and the bundled-payload messages
-  are translated for `zh-TW` and `zh-CN`; every locale keeps its existing
+  are translated for `zh-TW` and most for `zh-CN`; every locale keeps its existing
   upstream translations and falls back to English for keys it lacks, which is
   between 13 and 26 of the 161 keys depending on locale. `fr` is registered as
   an app locale but has no entry in the in-app language picker, so it is
   reachable only through Android's per-app language settings.
+- The on-device exploit harness lives in `app/src/androidTest/.../ExploitUidTest.kt`
+  and is run with `./gradlew connectedAndroidTest`. It still accepts a P0 offset
+  as an explicit argument
+  (`-Pandroid.testInstrumentationRunnerArguments.p0Offset=0x...`), which is
+  how the payload's unverified `forced` slide path can be exercised on purpose.
+  The app itself never sets it; see the note above on why it must not.
 - `requiresFreshP0Session` is carried over from the upstream manifest but is
   neither implemented by the app nor enforced by the bundled payload. The e1q
   target header does not define `APP_REQUIRE_FRESH_P0_SESSION`, so the payload
-  retains and reuses a discovered P0 offset. That is the behaviour the
-  porting record's validation ran with, so it is left alone rather than changed
-  on the strength of a field nothing reads.
+  takes the branch that retains and reuses a discovered P0 offset within one
+  run. The porting record's transcript contains no diagnostic showing that branch
+  actually ran, so this is what is compiled, not what is proven.
 - The vendored helper is built from a locally patched `su_daemon.c`; the patch
   is in `tools/helper-marker-removal.patch` and the reasoning is in
   `THIRD_PARTY_NOTICES.md`.

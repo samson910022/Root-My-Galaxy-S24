@@ -105,73 +105,118 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
         mutableHistory.value = mutableHistory.value.filterNot { it.id in toDelete }
     }
 
+    /** True while this ViewModel, and only this one, owns [installInProgress]. */
+    private var holdsInstallLock = false
+
     fun install() {
-        if (installJob?.isActive == true || mutableState.value.phase == InstallPhase.Installed) return
+        // The guard is process-wide, not per ViewModel: MainActivity and
+        // InstallActivity each own one, and a second installer can be launched
+        // while the first is only stopped. Two concurrent runs would share the
+        // payload scratch file and interleave writes into it, which would let
+        // unverified bytes reach the published destination.
+        if (!installInProgress.compareAndSet(false, true)) {
+            // Say so: a silently ignored tap is indistinguishable from a dead
+            // button, which is how a wedged flag would go unnoticed.
+            appendLog(app.getString(R.string.install_already_running))
+            return
+        }
+        holdsInstallLock = true
+        if (mutableState.value.phase == InstallPhase.Installed) {
+            installInProgress.set(false)
+            return
+        }
         discoveryJob?.cancel()
-        installJob = viewModelScope.launch(Dispatchers.IO) {
-            mutableState.value = InstallUiState(
-                phase = InstallPhase.Checking,
-                probeOutput = mutableState.value.probeOutput,
-            )
-            startHistory()
-            // Freeze the transport for the whole run so a mid-run preference
-            // change cannot mix Shizuku and standalone execution between the
-            // exploit and the KernelSU staging steps.
-            activeRunShizuku = AppPreferences.shizukuMode(app)
-            try {
-                if (shizukuEnabled()) {
-                    appendLog(app.getString(R.string.log_shizuku_prepare))
-                    if (!ShizukuController.isRunning() && !ShizukuController.pingUntilRunning()) {
-                        error(app.getString(R.string.error_shizuku_unavailable))
-                    }
-                    if (!ShizukuController.isGranted() && !ShizukuController.requestPermission()) {
-                        error(app.getString(R.string.error_shizuku_permission))
-                    }
-                    appendLog(app.getString(R.string.log_shizuku_permission))
-                }
-                setPhase(InstallPhase.Checking, app.getString(R.string.status_resolving_profile))
-                val profile = repository.resolveTarget(DeviceSnapshot.current())
-                appendLog(app.getString(R.string.log_profile, profile.profileId))
-                updateHistoryProfile(profile.profileId)
-
-                setPhase(
-                    InstallPhase.Downloading,
-                    app.getString(
-                        if (profile.bundled) {
-                            R.string.status_staging_payload
-                        } else {
-                            R.string.status_downloading_payload
-                        },
-                    ),
+        try {
+            installJob = viewModelScope.launch(Dispatchers.IO) {
+                mutableState.value = InstallUiState(
+                    phase = InstallPhase.Checking,
+                    probeOutput = mutableState.value.probeOutput,
                 )
-                val payloads = repository.acquire(profile) { appendLog("[*] $it") }
-                appendLog(
-                    app.getString(
-                        if (profile.bundled) {
-                            R.string.log_builtin_verified
-                        } else {
-                            R.string.log_download_verified
-                        },
-                    ),
-                )
+                startHistory()
+                // Freeze the transport for the whole run so a mid-run preference
+                // change cannot mix Shizuku and standalone execution between the
+                // exploit and the KernelSU staging steps.
+                activeRunShizuku = AppPreferences.shizukuMode(app)
+                try {
+                    if (shizukuEnabled()) {
+                        appendLog(app.getString(R.string.log_shizuku_prepare))
+                        if (!ShizukuController.isRunning() && !ShizukuController.pingUntilRunning()) {
+                            error(app.getString(R.string.error_shizuku_unavailable))
+                        }
+                        if (!ShizukuController.isGranted() && !ShizukuController.requestPermission()) {
+                            error(app.getString(R.string.error_shizuku_permission))
+                        }
+                        appendLog(app.getString(R.string.log_shizuku_permission))
+                    }
+                    setPhase(InstallPhase.Checking, app.getString(R.string.status_resolving_profile))
+                    val profile = repository.resolveTarget(DeviceSnapshot.current())
+                    appendLog(app.getString(R.string.log_profile, profile.profileId))
+                    updateHistoryProfile(profile.profileId)
 
-                setPhase(InstallPhase.Exploiting, app.getString(R.string.status_exploit_running))
-                executeExploit(payloads.exploit)
+                    setPhase(
+                        InstallPhase.Downloading,
+                        app.getString(
+                            if (profile.bundled) {
+                                R.string.status_staging_payload
+                            } else {
+                                R.string.status_downloading_payload
+                            },
+                        ),
+                    )
+                    val payloads = repository.acquire(profile) { appendLog("[*] $it") }
+                    appendLog(
+                        app.getString(
+                            if (profile.bundled) {
+                                R.string.log_builtin_verified
+                            } else {
+                                R.string.log_download_verified
+                            },
+                        ),
+                    )
 
-                setPhase(InstallPhase.LoadingKernelSu, app.getString(R.string.status_ksu_loading))
-                installKernelSu(payloads)
+                    setPhase(InstallPhase.Exploiting, app.getString(R.string.status_exploit_running))
+                    executeExploit(payloads.exploit)
 
-                setPhase(InstallPhase.Installed, app.getString(R.string.status_ksu_active))
-                appendLog(app.getString(R.string.log_install_complete))
-                finishHistory(InstallRunResult.Succeeded)
+                    setPhase(InstallPhase.LoadingKernelSu, app.getString(R.string.status_ksu_loading))
+                    installKernelSu(payloads)
+
+                    installInProgress.set(false)
+                    setPhase(InstallPhase.Installed, app.getString(R.string.status_ksu_active))
+                    appendLog(app.getString(R.string.log_install_complete))
+                    finishHistory(InstallRunResult.Succeeded)
             } catch (error: Throwable) {
                 appendLog("[-] ${error.message ?: error.javaClass.simpleName}")
+                installInProgress.set(false)
                 setPhase(InstallPhase.Failed, app.getString(R.string.status_install_failed))
                 finishHistory(InstallRunResult.Failed)
             } finally {
                 activeRunShizuku = null
             }
         }
+        } catch (error: Throwable) {
+            installInProgress.set(false)
+            holdsInstallLock = false
+            throw error
+        }
+        // Releasing here rather than in the body's finally: if the scope is
+        // cancelled between the launch above and the body starting, the finally
+        // never runs and the static flag would stay true for the life of the
+        // process, turning every later install into a silent no-op.
+        installJob?.invokeOnCompletion {
+            installInProgress.set(false)
+            holdsInstallLock = false
+        }
+    }
+
+    override fun onCleared() {
+        // Only release a lock this ViewModel actually holds. The flag is
+        // process-wide, so clearing it unconditionally would hand the guard's
+        // protection away to a run owned by the other ViewModel.
+        if (holdsInstallLock) {
+            installInProgress.set(false)
+            holdsInstallLock = false
+        }
+        super.onCleared()
     }
 
     private suspend fun executeExploit(payload: File) {
@@ -187,12 +232,11 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
             require(helper.canExecute()) { app.getString(R.string.error_helper_unavailable) }
         }
         val logPrefix = mutableState.value.log
-        val bootToken = currentBootToken()
         val process = if (shizuku) {
             val stagedPayload = shizukuStage(payload, SHIZUKU_PAYLOAD_PATH, "755")
             ShizukuController.exec(
                 arrayOf("/system/bin/sh", "-c", "true"),
-                shizukuEnvironment(bootToken, stagedPayload.absolutePath, helper.absolutePath),
+                shizukuEnvironment(stagedPayload.absolutePath, helper.absolutePath),
             )
         } else {
             val processBuilder = ProcessBuilder(
@@ -207,7 +251,6 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
                 put("P0_ATTEMPT_TIMEOUT_SEC", P0_ATTEMPT_TIMEOUT_SEC)
                 put("EXPLOIT_ATTEMPT_TIMEOUT_SEC", EXPLOIT_ATTEMPT_TIMEOUT_SEC)
                 put(STACK_WRITER_DELAY_ENV, STACK_WRITER_DELAY_USEC)
-                cachedP0Offset(bootToken)?.let { put(P0_OFFSET_ENV, it) }
             }
             processBuilder.start()
         }
@@ -228,7 +271,6 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
             while (process.isAlive) {
                 val rawLog = readLog()
                 if (rawLog != lastRawLog) {
-                    cacheP0Offset(bootToken, rawLog)
                     publishExploitLog(logPrefix, rawLog)
                     lastRawLog = rawLog
                     lastProgressAt = SystemClock.elapsedRealtime()
@@ -245,7 +287,6 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
 
             val exitCode = process.waitFor()
             val rawLog = readLog()
-            cacheP0Offset(bootToken, rawLog)
             publishExploitLog(logPrefix, rawLog)
             // Both transports drain into `captured` during the poll loop, so
             // this never blocks on a child still holding the pipe open.
@@ -348,29 +389,6 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
             .takeIf(String::isNotBlank)
     }.getOrNull()
 
-    private fun cachedP0Offset(bootToken: String?): String? {
-        if (bootToken == null) return null
-        val stored = app.getSharedPreferences(P0_CACHE, Application.MODE_PRIVATE)
-        if (stored.getString(P0_CACHE_BOOT_TOKEN, null) != bootToken) return null
-        return stored.getString(P0_CACHE_OFFSET, null)
-    }
-
-    private fun cacheP0Offset(bootToken: String?, log: String) {
-        if (bootToken == null) return
-        val match = P0_OFFSET_PATTERN.findAll(log).lastOrNull() ?: return
-        val offset = match.groupValues[1].toLongOrNull(16) ?: return
-        if (offset !in 0..P0_OFFSET_MAX || offset and P0_OFFSET_MASK != 0L) return
-        val value = "0x${offset.toString(16)}"
-        val stored = app.getSharedPreferences(P0_CACHE, Application.MODE_PRIVATE)
-        if (stored.getString(P0_CACHE_BOOT_TOKEN, null) == bootToken &&
-            stored.getString(P0_CACHE_OFFSET, null) == value
-        ) return
-        stored.edit()
-            .putString(P0_CACHE_BOOT_TOKEN, bootToken)
-            .putString(P0_CACHE_OFFSET, value)
-            .apply()
-    }
-
     private fun helperFile(): File =
         if (shizukuEnabled()) {
             shizukuStage(nativeHelperFile(), SHIZUKU_HELPER_PATH, "755")
@@ -412,7 +430,6 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun shizukuEnvironment(
-        bootToken: String?,
         payloadPath: String,
         helperPath: String,
     ): Array<String> = buildList {
@@ -422,7 +439,6 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
         add("CVE43499_ROOT_HELPER=$helperPath")
         add("LD_PRELOAD=$payloadPath")
         add("$STACK_WRITER_DELAY_ENV=$STACK_WRITER_DELAY_USEC")
-        cachedP0Offset(bootToken)?.let { add("$P0_OFFSET_ENV=$it") }
     }.toTypedArray()
 
     /**
@@ -525,16 +541,33 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
         private const val EXPLOIT_ATTEMPTS = "24"
         private const val P0_ATTEMPT_TIMEOUT_SEC = "45"
         private const val EXPLOIT_ATTEMPT_TIMEOUT_SEC = "120"
-        private const val EXPLOIT_STALL_MILLIS = 90_000L
-        private const val EXPLOIT_TOTAL_MILLIS = 900_000L
+        /**
+         * The payload is silent for up to APP_MIN_BOOT_UPTIME_SEC (120s)
+         * while it waits for the boot allocator to settle, and allows
+         * EXPLOIT_ATTEMPT_TIMEOUT_SEC for one attempt. A shorter window fires
+         * during normal operation, destroys the helper, and leaves the
+         * payload's setsid'd children still writing kernel memory while the UI
+         * reports a clean failure. It has to clear the longest silent gap.
+         */
+        private const val EXPLOIT_STALL_MILLIS = 150_000L
+
+        /**
+         * The payload's own bound: a 120s boot wait, then EXPLOIT_ATTEMPTS
+         * attempts of EXPLOIT_ATTEMPT_TIMEOUT_SEC each, the quiet gap it sleeps
+         * between them, and the supervisor's 100ms poll granularity, which comes
+         * to about 3117s. Giving up earlier would orphan a live run, so the
+         * budget covers the whole thing.
+         *
+         * The margin above that is under 3%. Raising EXPLOIT_ATTEMPTS or
+         * EXPLOIT_ATTEMPT_TIMEOUT_SEC without recomputing this is what turns the
+         * timeout into a mid-write kill, so the two constants are deliberately
+         * adjacent.
+         */
+        private const val EXPLOIT_TOTAL_MILLIS = 3_200_000L
         private const val HELPER_TIMEOUT_MILLIS = 120_000L
         private const val INSTALL_RECEIPT = "install_receipt"
         private const val RECEIPT_BOOT_TOKEN = "kernel_boot_id"
         private const val RECEIPT_VERIFIED = "verified"
-        private const val P0_CACHE = "p0_cache"
-        private const val P0_CACHE_BOOT_TOKEN = "kernel_boot_id"
-        private const val P0_CACHE_OFFSET = "offset"
-        private const val P0_OFFSET_ENV = "SLIDE_P0_OFFSET"
         private const val STACK_WRITER_DELAY_ENV = "STACK_WRITER_DELAY_USEC"
 
         /**
@@ -546,8 +579,6 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
          * actually proven on a device.
          */
         private const val STACK_WRITER_DELAY_USEC = "40000"
-        private const val P0_OFFSET_MAX = 0x1f0000L
-        private const val P0_OFFSET_MASK = 0xffffL
         private const val SHIZUKU_LOG_PATH = "/data/local/tmp/ksu-exploit.log"
         private const val SHIZUKU_HELPER_PATH = "/data/local/tmp/ksu-helper"
         private const val SHIZUKU_PAYLOAD_PATH = "/data/local/tmp/ksu-payload"
@@ -564,9 +595,9 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
         private val HELPER_POLL_INTERVAL = 250.milliseconds
         private val SHIZUKU_LOG_POLL_INTERVAL = 1.seconds
         private val ANSI_ESCAPE = Regex("\u001B\\[[0-?]*[ -/]*[@-~]")
-        private val P0_OFFSET_PATTERN = Regex(
-            "slide-kaslr-ok[^\\n]*slide=([0-9a-fA-F]{16})",
-        )
+
+        /** See [install]: the install lock spans ViewModels, so it is static. */
+        private val installInProgress = java.util.concurrent.atomic.AtomicBoolean(false)
 
         private fun stripAnsi(value: String): String = ANSI_ESCAPE.replace(value, "").replace("\r", "")
     }

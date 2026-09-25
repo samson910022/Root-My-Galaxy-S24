@@ -55,7 +55,11 @@ class PayloadRepositoryTest {
 
         for (artifact in listOf(profile.exploit, profile.kernelSu)) {
             val staged = if (artifact === profile.exploit) payloads.exploit else payloads.kernelSu
-            assertFalse("no .part file may be left behind", File(staged.parentFile, "${staged.name}.part").exists())
+            // The scratch name carries a random component, so match the suffix
+            // rather than reconstructing the exact path: naming it would let
+            // this assertion pass vacuously forever.
+            val leftovers = staged.parentFile?.listFiles()?.filter { it.name.endsWith(".part") }.orEmpty()
+            assertTrue("no .part file may be left behind, found $leftovers", leftovers.isEmpty())
             if (bundled) {
                 val expected = (artifact as BundledArtifact).sha256
                 assertEquals("digest mismatch for ${expected.take(12)}", expected, sha256OrNull(staged))

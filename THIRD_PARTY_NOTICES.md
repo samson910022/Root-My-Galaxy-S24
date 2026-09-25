@@ -11,8 +11,11 @@ components below. The Apache-2.0 licence covering the application source is in
 | Root My Galaxy | <https://github.com/BuSung-dev/Root-My-Galaxy> | Apache-2.0 |
 | Root-My-Galaxy-Payloads | <https://github.com/BuSung-dev/Root-My-Galaxy-Payloads> | Apache-2.0 |
 
-The application source, the Gradle configuration and the bundled-manifest
-format originate in Root My Galaxy. Changes made here: the package and
+The application source and the Gradle configuration originate in Root My
+Galaxy. The bundled-manifest format does not: upstream publishes schema 3,
+which pins artifacts by url, and has no `builtin-targets.json`. The schema 4
+format used here, with `assetPath` and a digest instead of a url, is an addition
+by this fork. Changes made here: the package and
 application id, the CMake and JNI names, the bundled-payload support described
 in the README, the removal of the advanced-mode UI, and the helper rebuild.
 
@@ -89,8 +92,11 @@ only to carry the marker path. No other source line is changed, so the
 target and the package name are byte-identical to upstream.
 
 Apache-2.0 section 4(b) requires modified files to carry prominent notices of
-the change; the patch file in this repository is that notice, and the
-provenance file records it as well.
+the change. This repository ships the change as a unified diff, not as the
+modified `su_daemon.c` itself, and the diff has no modification notice in its
+header. Whether that discharges 4(b) for any future conveyance is a
+distributional question that has not been settled here; carry the patched
+source with an explicit notice if this is ever shared.
 
 ### Samsung-derived material
 
@@ -105,9 +111,14 @@ Resolved at build time, not vendored:
 
 - Android Gradle Plugin 9.2.1, Kotlin 2.4.0, Gradle 9.5.1 — Apache-2.0
 - Jetpack Compose, AndroidX, Material Color Utilities — Apache-2.0
-- `dev.rikka.shizuku:api`, `dev.rikka.shizuku:provider` — see upstream
-- `org.json:json` (test only) — public domain / JSON licence
-- JUnit 4 — Eclipse Public License 1.0
+- `com.materialkolor:material-kolor:4.1.1` — MIT
+- `dev.rikka.shizuku:api:13.1.5`, `dev.rikka.shizuku:provider:13.1.5` — MIT
+- `org.json:json:20250517` (test only) — public domain / JSON licence
+- `junit:junit:4.13.2` — Eclipse Public License 1.0
+
+The MIT-licensed components require the licence text and copyright notice to
+travel with the binary distributions; their POMs carry those, and Gradle's
+cached metadata retains them, but no copy is checked into this repository.
 
 ## Attribution retained from upstream
 

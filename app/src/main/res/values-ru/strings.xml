@@ -63,7 +63,7 @@
     <string name="step_ksu_detail">Поздняя загрузка модуля и проверка канала управления</string>
     <string name="phase_checking">Проверка поддержки устройства и прошивки</string>
     <string name="phase_ready">Готово к установке</string>
-    <string name="phase_exploiting">Это может занять 10 минут или больше. Устройство может нагреться или перестать отвечать.</string>
+    <string name="phase_exploiting">Это может занять 10 минут или больше, до примерно 50 минут, если потребуется несколько попыток. Устройство может нагреться или перестать отвечать.</string>
     <string name="phase_loading_ksu">Загрузка KernelSU с использованием полученного временного root-доступа</string>
     <string name="phase_installed">Модуль KernelSU и канал управления успешно проверены</string>
     <string name="phase_failed">Проверьте место возникновения ошибки в журнале ниже</string>
@@ -81,8 +81,8 @@
     <string name="log_ksu_staged">[+] Подготовка KernelSU завершена</string>
     <string name="log_ksu_control_verified">[+] Канал управления KernelSU проверен</string>
     <string name="error_helper_unavailable">Вспомогательный bootstrap-файл не является исполняемым</string>
-    <string name="error_exploit_stalled">Журнал эксплойта не обновлялся в течение 90 секунд</string>
-    <string name="error_exploit_timeout">Эксплойт превысил лимит времени в 15 минут</string>
+    <string name="error_exploit_stalled">Вспомогательная программа остановлена, но полезная нагрузка выполняется отдельно и может всё ещё писать в ядро. Оставьте приложение на переднем плане и проверьте устройство перед повторной попыткой.</string>
+    <string name="error_exploit_timeout">Вспомогательная программа остановлена, но полезная нагрузка выполняется отдельно и может всё ещё писать в ядро. Оставьте приложение на переднем плане и проверьте устройство перед повторной попыткой.</string>
     <string name="error_payload_exit">Ошибка выполнения payload: %1$d%2$s</string>
     <string name="error_success_marker">Маркеры успешного выполнения эксплойта не найдены</string>
     <string name="error_ksu_stage">Не удалось подготовить KernelSU: %1$s</string>
@@ -149,4 +149,5 @@
         <item quantity="other">Эти запуски и их журналы будут удалены навсегда.</item>
     </plurals>
     <string name="history_delete">Удалить</string>
+    <string name="install_already_running">Установка уже выполняется. Дождитесь её завершения.</string>
 </resources>

@@ -12,16 +12,17 @@
 #           --check    verify the committed assets without fetching anything
 set -euo pipefail
 
+SCRIPT=tools/sync-payloads.sh
 PROVENANCE=app/src/main/assets/builtin-targets.json
 ASSET_DIR=app/src/main/assets/payloads/e1q-S9210ZHS6DZG1
 PROFILE=e1q-S9210ZHS6DZG1
 REPO_SLUG=BuSung-dev/Root-My-Galaxy-Payloads
 RAW_BASE=https://raw.githubusercontent.com/BuSung-dev/Root-My-Galaxy-Payloads
 PR_NUMBER=320
-# Set to true once PR #NUMBER is merged; the payloads main branch then carries
-# the profile and is used instead of the pull request ref.
+# Set to true once the pull request is merged; the payloads main branch then
+# carries the profile and is used instead of the pull request ref.
 PR_MERGED=false
-PR_REF=refs/pull/320/head
+PR_REF="refs/pull/$PR_NUMBER/head"
 PINNED_COMMIT=a311cb88c28204c3902af9450ae4077199e4d71d
 MAIN_REF=refs/heads/main
 
@@ -93,8 +94,23 @@ verify() {
 verify "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
 verify "$ASSET_DIR/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
 
+# Also prove the copy a commit would record is the same, so a tampered asset
+# cannot be blessed here and then committed from the index.
+verify_index() {
+  local path=$1 digest=$2 label=$3 staged
+  if staged=$(git cat-file blob ":$path" 2>/dev/null | sha256sum | cut -d' ' -f1); then
+    [ "$staged" = "$digest" ] || fail "the staged $label is $staged; the index does not hold the pinned bytes"
+  else
+    fail "cannot read the staged $label from the index"
+  fi
+  git diff --quiet -- "$PROVENANCE" "$ASSET_DIR" "$SCRIPT" ||
+    fail "staged content differs from the worktree; commit or unstage first"
+}
+
 if $check_only; then
-  note "assets match the manifest"
+  verify_index "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SHA256" exploit
+  verify_index "$ASSET_DIR/$KSUD_NAME" "$KSUD_SHA256" ksud
+  note "assets match the manifest, in the worktree and in the index"
   exit 0
 fi
 
@@ -132,8 +148,10 @@ fetch() {
   verify "$destination" "$size" "$digest" "$label (downloaded)"
 }
 
-# Fetch and verify everything before the committed tree is touched, so a failed
-# sync cannot leave one asset updated and the other not.
+# Fetch and verify both before the committed tree is touched. The two installs
+# remain separate operations, so a failure of the second could leave one
+# updated; re-running repairs it, and the manifest digests do not change in
+# between, so a partial state is detected rather than shipped.
 fetch "$EXPLOIT_UPSTREAM" "$work/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
 fetch "$KSUD_UPSTREAM" "$work/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
 

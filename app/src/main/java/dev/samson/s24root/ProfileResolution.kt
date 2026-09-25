@@ -8,7 +8,7 @@ package dev.samson.s24root
 internal val RESERVED_MODELS = setOf("SM-S9210")
 
 internal fun isReservedModel(model: String): Boolean =
-    RESERVED_MODELS.any { it.equals(model, ignoreCase = true) }
+    RESERVED_MODELS.any { it.equals(model.trim(), ignoreCase = true) }
 
 /** Why [resolveProfile] could not pick a payload, or null when it picked one. */
 internal sealed interface ResolutionFailure {
