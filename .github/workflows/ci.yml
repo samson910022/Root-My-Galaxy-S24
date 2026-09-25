@@ -6,6 +6,9 @@ on:
       - '**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,33 +20,38 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
 
+      # The platform is versioned by minor now, so the package is android-37.0
+      # rather than android-37. Installing the wrong one only works by relying
+      # on AGP's auto-download, which hides the real requirement. The NDK is
+      # pinned to the version app/build.gradle.kts declares, because the
+      # vendored helper binary is built with it and the two must agree.
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
-          packages: 'platform-tools platforms;android-35 cmake;3.22.1'
+          packages: 'platform-tools platforms;android-37.0 build-tools;36.0.0 cmake;3.22.1 ndk;28.2.13676358'
           accept-android-sdk-licenses: true
-
-      - name: Setup NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r28
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Verify the vendored helper binary
+        run: ./tools/build-helper.sh --check
+
+      # The instrumented suite is compiled but not run: one of its tests
+      # launches the exploit and needs the real device.
+      - name: Build debug APK and run unit tests
+        run: ./gradlew testDebugUnitTest compileDebugAndroidTestKotlin assembleDebug --no-daemon
 
       - name: Upload debug APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/*.apk

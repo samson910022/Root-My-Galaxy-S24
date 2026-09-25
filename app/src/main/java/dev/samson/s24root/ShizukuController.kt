@@ -72,9 +72,10 @@ object ShizukuController {
     }
 
     /**
-     * Runs a short command and returns its combined output. Used to read files the app
-     * process cannot access directly because SELinux confines app UIDs away from the
-     * shell-owned /data/local/tmp directory.
+     * Runs a short command and returns its combined output, or an empty string
+     * when the command failed. Used to read files the app process cannot access
+     * directly because SELinux confines app UIDs away from the shell-owned
+     * /data/local/tmp directory.
      */
     fun capture(cmd: Array<String>): String {
         val process = exec(cmd)
@@ -85,6 +86,26 @@ object ShizukuController {
         } finally {
             if (process.isAlive) process.destroy()
         }
+    }
+
+    /**
+     * Whether a predicate command succeeds. This has to be the exit status and
+     * not the presence of output: `test -x <path>` is silent on both success and
+     * failure, so an output check would report every staged file as unusable.
+     */
+    fun testSucceeds(cmd: Array<String>): Boolean {
+        val process = exec(cmd)
+        return try {
+            drain(process)
+            process.waitFor() == 0
+        } finally {
+            if (process.isAlive) process.destroy()
+        }
+    }
+
+    private fun drain(process: Process) {
+        runCatching { process.inputStream.bufferedReader().use { it.readText() } }
+        runCatching { process.errorStream.bufferedReader().use { it.readText() } }
     }
 
     fun writeFile(remotePath: String, mode: String, source: InputStream) {
@@ -117,7 +138,7 @@ object ShizukuController {
 
     /** Asks the shell that will actually run the file whether it can. */
     fun isExecutable(remotePath: String): Boolean =
-        capture(arrayOf("sh", "-c", "test -x '$remotePath'")).isNotEmpty()
+        testSucceeds(arrayOf("sh", "-c", "test -x '$remotePath'"))
 
     private class RemoteProcess(private val remote: IRemoteProcess) : Process() {
         private val input by lazy { ParcelFileDescriptor.AutoCloseInputStream(remote.getInputStream()) }

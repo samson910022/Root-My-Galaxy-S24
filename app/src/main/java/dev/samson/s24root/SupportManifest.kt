@@ -103,12 +103,6 @@ data class TargetProfile(
     fun matches(snapshot: DeviceSnapshot): Boolean =
         matchesDevice(snapshot) && matchesKernelVersion(snapshot) && matchesKernelRelease(snapshot)
 
-    val supportedModels: String
-        get() = models.joinToString()
-
-    val supportedKernelVersions: String
-        get() = kernelVersions.joinToString()
-
     val supportedKernelReleases: String
         get() = kernelReleases.sorted().joinToString()
 }

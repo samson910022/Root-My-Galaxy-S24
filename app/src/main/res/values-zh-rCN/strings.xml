@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Root My Galaxy</string><string name="nav_overview">主页</string><string name="nav_history">运行记录</string><string name="nav_settings">设置</string>
+    <string name="app_name">Root My Galaxy S24</string><string name="nav_overview">主页</string><string name="nav_history">运行记录</string><string name="nav_settings">设置</string>
     <string name="install_confirm_title">安装 KernelSU？</string>
     <string name="action_confirm">确认</string><string name="action_cancel">取消</string><string name="action_close">关闭</string><string name="action_retry">重试</string><string name="action_done">完成</string><string name="action_back">返回</string>
     <string name="install_tap_manager">点击安装 KernelSU Manager</string><string name="install_tap_retry">点击重试</string><string name="install_tap_start">点击安装 KernelSU</string>
@@ -19,17 +19,11 @@
     <string name="open_github">打开 GitHub</string>
     <string name="github_card_title">了解 Root My Galaxy</string>
     <string name="github_card_description">查看源代码和使用方法。</string>
-    <string name="action_continue">忽略并继续</string><string name="action_next">下一步</string>
-    <string name="advanced">高级</string><string name="advanced_mode">高级模式</string><string name="advanced_mode_description">安装时手动选择设备兼容 payload</string>
     <string name="shizuku_mode">使用 Shizuku</string><string name="shizuku_mode_description">使用 Shizuku 运行 payload，可能提高可靠性。</string><string name="shizuku_not_running_title">Shizuku 未在运行</string><string name="shizuku_not_running_body">请先通过 adb 或 root 启动 Shizuku 服务，并授予此应用权限，然后启用该选项。</string><string name="action_download_shizuku">下载 Shizuku</string><string name="error_shizuku_unavailable">Shizuku 未在运行，请先通过 adb 或 root 启动 Shizuku。</string><string name="error_shizuku_permission">未授予 Shizuku 权限</string><string name="error_shizuku_stage">无法通过 Shizuku 部署 %1$s：%2$s</string><string name="log_shizuku_prepare">[*] 正在准备 Shizuku 执行</string><string name="log_shizuku_permission">[+] 已授予 Shizuku 权限</string>
-    <string name="repo_profile_missing">支持配置 %1$s 已不可用</string>
-    <string name="select_device_title">选择支持的 payload</string><string name="select_device_description">按设备型号和内核版本选择 payload。</string><string name="show_my_device_only">仅显示我的设备</string><string name="no_matching_devices">没有与此型号和内核版本匹配的 payload。</string>
-    <string name="device_mismatch_title">设备不匹配</string><string name="device_mismatch_body">当前设备为 %1$s，但所选 payload 支持 %2$s。运行可能导致设备停止响应或损坏。</string>
-    <string name="kernel_version_mismatch_title">内核版本不匹配</string><string name="kernel_version_mismatch_body">当前内核为 %1$s，但所选 payload 支持 %2$s。偏移量可能不兼容。</string>
     <string name="about">关于</string>
-    <string name="about_title">关于 Root My Galaxy</string>
-    <string name="install_confirm_body">应用会先验证支持配置，再暂存并执行此设备对应的 exploit 与 KernelSU payload。</string><string name="step_download_title">准备 payload</string><string name="step_download_detail">解析支持配置</string><string name="phase_downloading">正在获取 payload</string><string name="about_description">关于 Root My Galaxy</string>
-    <string name="about_body">一键安装器，利用内核漏洞对受支持的三星 Galaxy 设备进行 root。</string>
+    <string name="about_title">关于 Root My Galaxy S24</string>
+    <string name="install_confirm_body">应用会先验证支持配置，再暂存并执行此设备对应的 exploit 与 KernelSU payload。</string><string name="step_download_title">准备 payload</string><string name="step_download_detail">解析支持配置</string><string name="phase_downloading">正在获取 payload</string><string name="about_description">关于 Root My Galaxy S24</string>
+    <string name="about_body">一键安装工具，利用内核漏洞为运行 S9210ZHS6DZG1 固件的 Galaxy S24 国行 (SM-S9210) 提供 root。其他型号则从上游支持源获取。</string>
     <string name="history_payload">Payload: %1$s</string>
     <string name="export_log">导出日志</string>
     <string name="export_log_saved">日志已保存</string>

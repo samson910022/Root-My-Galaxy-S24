@@ -42,12 +42,6 @@ data class InstallUiState(
 
 }
 
-data class TargetCatalogUiState(
-    val loading: Boolean = false,
-    val profiles: List<TargetProfile> = emptyList(),
-    val error: String? = null,
-)
-
 private data class CommandResult(val code: Int, val output: String)
 
 class InstallViewModel(application: Application) : AndroidViewModel(application) {
@@ -56,7 +50,6 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
     private val historyStore = InstallHistoryStore(application)
     private val mutableState = MutableStateFlow(InstallUiState())
     private val mutableHistory = MutableStateFlow(historyStore.closeInterruptedRuns())
-    private val mutableTargetCatalog = MutableStateFlow(TargetCatalogUiState())
     private var discoveryJob: Job? = null
     private var installJob: Job? = null
     private var activeHistoryEntry: InstallHistoryEntry? = null
@@ -65,7 +58,6 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
     private var activeRunShizuku: Boolean? = null
     val state: StateFlow<InstallUiState> = mutableState.asStateFlow()
     val history: StateFlow<List<InstallHistoryEntry>> = mutableHistory.asStateFlow()
-    val targetCatalog: StateFlow<TargetCatalogUiState> = mutableTargetCatalog.asStateFlow()
 
     init {
         refresh()
@@ -113,26 +105,7 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
         mutableHistory.value = mutableHistory.value.filterNot { it.id in toDelete }
     }
 
-    fun loadTargetCatalog() {
-        if (mutableTargetCatalog.value.loading) return
-        viewModelScope.launch(Dispatchers.IO) {
-            mutableTargetCatalog.value = TargetCatalogUiState(loading = true)
-            mutableTargetCatalog.value = try {
-                TargetCatalogUiState(
-                    profiles = repository.loadTargets().sortedWith(
-                        compareBy(
-                            TargetProfile::displayName,
-                            TargetProfile::profileId,
-                        ),
-                    ),
-                )
-            } catch (error: Throwable) {
-                TargetCatalogUiState(error = error.message ?: error.javaClass.simpleName)
-            }
-        }
-    }
-
-    fun install(profileId: String? = null) {
+    fun install() {
         if (installJob?.isActive == true || mutableState.value.phase == InstallPhase.Installed) return
         discoveryJob?.cancel()
         installJob = viewModelScope.launch(Dispatchers.IO) {
@@ -157,11 +130,7 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
                     appendLog(app.getString(R.string.log_shizuku_permission))
                 }
                 setPhase(InstallPhase.Checking, app.getString(R.string.status_resolving_profile))
-                val profile = if (profileId == null) {
-                    repository.resolveTarget(DeviceSnapshot.current())
-                } else {
-                    repository.resolveTarget(profileId)
-                }
+                val profile = repository.resolveTarget(DeviceSnapshot.current())
                 appendLog(app.getString(R.string.log_profile, profile.profileId))
                 updateHistoryProfile(profile.profileId)
 
@@ -237,6 +206,7 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
                 put("EXPLOIT_ATTEMPTS", EXPLOIT_ATTEMPTS)
                 put("P0_ATTEMPT_TIMEOUT_SEC", P0_ATTEMPT_TIMEOUT_SEC)
                 put("EXPLOIT_ATTEMPT_TIMEOUT_SEC", EXPLOIT_ATTEMPT_TIMEOUT_SEC)
+                put(STACK_WRITER_DELAY_ENV, STACK_WRITER_DELAY_USEC)
                 cachedP0Offset(bootToken)?.let { put(P0_OFFSET_ENV, it) }
             }
             processBuilder.start()
@@ -451,6 +421,7 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
         add("EXPLOIT_ATTEMPT_TIMEOUT_SEC=$EXPLOIT_ATTEMPT_TIMEOUT_SEC")
         add("CVE43499_ROOT_HELPER=$helperPath")
         add("LD_PRELOAD=$payloadPath")
+        add("$STACK_WRITER_DELAY_ENV=$STACK_WRITER_DELAY_USEC")
         cachedP0Offset(bootToken)?.let { add("$P0_OFFSET_ENV=$it") }
     }.toTypedArray()
 
@@ -564,6 +535,17 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
         private const val P0_CACHE_BOOT_TOKEN = "kernel_boot_id"
         private const val P0_CACHE_OFFSET = "offset"
         private const val P0_OFFSET_ENV = "SLIDE_P0_OFFSET"
+        private const val STACK_WRITER_DELAY_ENV = "STACK_WRITER_DELAY_USEC"
+
+        /**
+         * The coarse delay for the slide writer stage. The payloads porting
+         * record for S9210ZHS6DZG1 lists this exact value as part of the
+         * environment the hardware validation ran with, and the payload reads
+         * it from the environment with no compile-time default for this target.
+         * Setting it keeps the shipped app on the configuration that was
+         * actually proven on a device.
+         */
+        private const val STACK_WRITER_DELAY_USEC = "40000"
         private const val P0_OFFSET_MAX = 0x1f0000L
         private const val P0_OFFSET_MASK = 0xffffL
         private const val SHIZUKU_LOG_PATH = "/data/local/tmp/ksu-exploit.log"

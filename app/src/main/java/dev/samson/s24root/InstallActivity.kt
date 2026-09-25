@@ -68,7 +68,6 @@ class InstallActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        val profileId = intent.getStringExtra(EXTRA_PROFILE_ID)
         val startInstall = savedInstanceState == null && AppPreferences.consumeInstallRequest(
             this,
             intent.getStringExtra(EXTRA_INSTALL_REQUEST_ID),
@@ -81,12 +80,12 @@ class InstallActivity : ComponentActivity() {
             ) {
                 val installState by installViewModel.state.collectAsStateWithLifecycle()
                 BackHandler(enabled = installState.busy) {}
-                LaunchedEffect(startInstall, profileId) {
-                    if (startInstall) installViewModel.install(profileId)
+                LaunchedEffect(startInstall) {
+                    if (startInstall) installViewModel.install()
                 }
                 InstallScreen(
                     installState = installState,
-                    onRetry = { installViewModel.install(profileId) },
+                    onRetry = { installViewModel.install() },
                     onClose = ::finish,
                 )
             }
@@ -95,7 +94,6 @@ class InstallActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_INSTALL_REQUEST_ID = "install_request_id"
-        const val EXTRA_PROFILE_ID = "profile_id"
     }
 }
 

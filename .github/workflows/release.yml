@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: Release tag to publish, or leave blank to use the latest v* tag
+        description: Release tag to publish, or leave blank to derive it as v plus versionName
         required: false
         type: string
 
@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -34,7 +34,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -42,13 +42,8 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
-          packages: 'platform-tools platforms;android-35 cmake;3.22.1'
+          packages: 'platform-tools platforms;android-37.0 build-tools;36.0.0 cmake;3.22.1 ndk;28.2.13676358'
           accept-android-sdk-licenses: true
-
-      - name: Setup NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r28
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -81,31 +76,55 @@ jobs:
             exit 1
           fi
 
-          if ! git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null; then
-            git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
-            git push origin "refs/tags/$TAG_NAME"
+          # An existing tag must point at the commit being released. Reusing a
+          # tag left behind by a failed run would otherwise republish whatever
+          # that run happened to check out.
+          HEAD_COMMIT="$(git rev-parse HEAD)"
+          if git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null; then
+            EXISTING="$(git rev-list -n 1 "$TAG_NAME")"
+            if [ "$EXISTING" != "$HEAD_COMMIT" ]; then
+              echo "Tag $TAG_NAME points at $EXISTING but this run is $HEAD_COMMIT." >&2
+              echo "Delete the tag or release from the commit it names." >&2
+              exit 1
+            fi
+            TAG_EXISTS=true
+          else
+            TAG_EXISTS=false
           fi
 
-          TAG_COMMIT="$(git rev-list -n 1 "$TAG_NAME")"
-          PREVIOUS_TAG="$(git tag --list 'v*' --sort=-v:refname | grep -Fxv "$TAG_NAME" | head -n 1 || true)"
+          # Only this fork's tags count: every other v* tag here came from
+          # upstream, and diffing against one would misreport the release.
+          PREVIOUS_TAG="$(git tag --list 'v*-s24.*' --sort=-v:refname | grep -Fxv "$TAG_NAME" | head -n 1 || true)"
 
           {
             echo "tag_name=$TAG_NAME"
             echo "version_name=$VERSION_NAME"
-            echo "tag_commit=$TAG_COMMIT"
+            echo "tag_commit=$HEAD_COMMIT"
             echo "previous_tag=$PREVIOUS_TAG"
+            echo "tag_exists=$TAG_EXISTS"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Checkout release tag
+      - name: Verify the vendored helper binary
+        run: ./tools/build-helper.sh --check
+
+      - name: Build Debug APK and run unit tests
+        run: ./gradlew testDebugUnitTest compileDebugAndroidTestKotlin assembleDebug --no-daemon
+
+      # Deliberately after the build: a tag is what a release is cut from, so
+      # it must not exist unless the build it names actually succeeded.
+      - name: Create the release tag
         shell: bash
         env:
           TAG_NAME: ${{ steps.release_tag.outputs.tag_name }}
+          TAG_EXISTS: ${{ steps.release_tag.outputs.tag_exists }}
         run: |
           set -euo pipefail
-          git checkout --force "$TAG_NAME"
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
+          if [ "$TAG_EXISTS" = "true" ]; then
+            echo "Tag $TAG_NAME already exists at the right commit; reusing it."
+            exit 0
+          fi
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          git push origin "refs/tags/$TAG_NAME"
 
       - name: Generate release notes
         shell: bash

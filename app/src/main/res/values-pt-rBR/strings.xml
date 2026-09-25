@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Root my Galaxy</string>
+    <string name="app_name">Root My Galaxy S24</string>
     <string name="nav_overview">Início</string>
     <string name="nav_history">Histórico</string>
     <string name="nav_settings">Configurações</string>
@@ -50,16 +50,13 @@
     <string name="history_detail_title">Detalhes da execução</string>
     <string name="history_started">Começou: %1$s</string>
     <string name="history_completed">Completou: %1$s</string>
-    <string name="history_log">Logs de execução</string>
     <string name="history_log_empty">Nenhum output de log por enquanto.</string>
-
     <string name="install_title">Instalar</string>
     <string name="install_keep_open">Fique nessa tela até a instalação acabar</string>
     <string name="install_live_progress">Log</string>
     <string name="install_preparing">Preparando…</string>
     <string name="step_support_title">Checar suporte</string>
     <string name="step_support_detail">Verifificar dispositivo e perfil de firmware</string>
-
     <string name="step_exploit_title">Exploit de kernel</string>
     <string name="step_exploit_detail">Adquirir root bootstrap</string>
     <string name="step_ksu_title">Carregar o KernelSU</string>
@@ -70,7 +67,6 @@
     <string name="phase_loading_ksu">Carregando o KernelSU com o root bootstrap adquirido</string>
     <string name="phase_installed">Módulo do KernelSU e canal de controle verificados</string>
     <string name="phase_failed">Revise o ponto de falha no log abaixo</string>
-
     <string name="status_ksu_active">KernelSU ativo</string>
     <string name="status_not_installed">Não instalado</string>
     <string name="status_support_failed">Verificação de suporte falhou</string>
@@ -93,7 +89,6 @@
     <string name="error_ksu_verify">Carregamento tardio ou verificação de controle do KernelSU falhou (rc=%1$d): %2$s</string>
     <string name="error_boot_id">Não foi possível ler o boot_id atual</string>
     <string name="error_receipt">Não foi possível salvar o recibo de verificação da instalação</string>
-
     <string name="artifact_exploit">exploit</string>
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_no_profile">Nenhum payload compatível suporta esse modelo e versão de kernel</string>
@@ -109,20 +104,6 @@
     <string name="open_github">Abrir GitHub</string>
     <string name="github_card_title">Explorar o Root My Galaxy</string>
     <string name="github_card_description">Ver o código-fonte e instruções de uso.</string>
-    <string name="action_continue">Continuar mesmo assim</string>
-    <string name="action_next">Próximo</string>
-    <string name="advanced">Avançado</string>
-    <string name="advanced_mode">Modo avançado</string>
-    <string name="advanced_mode_description">Escolha manualmente um payload compatível com o dispositivo durante a instalação</string>
-    <string name="repo_profile_missing">O perfil de suporte %1$s não está mais disponível</string>
-    <string name="select_device_title">Escolha um payload</string>
-    <string name="select_device_description">Selecione um payload por modelo de dispositivo e versão de kernel.</string>
-    <string name="show_my_device_only">Mostrar apenas meu dispositivo</string>
-    <string name="no_matching_devices">Nenhum payload corresponde a esse modelo e versão de kernel.</string>
-    <string name="device_mismatch_title">Dispositivo incompatível</string>
-    <string name="device_mismatch_body">Esse celular é o %1$s, mas o payload que você selecionou suporta o %2$s. Rodar ele pode crashar ou danificar o dispositivo.</string>
-    <string name="kernel_version_mismatch_title">Versão de kernel incompatível</string>
-    <string name="kernel_version_mismatch_body">Esse celular usa o kernel %1$s, mas o payload que você selecionou suporta o %2$s. Os offsets podem ser incompatíveis.</string>
     <string name="shizuku_mode">Usar Shizuku</string>
     <string name="shizuku_mode_description">Usar o Shizuku para executar o payload. Isso pode melhorar a confiabilidade.</string>
     <string name="shizuku_not_running_title">Shizuku não está em execução</string>
@@ -134,9 +115,9 @@
     <string name="log_shizuku_prepare">[*] Preparando a execução do Shizuku</string>
     <string name="log_shizuku_permission">[+] Permissão do Shizuku concedida</string>
     <string name="about">Sobre</string>
-    <string name="about_title">Sobre o Root My Galaxy</string>
-    <string name="about_description">Sobre o Root My Galaxy</string>
-    <string name="about_body">Instalador de um toque que usa uma exploração de kernel para enraizar dispositivos Samsung Galaxy compatíveis.</string>
+    <string name="about_title">Sobre o Root My Galaxy S24</string>
+    <string name="about_description">Sobre o Root My Galaxy S24</string>
+    <string name="about_body">Instalador de um clique que usa um exploit de kernel para aplicar root no Galaxy S24 China (SM-S9210) com o firmware S9210ZHS6DZG1. Outros modelos vêm do feed de suporte upstream.</string>
     <string name="kernelsu_card_description">Solução de root baseada em kernel para Android</string>
     <string name="history_shizuku_used">Shizuku: usado</string>
     <string name="history_shizuku_not_used">Shizuku: não usado</string>

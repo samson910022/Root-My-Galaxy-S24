@@ -32,7 +32,6 @@ object AppPreferences {
     private const val PREFERENCES = "appearance"
     private const val ACCENT_COLOR = "accent_color"
     private const val THEME_MODE = "theme_mode"
-    private const val ADVANCED_MODE = "advanced_mode"
     private const val SHIZUKU_MODE = "shizuku_mode"
     private const val CONSUMED_INSTALL_REQUEST = "consumed_install_request"
 
@@ -53,15 +52,6 @@ object AppPreferences {
     fun setThemeMode(context: Context, themeMode: AppThemeMode) {
         prefs(context).edit()
             .putString(THEME_MODE, themeMode.storedValue)
-            .apply()
-    }
-
-    fun advancedMode(context: Context): Boolean =
-        prefs(context).getBoolean(ADVANCED_MODE, false)
-
-    fun setAdvancedMode(context: Context, enabled: Boolean) {
-        prefs(context).edit()
-            .putBoolean(ADVANCED_MODE, enabled)
             .apply()
     }
 

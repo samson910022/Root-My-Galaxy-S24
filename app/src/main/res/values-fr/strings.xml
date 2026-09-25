@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Root My Galaxy</string>
+    <string name="app_name">Root My Galaxy S24</string>
     <string name="nav_overview">Accueil</string>
     <string name="nav_history">Historique</string>
     <string name="nav_settings">Paramètres</string>
@@ -50,14 +50,12 @@
     <string name="history_started">Début : %1$s</string>
     <string name="history_completed">Fin : %1$s</string>
     <string name="history_log_empty">Aucune sortie de journal pour l\'instant.</string>
-
     <string name="install_title">Installation</string>
     <string name="install_keep_open">Gardez cet écran ouvert jusqu\'à la fin de l\'installation</string>
     <string name="install_live_progress">Journal</string>
     <string name="install_preparing">Préparation…</string>
     <string name="step_support_title">Vérification de compatibilité</string>
     <string name="step_support_detail">Vérifier l\'appareil et le profil du firmware</string>
-
     <string name="step_exploit_title">Exploit du noyau</string>
     <string name="step_exploit_detail">Acquérir les droits root de base</string>
     <string name="step_ksu_title">Charger KernelSU</string>
@@ -68,7 +66,6 @@
     <string name="phase_loading_ksu">Chargement de KernelSU avec les droits root de base acquis</string>
     <string name="phase_installed">Module KernelSU et canal de contrôle vérifiés</string>
     <string name="phase_failed">Vérifiez le point d\'échec dans le journal ci-dessous</string>
-
     <string name="status_ksu_active">KernelSU actif</string>
     <string name="status_not_installed">Non installé</string>
     <string name="status_support_failed">Vérification de compatibilité échouée</string>
@@ -91,7 +88,6 @@
     <string name="error_ksu_verify">Le chargement tardif ou la vérification du contrôle de KernelSU a échoué (rc=%1$d) : %2$s</string>
     <string name="error_boot_id">Impossible de lire le boot_id actuel</string>
     <string name="error_receipt">Impossible de sauvegarder le reçu de vérification de l\'installation</string>
-
     <string name="artifact_exploit">exploit</string>
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_no_profile">Aucune charge utile compatible ne prend en charge ce modèle et cette version de noyau</string>
@@ -107,11 +103,6 @@
     <string name="open_github">Ouvrir GitHub</string>
     <string name="github_card_title">Explorer Root My Galaxy</string>
     <string name="github_card_description">Voir le code source et les instructions d\'utilisation.</string>
-    <string name="action_continue">Continuer quand même</string>
-    <string name="action_next">Suivant</string>
-    <string name="advanced">Avancé</string>
-    <string name="advanced_mode">Mode avancé</string>
-    <string name="advanced_mode_description">Choisir manuellement une charge utile compatible avec l\'appareil lors de l\'installation</string>
     <string name="shizuku_mode">Utiliser Shizuku</string>
     <string name="shizuku_mode_description">Utiliser Shizuku pour exécuter la charge utile. Cela peut améliorer la fiabilité.</string>
     <string name="shizuku_not_running_title">Shizuku n\'est pas en cours d\'exécution</string>
@@ -122,19 +113,10 @@
     <string name="error_shizuku_stage">Impossible de préparer %1$s via Shizuku : %2$s</string>
     <string name="log_shizuku_prepare">[*] Préparation de l\'exécution Shizuku</string>
     <string name="log_shizuku_permission">[+] Permission Shizuku accordée</string>
-    <string name="repo_profile_missing">Le profil de compatibilité %1$s n\'est plus disponible</string>
-    <string name="select_device_title">Choisir une charge utile</string>
-    <string name="select_device_description">Sélectionner une charge utile par modèle d\'appareil et version de noyau.</string>
-    <string name="show_my_device_only">Afficher uniquement mon appareil</string>
-    <string name="no_matching_devices">Aucune charge utile ne correspond à ce modèle et à cette version de noyau.</string>
-    <string name="device_mismatch_title">Incompatibilité d\'appareil</string>
-    <string name="device_mismatch_body">Ce téléphone est un %1$s, mais la charge utile sélectionnée prend en charge %2$s. L\'exécuter pourrait planter ou endommager l\'appareil.</string>
-    <string name="kernel_version_mismatch_title">Incompatibilité de version de noyau</string>
-    <string name="kernel_version_mismatch_body">Ce téléphone utilise le noyau %1$s, mais la charge utile sélectionnée prend en charge %2$s. Les décalages peuvent être incompatibles.</string>
     <string name="about">À propos</string>
-    <string name="about_title">À propos de Root My Galaxy</string>
-    <string name="about_description">À propos de Root My Galaxy</string>
-    <string name="about_body">Installeur en un clic qui exploite une faille du noyau pour rooter les appareils Samsung Galaxy pris en charge.</string>
+    <string name="about_title">À propos de Root My Galaxy S24</string>
+    <string name="about_description">À propos de Root My Galaxy S24</string>
+    <string name="about_body">Installateur en un clic qui utilise un exploit noyau pour rooter le Galaxy S24 China (SM-S9210) sur le firmware S9210ZHS6DZG1. Les autres modèles proviennent du flux de support amont.</string>
     <string name="history_payload">Payload : %1$s</string>
     <string name="export_log">Exporter le journal</string>
     <string name="export_log_saved">Journal enregistré</string>

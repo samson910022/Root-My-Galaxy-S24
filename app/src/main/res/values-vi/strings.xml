@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Root My Galaxy</string>
+    <string name="app_name">Root My Galaxy S24</string>
     <string name="nav_overview">Trang chủ</string>
     <string name="nav_history">Lịch sử</string>
     <string name="nav_settings">Cài đặt</string>
@@ -44,14 +44,12 @@
     <string name="history_started">Bắt đầu: %1$s</string>
     <string name="history_completed">Hoàn thành: %1$s</string>
     <string name="history_log_empty">Chưa có nhật ký nào.</string>
-
     <string name="install_title">Cài đặt</string>
     <string name="install_keep_open">Giữ màn hình này mở cho đến khi cài đặt hoàn tất</string>
     <string name="install_live_progress">Nhật ký</string>
     <string name="install_preparing">Đang chuẩn bị…</string>
     <string name="step_support_title">Kiểm tra hỗ trợ</string>
     <string name="step_support_detail">Xác minh hồ sơ thiết bị và firmware</string>
-
     <string name="step_exploit_title">Khai thác kernel</string>
     <string name="step_exploit_detail">Giành quyền root khởi tạo</string>
     <string name="step_ksu_title">Nạp KernelSU</string>
@@ -62,7 +60,6 @@
     <string name="phase_loading_ksu">Đang nạp KernelSU với quyền root khởi tạo đã giành được</string>
     <string name="phase_installed">Đã xác minh mô-đun KernelSU và kênh điều khiển</string>
     <string name="phase_failed">Xem lại điểm lỗi trong nhật ký bên dưới</string>
-
     <string name="status_ksu_active">KernelSU đang hoạt động</string>
     <string name="status_not_installed">Chưa cài đặt</string>
     <string name="status_support_failed">Kiểm tra hỗ trợ thất bại</string>
@@ -85,7 +82,6 @@
     <string name="error_ksu_verify">Nạp chậm KernelSU hoặc xác minh điều khiển thất bại (rc=%1$d): %2$s</string>
     <string name="error_boot_id">Không thể đọc boot_id hiện tại</string>
     <string name="error_receipt">Không thể lưu biên nhận xác minh cài đặt</string>
-
     <string name="artifact_exploit">exploit</string>
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_no_profile">Không có payload tương thích nào hỗ trợ mẫu và phiên bản kernel này</string>
@@ -101,11 +97,6 @@
     <string name="open_github">Mở GitHub</string>
     <string name="github_card_title">Khám phá Root My Galaxy</string>
     <string name="github_card_description">Xem mã nguồn và hướng dẫn sử dụng.</string>
-    <string name="action_continue">Vẫn tiếp tục</string>
-    <string name="action_next">Tiếp theo</string>
-    <string name="advanced">Nâng cao</string>
-    <string name="advanced_mode">Chế độ nâng cao</string>
-    <string name="advanced_mode_description">Tự chọn payload tương thích với thiết bị khi cài đặt</string>
     <string name="shizuku_mode">Sử dụng Shizuku</string>
     <string name="shizuku_mode_description">Dùng Shizuku để chạy payload. Điều này có thể cải thiện độ tin cậy.</string>
     <string name="shizuku_not_running_title">Shizuku không chạy</string>
@@ -116,19 +107,10 @@
     <string name="error_shizuku_stage">Không thể chuẩn bị %1$s qua Shizuku: %2$s</string>
     <string name="log_shizuku_prepare">[*] Đang chuẩn bị thực thi Shizuku</string>
     <string name="log_shizuku_permission">[+] Đã cấp quyền Shizuku</string>
-    <string name="repo_profile_missing">Hồ sơ hỗ trợ %1$s không còn khả dụng</string>
-    <string name="select_device_title">Chọn payload</string>
-    <string name="select_device_description">Chọn payload theo mẫu thiết bị và phiên bản kernel.</string>
-    <string name="show_my_device_only">Chỉ hiển thị thiết bị của tôi</string>
-    <string name="no_matching_devices">Không có payload nào khớp với thiết bị và phiên bản kernel này.</string>
-    <string name="device_mismatch_title">Thiết bị không khớp</string>
-    <string name="device_mismatch_body">Điện thoại này là %1$s, nhưng payload đã chọn chỉ hỗ trợ %2$s. Chạy payload có thể làm thiết bị treo hoặc hư hỏng.</string>
-    <string name="kernel_version_mismatch_title">Kernel không khớp</string>
-    <string name="kernel_version_mismatch_body">Điện thoại này dùng kernel %1$s, nhưng payload đã chọn chỉ hỗ trợ %2$s. Các offset có thể không tương thích.</string>
     <string name="about">Giới thiệu</string>
-    <string name="about_title">Giới thiệu về Root My Galaxy</string>
-    <string name="about_description">Giới thiệu về Root My Galaxy</string>
-    <string name="about_body">Trình cài đặt một chạm sử dụng lỗ hổng kernel để root các thiết bị Samsung Galaxy được hỗ trợ.</string>
+    <string name="about_title">Giới thiệu về Root My Galaxy S24</string>
+    <string name="about_description">Giới thiệu về Root My Galaxy S24</string>
+    <string name="about_body">Trình cài đặt một chạm dùng khai thác lõi để root Galaxy S24 China (SM-S9210) trên bản firmware S9210ZHS6DZG1. Các mô hình khác lấy từ nguồn hỗ trợ của dự án gốc.</string>
     <string name="history_payload">Payload: %1$s</string>
     <string name="export_log">Xuất nhật ký</string>
     <string name="export_log_saved">Đã lưu nhật ký</string>

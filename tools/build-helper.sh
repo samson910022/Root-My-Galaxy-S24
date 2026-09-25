@@ -20,8 +20,10 @@ SOURCE_PATH=src/su_daemon.c
 SOURCE_COMMIT=a311cb88c28204c3902af9450ae4077199e4d71d
 SOURCE_BLOB=6565a0a85d71c0556950cd6d488040b99b4da642
 SOURCE_SHA256=3509de28cc194b275ab6f8c254a838b1ebc55e1fa094647ae83ef56639442996
-BINARY_SHA256=f6da8c44bdf63fcacd8c70149e382b39f638f18a1f1f28e0e2c7c117652661a0
-BINARY_SIZE=27088
+PATCHED_SOURCE_SHA256=4165b1da52c0529cc5a80eed15b5d5cebade39df44bbd83c8ac2c7c3a603ffe0
+LOCAL_PATCH=tools/helper-marker-removal.patch
+BINARY_SHA256=b63951595d631fc7f259ce2ae596da121bd62765e2c016d460fb61b694b5bb1f
+BINARY_SIZE=26040
 API=35
 NDK_VERSION=28.2.13676358
 
@@ -72,8 +74,11 @@ expected = {
     ("source", "sha256"): "3509de28cc194b275ab6f8c254a838b1ebc55e1fa094647ae83ef56639442996",
     ("build", "ndkPackage"): "ndk;28.2.13676358",
     ("build", "apiLevel"): 35,
-    ("build", "unpackedSize"): 27088,
-    ("build", "sha256"): "f6da8c44bdf63fcacd8c70149e382b39f638f18a1f1f28e0e2c7c117652661a0",
+    ("build", "unpackedSize"): 26040,
+    ("build", "sha256"): "b63951595d631fc7f259ce2ae596da121bd62765e2c016d460fb61b694b5bb1f",
+    ("build", "patchedSourceSha256"): "4165b1da52c0529cc5a80eed15b5d5cebade39df44bbd83c8ac2c7c3a603ffe0",
+    ("build", "localPatch"): "tools/helper-marker-removal.patch",
+    ("build", "packedSizeAfterAgpStrip"): 21480,
 }
 
 bad = []
@@ -102,13 +107,20 @@ verify_provenance
 # --- the worktree file and the staged blob must both be the pinned binary ----
 # Checking only the worktree would let a staged-but-different helper through,
 # because that is the copy a commit would actually record.
-verify_binary() {
+# Verifies the worktree copy. The index is only consulted by --check: a rebuild
+# legitimately leaves the index holding the previous binary until it is staged.
+verify_worktree() {
   local size digest
   size=$(stat -c %s "$TARGET")
   digest=$(sha256sum "$TARGET" | cut -d' ' -f1)
   [ "$size" = "$BINARY_SIZE" ] || fail "$TARGET is $size bytes, expected $BINARY_SIZE"
   [ "$digest" = "$BINARY_SHA256" ] || fail "$TARGET digest $digest, expected $BINARY_SHA256"
+  note "verified $TARGET ($size bytes, $digest)"
+}
 
+# --check additionally proves the copy a commit would record is the same, so a
+# tampered binary cannot be blessed here and then committed from the index.
+verify_index() {
   local staged
   if staged=$(git cat-file blob ":$TARGET" 2>/dev/null | sha256sum | cut -d' ' -f1); then
     [ "$staged" = "$BINARY_SHA256" ] || \
@@ -116,10 +128,9 @@ verify_binary() {
   else
     fail "cannot read the staged $TARGET from the index"
   fi
-
-  git diff --quiet -- "$PROVENANCE" "$TARGET" "$SCRIPT" ||
+  git diff --quiet -- "$PROVENANCE" "$TARGET" "$SCRIPT" "$LOCAL_PATCH" ||
     fail "staged content differs from the worktree for these files; commit or unstage first"
-  note "verified $TARGET ($size bytes) in the worktree and in the index"
+  note "verified the staged copy as well"
 }
 
 verify_contracts() {
@@ -130,7 +141,8 @@ verify_contracts() {
 }
 
 if $check_only; then
-  verify_binary
+  verify_worktree
+  verify_index
   verify_contracts "$TARGET"
   exit 0
 fi
@@ -151,6 +163,18 @@ blob=$(git -C "$work/repo" rev-parse "FETCH_HEAD:$SOURCE_PATH")
 [ "$blob" = "$SOURCE_BLOB" ] || fail "$SOURCE_PATH blob is $blob, expected $SOURCE_BLOB"
 git -C "$work/repo" show "FETCH_HEAD:$SOURCE_PATH" > "$work/su_daemon.c"
 [ "$(sha256sum "$work/su_daemon.c" | cut -d' ' -f1)" = "$SOURCE_SHA256" ] || fail "source digest mismatch"
+
+# A local patch removes the bootstrap marker feature. Upstream's version reads a
+# path from a shell-writable file and then creates that path as root, which is a
+# root-write primitive this app never uses. The patch is kept in the repository
+# so the divergence from upstream stays reviewable.
+[ -f "$LOCAL_PATCH" ] || fail "missing $LOCAL_PATCH"
+patch --batch --forward --silent "$work/su_daemon.c" "$LOCAL_PATCH" ||
+  fail "$LOCAL_PATCH does not apply to the pinned source"
+[ "$(sha256sum "$work/su_daemon.c" | cut -d' ' -f1)" = "$PATCHED_SOURCE_SHA256" ] ||
+  fail "patched source digest mismatch"
+grep -q 'bootstrap_marker_path\|BOOTSTRAP_MARKER_CONFIG' "$work/su_daemon.c" &&
+  fail "the marker primitive is still present after patching"
 
 # The helper must stay self-contained: no local header means no target context
 # leaks into this build.
@@ -174,5 +198,6 @@ readelf -lW "$work/helper" | awk '/LOAD/{print $NF}' | sort -u | grep -qx '0x400
 # entry, and recording the executable bit here would only make the worktree look
 # dirty after every rebuild.
 install -m 0644 "$work/helper" "$TARGET"
-verify_binary
-note "rebuilt from $SOURCE_COMMIT and verified"
+verify_worktree
+verify_contracts "$TARGET"
+note "rebuilt from $SOURCE_COMMIT with $LOCAL_PATCH applied, and verified"

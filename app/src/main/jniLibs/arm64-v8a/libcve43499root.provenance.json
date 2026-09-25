@@ -16,10 +16,12 @@
     "ndkPackage": "ndk;28.2.13676358",
     "ndkRelease": "r28c",
     "apiLevel": 35,
-    "note": "The rule above is the payloads repository Makefile ROOT_HELPER rule verbatim. The helper includes no local or target headers, so the build takes no target context. Reproduce with tools/build-helper.sh, which pins the commit and verifies every hash below.",
-    "unpackedSize": 27088,
-    "sha256": "f6da8c44bdf63fcacd8c70149e382b39f638f18a1f1f28e0e2c7c117652661a0",
-    "packedSizeAfterAgpStrip": 22264
+    "note": "The rule above is the payloads repository Makefile ROOT_HELPER rule verbatim. The helper includes no local or target headers, so the build takes no target context. tools/helper-marker-removal.patch is then applied and the result is a different source from upstream; see localChanges. Reproduce with tools/build-helper.sh, which pins the commit, applies the patch, and verifies every hash below.",
+    "unpackedSize": 26040,
+    "sha256": "b63951595d631fc7f259ce2ae596da121bd62765e2c016d460fb61b694b5bb1f",
+    "packedSizeAfterAgpStrip": 21480,
+    "patchedSourceSha256": "4165b1da52c0529cc5a80eed15b5d5cebade39df44bbd83c8ac2c7c3a603ffe0",
+    "localPatch": "tools/helper-marker-removal.patch"
   },
   "replaces": {
     "sha256": "c6b0612b6bdbd60ded964694284f7e8d81cfff2079abeaf3b8854952c2b49eec",
@@ -28,12 +30,16 @@
   },
   "behaviourChanges": [
     "late-load now first attempts `logcat late-load --ephemeral --package-name me.weishu.kernelsu`, then checks the KernelSU control interface, and retries once without --ephemeral if the module is not live. The retry exists because the Samsung-patched KernelSU 3.2.5 loader rejects --ephemeral with a usage error yet still exits 0, so the exit status alone cannot gate the fallback. The bundled loader contains no `ephemeral` string at all, so on a clean device the first attempt is expected to be rejected and the retry to do the work.",
-    "umh_main now accepts an optional fourth argument, used as the bootstrap marker path when it is absolute. The app's own calls pass three arguments, so the accepted argc values are unchanged for it.",
-    "daemon_main can now write a `uid=0` readiness marker, but only when a marker path was set. With the app's three-argument call the path is set only by load_bootstrap_marker_config(), which requires /data/local/tmp/cve43499-root-marker-path to already exist. This app never creates that file, so the marker write does not happen in its flow; if some other process left that file on the device, the helper would read and unlink it and honour the path it names."
+    "The bootstrap readiness marker present in the pinned upstream source is removed here; see localChanges."
   ],
   "unchangedContracts": [
     "/data/local/tmp/ksud-s25u-kdp stays the compiled-in loader path; the app must stage the ksud under exactly that name.",
     "/system/bin/logcat stays the bind-mount target used to exec the loader.",
     "me.weishu.kernelsu stays the package name passed to the loader."
-  ]
+  ],
+  "localChanges": [
+    "tools/helper-marker-removal.patch removes the bootstrap readiness marker. Upstream's version reads a path from /data/local/tmp/cve43499-root-marker-path, a directory any shell can write to, and then opens that path as root with O_CREAT|O_TRUNC and no ownership, mode, symlink or directory check. That is a root-write primitive with attacker-chosen destination, and this app never uses the feature, so it is removed rather than merely left dormant. The patch also restores umh_main's original three-argument check, since the fourth argument existed only to carry the marker path.",
+    "No other source line is changed. The --ephemeral attempt and its fallback, the loader path, the logcat bind-mount target and the package name are all byte-identical to the pinned upstream source."
+  ],
+  "requiresFreshP0Session": "The upstream manifest sets requiresFreshP0Session true. The app does not implement it and the bundled payload does not enforce it: the e1q target header does not define APP_REQUIRE_FRESH_P0_SESSION, so the payload takes the branch that retains a discovered P0 offset and injects it into the next child. The payloads porting record documents EXPLOIT_ATTEMPTS=24 and a golden run on attempt 5/48, and contains no supervisor-retained diagnostic, so it does not establish that the retention branch was exercised. The app keeps the upstream behaviour rather than changing tested exploit semantics on the strength of a field nothing reads."
 }

@@ -69,23 +69,23 @@ class PayloadRepository(
                 ),
             )
         }
-        return loadTargets()
-            .firstOrNull { it.matches(snapshot) }
-            ?: error(context.getString(R.string.repo_no_profile))
+        val remote = loadTargets()
+        remote.firstOrNull { it.matches(snapshot) }?.let {
+            requireCompatible(it)
+            return it
+        }
+        // The reserved model is served only by the bundled manifest. If that
+        // manifest is missing or malformed, falling through to the online feed
+        // would run an unverified payload on a device whose exact-firmware and
+        // digest guarantees only the bundled path provides.
+        if (isReservedModel(snapshot)) {
+            error(context.getString(R.string.repo_builtin_unavailable))
+        }
+        error(context.getString(R.string.repo_no_profile))
     }
 
-    fun resolveTarget(profileId: String): TargetProfile {
-        val bundled = loadBuiltinTargets().firstOrNull { it.profileId == profileId }
-        if (bundled != null) {
-            // A bundled profile is only ever run on the exact firmware it was
-            // derived from, whoever asked for it. Advanced mode can name a
-            // profile directly, and that must not become a way around the gate.
-            requireCompatible(bundled)
-            return bundled
-        }
-        return loadTargets().firstOrNull { it.profileId == profileId }
-            ?: error(context.getString(R.string.repo_profile_missing, profileId))
-    }
+    private fun isReservedModel(snapshot: DeviceSnapshot): Boolean =
+        RESERVED_MODELS.any { it.equals(snapshot.model, ignoreCase = true) }
 
     fun acquire(profile: TargetProfile, onProgress: (String) -> Unit): VerifiedPayloads {
         // Last gate before anything is written or run. Automatic resolution has
@@ -288,6 +288,13 @@ class PayloadRepository(
         private const val MAX_MANIFEST_BYTES = 256 * 1024
         private const val MAX_BUILTIN_MANIFEST_BYTES = 256 * 1024
         private const val PAYLOAD_ROOT = "payloads"
+
+        /**
+         * Models this fork serves from its own bundled manifest rather than
+         * from the online feed. Keeping the list explicit means a future
+         * upstream entry for the same model cannot quietly take over.
+         */
+        private val RESERVED_MODELS = setOf("SM-S9210")
         private const val BUILTIN_MANIFEST = "builtin-targets.json"
         private const val EXPLOIT_FILE_NAME = "cve-2026-43499-app.so"
         private const val KERNELSU_FILE_NAME = "ksud-kdp"

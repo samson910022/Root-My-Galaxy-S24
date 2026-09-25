@@ -1,5 +1,7 @@
 # Bundled exploit payloads and KernelSU loaders are prebuilt binaries.
 # Never let git guess text conversion or apply end-of-line normalisation to them.
 app/src/main/assets/payloads/** binary
-app/src/main/jniLibs/** binary
-app/src/main/jniLibs/**/*.provenance.json text eol=lf
+app/src/main/jniLibs/**/*.so binary
+# The provenance record next to a binary is ordinary reviewable JSON.
+app/src/main/jniLibs/**/*.provenance.json text eol=lf diff
+tools/*.patch -whitespace
