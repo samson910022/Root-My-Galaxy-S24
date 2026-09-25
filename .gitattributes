@@ -1,0 +1,4 @@
+# Bundled exploit payloads and KernelSU loaders are prebuilt binaries.
+# Never let git guess text conversion or apply end-of-line normalisation to them.
+app/src/main/assets/payloads/** binary
+app/src/main/jniLibs/** binary

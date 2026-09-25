@@ -50,6 +50,16 @@ android {
     }
 
     packaging {
+        // Required: libcve43499root.so is a PIE executable, not a shared library.
+        // It must be extracted to nativeLibraryDir and marked executable by
+        // PackageManager so the app can run it with ProcessBuilder.
+        //
+        // This also fixes the packaging mode to COMPRESSED, which is why
+        // app/src/main/assets/**/*.so is deflated even though AGP would
+        // otherwise exempt .so from compression. Payload assets are staged
+        // out of the APK with AssetManager.open(), which serves stored and
+        // deflated entries alike, so their compression state is irrelevant
+        // and must not be relied on. Do not add noCompress for them.
         jniLibs.useLegacyPackaging = true
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
