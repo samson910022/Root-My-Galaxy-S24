@@ -1,4 +1,4 @@
-package dev.busung.s25uroot
+package dev.samson.s24root
 
 import android.os.Build
 import android.os.Bundle
@@ -58,7 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.busung.s25uroot.ui.theme.RootMyGalaxyTheme
+import dev.samson.s24root.ui.theme.RootMyGalaxyTheme
 import kotlinx.coroutines.delay
 
 class InstallActivity : ComponentActivity() {

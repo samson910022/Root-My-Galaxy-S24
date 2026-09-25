@@ -1,4 +1,4 @@
-package dev.busung.s25uroot
+package dev.samson.s24root
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -18,11 +18,11 @@ data class UpdateInfo(
     val releaseUrl: String,
 )
 
-const val ROOT_MY_GALAXY_URL = "https://github.com/BuSung-dev/Root-My-Galaxy"
+const val ROOT_MY_GALAXY_URL = "https://github.com/samson910022/Root-My-Galaxy-S24"
 
 object AppUpdater {
 
-    private const val GITHUB_API = "https://api.github.com/repos/BuSung-dev/Root-My-Galaxy"
+    private const val GITHUB_API = "https://api.github.com/repos/samson910022/Root-My-Galaxy-S24"
     private const val RELEASES_PAGE = "$ROOT_MY_GALAXY_URL/releases/latest"
 
     suspend fun fetchLatestRelease(): UpdateInfo? = withContext(Dispatchers.IO) {
@@ -30,7 +30,7 @@ object AppUpdater {
             val connection = URL("$GITHUB_API/releases/latest").openConnection() as HttpURLConnection
             try {
                 connection.requestMethod = "GET"
-                connection.setRequestProperty("User-Agent", "RootMyGalaxy/${BuildConfig.VERSION_NAME}")
+                connection.setRequestProperty("User-Agent", "RootMyGalaxyS24/${BuildConfig.VERSION_NAME}")
                 connection.setRequestProperty("Accept", "application/vnd.github+json")
                 connection.connectTimeout = 10_000
                 connection.readTimeout = 10_000
@@ -77,7 +77,7 @@ object AppUpdater {
             val connection = URL(url).openConnection() as HttpURLConnection
             try {
                 connection.requestMethod = "GET"
-                connection.setRequestProperty("User-Agent", "RootMyGalaxy/${BuildConfig.VERSION_NAME}")
+                connection.setRequestProperty("User-Agent", "RootMyGalaxyS24/${BuildConfig.VERSION_NAME}")
                 connection.connectTimeout = 15_000
                 connection.readTimeout = 30_000
                 if (connection.responseCode != HttpURLConnection.HTTP_OK) return@withContext null

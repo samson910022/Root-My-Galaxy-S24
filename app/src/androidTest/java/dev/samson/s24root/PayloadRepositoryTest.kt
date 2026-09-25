@@ -1,4 +1,4 @@
-package dev.busung.s25uroot
+package dev.samson.s24root
 
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4

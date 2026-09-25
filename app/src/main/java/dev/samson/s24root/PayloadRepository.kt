@@ -1,4 +1,4 @@
-package dev.busung.s25uroot
+package dev.samson.s24root
 
 import android.content.Context
 import android.system.Os
@@ -130,7 +130,7 @@ class PayloadRepository(private val context: Context) {
             connectTimeout = 15_000
             readTimeout = 60_000
             instanceFollowRedirects = true
-            setRequestProperty("User-Agent", "S25URoot/${BuildConfig.VERSION_NAME}")
+            setRequestProperty("User-Agent", "RootMyGalaxyS24/${BuildConfig.VERSION_NAME}")
             connect()
             require(responseCode == HttpURLConnection.HTTP_OK) { "HTTP $responseCode" }
         }

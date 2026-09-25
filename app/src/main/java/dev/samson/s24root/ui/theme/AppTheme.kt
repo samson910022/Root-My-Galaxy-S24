@@ -1,4 +1,4 @@
-package dev.busung.s25uroot.ui.theme
+package dev.samson.s24root.ui.theme
 
 import android.app.Activity
 import android.content.Context
@@ -20,8 +20,8 @@ import androidx.core.view.WindowCompat
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
-import dev.busung.s25uroot.AccentColor
-import dev.busung.s25uroot.AppThemeMode
+import dev.samson.s24root.AccentColor
+import dev.samson.s24root.AppThemeMode
 
 private val AppTypography = Typography(
     displaySmall = TextStyle(fontSize = 38.sp, lineHeight = 44.sp, fontWeight = FontWeight.Light),

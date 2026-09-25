@@ -1,4 +1,4 @@
-package dev.busung.s25uroot
+package dev.samson.s24root
 
 import android.app.Application
 import android.os.SystemClock

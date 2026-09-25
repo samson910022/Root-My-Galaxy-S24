@@ -1,4 +1,4 @@
-package dev.busung.s25uroot
+package dev.samson.s24root
 
 import org.json.JSONArray
 import org.json.JSONObject

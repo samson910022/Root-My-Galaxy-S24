@@ -1,4 +1,4 @@
-package dev.busung.s25uroot
+package dev.samson.s24root
 
 import android.content.Context
 import android.content.Intent
@@ -149,7 +149,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.busung.s25uroot.ui.theme.RootMyGalaxyTheme
+import dev.samson.s24root.ui.theme.RootMyGalaxyTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.DateFormat
@@ -301,7 +301,7 @@ private fun RootApp(
     var updateStatus by remember { mutableStateOf<UpdateStatus>(UpdateStatus.Idle) }
     var updateCardDismissed by remember { mutableStateOf(false) }
     val checkForUpdate: () -> Unit = {
-        if (!updateStatus.busy) {
+        if (BuildConfig.SELF_UPDATE_ENABLED && !updateStatus.busy) {
             updateStatus = UpdateStatus.Checking
             scope.launch {
                 val info = AppUpdater.fetchLatestRelease()
@@ -1578,18 +1578,24 @@ private fun SettingsPage(
         item { SectionLabel(stringResource(R.string.about)) }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                UpdateSettingsCard(
-                    status = updateStatus,
-                    position = SettingsCardPosition.Top,
-                    onCheckForUpdate = onCheckForUpdate,
-                    onStartDownload = onStartDownload,
-                )
+                if (BuildConfig.SELF_UPDATE_ENABLED) {
+                    UpdateSettingsCard(
+                        status = updateStatus,
+                        position = SettingsCardPosition.Top,
+                        onCheckForUpdate = onCheckForUpdate,
+                        onStartDownload = onStartDownload,
+                    )
+                }
                 SettingsCard(
                     icon = Icons.Rounded.Info,
                     title = stringResource(R.string.about),
                     description = stringResource(R.string.about_description),
                     value = "",
-                    position = SettingsCardPosition.Bottom,
+                    position = if (BuildConfig.SELF_UPDATE_ENABLED) {
+                        SettingsCardPosition.Bottom
+                    } else {
+                        SettingsCardPosition.Single
+                    },
                     onClick = {
                         clickHaptic(view)
                         showAboutDialog = true

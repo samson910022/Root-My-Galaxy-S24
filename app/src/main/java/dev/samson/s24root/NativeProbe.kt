@@ -1,8 +1,8 @@
-package dev.busung.s25uroot
+package dev.samson.s24root
 
 object NativeProbe {
     init {
-        System.loadLibrary("s25u_native")
+        System.loadLibrary("s24_native")
     }
 
     external fun run(): String

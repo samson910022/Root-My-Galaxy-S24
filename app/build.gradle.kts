@@ -4,16 +4,22 @@ plugins {
 }
 
 android {
-    namespace = "dev.busung.s25uroot"
+    namespace = "dev.samson.s24root"
     compileSdk = 37
+    ndkVersion = "28.2.13676358"
 
     defaultConfig {
-        applicationId = "dev.busung.s25uroot"
+        applicationId = "dev.samson.s24root"
         minSdk = 33
         targetSdk = 36
-        versionCode = 13
-        versionName = "0.2.65"
+        versionCode = 14
+        versionName = "0.3.0-s24.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // This fork ships from a private repository, whose release feed is not
+        // readable without an Authorization header. Self-update stays off until
+        // a token-free distribution endpoint exists.
+        buildConfigField("boolean", "SELF_UPDATE_ENABLED", "false")
 
         ndk {
             abiFilters += "arm64-v8a"
@@ -76,6 +82,9 @@ dependencies {
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
+    // AGP's unit-test android.jar only has org.json stubs that throw; the real
+    // implementation is required to exercise the support-manifest parser.
+    testImplementation("org.json:json:20250517")
     androidTestImplementation("androidx.test:core-ktx:1.7.0")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test:runner:1.7.0")
