@@ -75,20 +75,27 @@ Unit tests:
 ./gradlew :app:testDebugUnitTest
 ```
 
-## Verifying the vendored binary
+## Verifying and refreshing the vendored binaries
 
-The helper is a prebuilt executable, not something Gradle compiles, so it is
-checked explicitly:
+Neither binary is compiled by Gradle, so both are checked explicitly. CI runs
+these two commands on every push.
 
 ```sh
-./tools/build-helper.sh --check   # verify the committed binary
-./tools/build-helper.sh           # rebuild it from the pinned commit
+./tools/build-helper.sh --check    # helper, against its recorded provenance
+./tools/sync-payloads.sh --check   # payload, against the bundled manifest
 ```
 
-`--check` validates the worktree copy *and* the staged blob, so a tampered
-binary cannot be blessed and then committed. The build fetches the source by
-pinned commit SHA rather than by a branch name, since `refs/pull/320/head` can
-move and the commit cannot.
+`build-helper.sh --check` validates the worktree copy *and* the staged blob, so
+a tampered binary cannot be blessed and then committed. A full
+`./tools/build-helper.sh` refetches the source by pinned commit SHA, applies
+`tools/helper-marker-removal.patch`, rebuilds it with the payloads Makefile's
+rule, and verifies the result.
+
+`./tools/sync-payloads.sh` refetches the two payload files, verifies their
+digests against the manifest, and installs them. It reads `refs/pull/320/head`
+while the pull request is open; once that merges, set `PR_MERGED=true` at the
+top of the script and it will read the payloads `main` branch instead, still
+refusing any content that does not match the recorded digests.
 
 ## Known limitations
 

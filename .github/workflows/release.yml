@@ -104,8 +104,13 @@ jobs:
             echo "tag_exists=$TAG_EXISTS"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Verify the vendored helper binary
-        run: ./tools/build-helper.sh --check
+      # The two vendored binaries are not compiled by Gradle, so they are
+      # checked explicitly: the helper against its recorded provenance, and the
+      # payload against the digest in the bundled manifest.
+      - name: Verify the vendored binaries
+        run: |
+          ./tools/build-helper.sh --check
+          ./tools/sync-payloads.sh --check
 
       - name: Build Debug APK and run unit tests
         run: ./gradlew testDebugUnitTest compileDebugAndroidTestKotlin assembleDebug --no-daemon

@@ -54,38 +54,27 @@ class PayloadRepository(
         return (loadBuiltinTargets() + remote).distinctBy(TargetProfile::profileId)
     }
 
-    fun resolveTarget(snapshot: DeviceSnapshot): TargetProfile {
-        // Checked before any HTTP call: the bundled profile is the one device
-        // this app targets, and it must resolve with no connectivity at all.
-        val bundled = loadBuiltinTargets()
-        bundled.firstOrNull { it.passesFirmwareGate(snapshot) }?.let { return it }
-        val wrongFirmware = bundled.firstOrNull { it.matchesDevice(snapshot) }
-        if (wrongFirmware != null) {
-            error(
-                context.getString(
-                    R.string.repo_firmware_unsupported,
-                    wrongFirmware.supportedKernelReleases,
-                    snapshot.kernelRelease,
-                ),
-            )
+    /**
+     * Bundled profiles are consulted first and the online feed is loaded lazily,
+     * so the device this fork targets resolves with no connectivity at all.
+     * The decision itself is the pure [resolveProfile].
+     */
+    fun resolveTarget(snapshot: DeviceSnapshot): TargetProfile =
+        when (val resolution = resolveProfile(snapshot, loadBuiltinTargets(), ::loadTargets)) {
+            is Resolution.Found -> resolution.profile
+            is Resolution.Failed -> error(messageFor(resolution.failure, snapshot))
         }
-        val remote = loadTargets()
-        remote.firstOrNull { it.matches(snapshot) }?.let {
-            requireCompatible(it)
-            return it
-        }
-        // The reserved model is served only by the bundled manifest. If that
-        // manifest is missing or malformed, falling through to the online feed
-        // would run an unverified payload on a device whose exact-firmware and
-        // digest guarantees only the bundled path provides.
-        if (isReservedModel(snapshot)) {
-            error(context.getString(R.string.repo_builtin_unavailable))
-        }
-        error(context.getString(R.string.repo_no_profile))
-    }
 
-    private fun isReservedModel(snapshot: DeviceSnapshot): Boolean =
-        RESERVED_MODELS.any { it.equals(snapshot.model, ignoreCase = true) }
+    private fun messageFor(failure: ResolutionFailure, snapshot: DeviceSnapshot): String = when (failure) {
+        is ResolutionFailure.WrongFirmware -> context.getString(
+            R.string.repo_firmware_unsupported,
+            failure.supportedRelease,
+            snapshot.kernelRelease,
+        )
+        ResolutionFailure.ReservedModelWithoutBundledPayload ->
+            context.getString(R.string.repo_builtin_unavailable)
+        ResolutionFailure.NoProfile -> context.getString(R.string.repo_no_profile)
+    }
 
     fun acquire(profile: TargetProfile, onProgress: (String) -> Unit): VerifiedPayloads {
         // Last gate before anything is written or run. Automatic resolution has
@@ -289,12 +278,6 @@ class PayloadRepository(
         private const val MAX_BUILTIN_MANIFEST_BYTES = 256 * 1024
         private const val PAYLOAD_ROOT = "payloads"
 
-        /**
-         * Models this fork serves from its own bundled manifest rather than
-         * from the online feed. Keeping the list explicit means a future
-         * upstream entry for the same model cannot quietly take over.
-         */
-        private val RESERVED_MODELS = setOf("SM-S9210")
         private const val BUILTIN_MANIFEST = "builtin-targets.json"
         private const val EXPLOIT_FILE_NAME = "cve-2026-43499-app.so"
         private const val KERNELSU_FILE_NAME = "ksud-kdp"

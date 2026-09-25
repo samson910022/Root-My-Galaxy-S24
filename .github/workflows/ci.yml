@@ -42,8 +42,13 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Verify the vendored helper binary
-        run: ./tools/build-helper.sh --check
+      # The two vendored binaries are not compiled by Gradle, so they are
+      # checked explicitly: the helper against its recorded provenance, and the
+      # payload against the digest in the bundled manifest.
+      - name: Verify the vendored binaries
+        run: |
+          ./tools/build-helper.sh --check
+          ./tools/sync-payloads.sh --check
 
       # The instrumented suite is compiled but not run: one of its tests
       # launches the exploit and needs the real device.
