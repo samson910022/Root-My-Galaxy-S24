@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.InputStream
-import java.security.MessageDigest
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -50,30 +49,6 @@ data class TargetCatalogUiState(
 )
 
 private data class CommandResult(val code: Int, val output: String)
-
-/**
- * Payloads are truncated to a fixed release size, so a rebuild of a target --
- * or a different target padded to the same size -- has exactly the length of
- * whatever is already staged, and would keep running in its place.
- */
-internal fun stagedFileIsCurrent(staged: File, source: File): Boolean {
-    if (!staged.exists()) return false
-    val stagedDigest = sha256OrNull(staged) ?: return false
-    return stagedDigest == sha256OrNull(source)
-}
-
-private fun sha256OrNull(file: File): String? = runCatching {
-    file.inputStream().use { input ->
-        val digest = MessageDigest.getInstance("SHA-256")
-        val buffer = ByteArray(8192)
-        while (true) {
-            val count = input.read(buffer)
-            if (count < 0) break
-            digest.update(buffer, 0, count)
-        }
-        digest.digest().joinToString("") { "%02x".format(it) }
-    }
-}.getOrNull()
 
 class InstallViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application
@@ -181,7 +156,7 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
                     }
                     appendLog(app.getString(R.string.log_shizuku_permission))
                 }
-                setPhase(InstallPhase.Checking, app.getString(R.string.status_checking_github))
+                setPhase(InstallPhase.Checking, app.getString(R.string.status_resolving_profile))
                 val profile = if (profileId == null) {
                     repository.resolveTarget(DeviceSnapshot.current())
                 } else {
@@ -190,9 +165,26 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
                 appendLog(app.getString(R.string.log_profile, profile.profileId))
                 updateHistoryProfile(profile.profileId)
 
-                setPhase(InstallPhase.Downloading, app.getString(R.string.status_downloading_payload))
-                val payloads = repository.download(profile) { appendLog("[*] $it") }
-                appendLog(app.getString(R.string.log_download_verified))
+                setPhase(
+                    InstallPhase.Downloading,
+                    app.getString(
+                        if (profile.bundled) {
+                            R.string.status_staging_payload
+                        } else {
+                            R.string.status_downloading_payload
+                        },
+                    ),
+                )
+                val payloads = repository.acquire(profile) { appendLog("[*] $it") }
+                appendLog(
+                    app.getString(
+                        if (profile.bundled) {
+                            R.string.log_builtin_verified
+                        } else {
+                            R.string.log_download_verified
+                        },
+                    ),
+                )
 
                 setPhase(InstallPhase.Exploiting, app.getString(R.string.status_exploit_running))
                 executeExploit(payloads.exploit)
@@ -562,6 +554,13 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
         private const val SHIZUKU_LOG_PATH = "/data/local/tmp/ksu-exploit.log"
         private const val SHIZUKU_HELPER_PATH = "/data/local/tmp/ksu-helper"
         private const val SHIZUKU_PAYLOAD_PATH = "/data/local/tmp/ksu-payload"
+        /**
+         * The helper bind-mounts this exact path over /system/bin/logcat and
+         * execs it, so the name is compiled into libcve43499root.so and must
+         * not be renamed here even though this build targets S24. The name the
+         * loader is cached under inside the app is unrelated and is
+         * PayloadRepository.KERNELSU_FILE_NAME.
+         */
         private const val SHIZUKU_KSUD_PATH = "/data/local/tmp/ksud-s25u-kdp"
         private const val SHIZUKU_KSUD_STAGE_PATH = "/data/local/tmp/.ksud-stage"
         private val LOG_POLL_INTERVAL = 250.milliseconds

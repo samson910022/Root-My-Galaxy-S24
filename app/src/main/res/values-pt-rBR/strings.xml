@@ -5,7 +5,6 @@
     <string name="nav_history">Histórico</string>
     <string name="nav_settings">Configurações</string>
     <string name="install_confirm_title">Instalar o KernelSU?</string>
-    <string name="install_confirm_body">O app vai verificar o perfil suportado, e depois baixar e rodar o exploit e o payload do KernelSU do GitHub.</string>
     <string name="action_confirm">Confirmar</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_close">Fechar</string>
@@ -60,15 +59,13 @@
     <string name="install_preparing">Preparando…</string>
     <string name="step_support_title">Checar suporte</string>
     <string name="step_support_detail">Verifificar dispositivo e perfil de firmware</string>
-    <string name="step_download_title">Baixar</string>
-    <string name="step_download_detail">Carregar o perfil de suporte</string>
+
     <string name="step_exploit_title">Exploit de kernel</string>
     <string name="step_exploit_detail">Adquirir root bootstrap</string>
     <string name="step_ksu_title">Carregar o KernelSU</string>
     <string name="step_ksu_detail">Módulo de carregamento tardio e canal de controle de verificação</string>
     <string name="phase_checking">Verificando o dispositivo e firmware suportados</string>
     <string name="phase_ready">Pronto para instalar</string>
-    <string name="phase_downloading">Baixando payloads fixados por commit do GitHub</string>
     <string name="phase_exploiting">Isso pode levar 10 minutos ou mais. Seu dispositivo pode esquentar ou parar de responder.</string>
     <string name="phase_loading_ksu">Carregando o KernelSU com o root bootstrap adquirido</string>
     <string name="phase_installed">Módulo do KernelSU e canal de controle verificados</string>
@@ -77,7 +74,6 @@
     <string name="status_ksu_active">KernelSU ativo</string>
     <string name="status_not_installed">Não instalado</string>
     <string name="status_support_failed">Verificação de suporte falhou</string>
-    <string name="status_checking_github">Verificando manifesto de suporte no GitHub</string>
     <string name="status_downloading_payload">Baixando payloads</string>
     <string name="status_exploit_running">Rodando exploit de kernel</string>
     <string name="status_ksu_loading">Carregando o KernelSU tardiamente</string>

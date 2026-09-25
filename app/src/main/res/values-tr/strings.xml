@@ -5,7 +5,6 @@
     <string name="nav_history">Geçmiş</string>
     <string name="nav_settings">Ayarlar</string>
     <string name="install_confirm_title">KernelSU yüklensin mi?</string>
-    <string name="install_confirm_body">Uygulama destek profilini doğrulayacak, ardından exploit ve KernelSU payload dosyalarını GitHub\'dan indirip çalıştıracaktır.</string>
     <string name="action_confirm">Onayla</string>
     <string name="action_cancel">İptal</string>
     <string name="action_close">Kapat</string>
@@ -52,15 +51,13 @@
     <string name="install_preparing">Hazırlanıyor…</string>
     <string name="step_support_title">Destek Kontrolü</string>
     <string name="step_support_detail">Cihaz ve yazılım uyumluluğunu kontrol et</string>
-    <string name="step_download_title">İndirme</string>
-    <string name="step_download_detail">Destek listesini yükle</string>
+
     <string name="step_exploit_title">Kernel exploit</string>
     <string name="step_exploit_detail">Bootstrap root al</string>
     <string name="step_ksu_title">KernelSU Yükle</string>
     <string name="step_ksu_detail">Modülü yükle ve kontrol kanalını doğrula</string>
     <string name="phase_checking">Desteklenen cihaz ve yazılım kontrol ediliyor</string>
     <string name="phase_ready">Yüklemeye hazır</string>
-    <string name="phase_downloading">GitHub\'dan hedefteki commit\'e ait payload dosyaları indiriliyor</string>
     <string name="phase_exploiting">Bu işlem 10 dakika veya daha uzun sürebilir. Cihazınız ısınabilir veya yanıt vermeyebilir.</string>
     <string name="phase_loading_ksu">Elde edilen bootstrap root ile KernelSU yükleniyor</string>
     <string name="phase_installed">KernelSU modülü ve kontrol kanalı doğrulandı</string>
@@ -69,7 +66,6 @@
     <string name="status_ksu_active">KernelSU aktif</string>
     <string name="status_not_installed">Yüklü değil</string>
     <string name="status_support_failed">Destek kontrolü başarısız</string>
-    <string name="status_checking_github">GitHub destek listesi kontrol ediliyor</string>
     <string name="status_downloading_payload">Payload dosyaları indiriliyor</string>
     <string name="status_exploit_running">Kernel exploit çalıştırılıyor</string>
     <string name="status_ksu_loading">KernelSU yükleniyor</string>

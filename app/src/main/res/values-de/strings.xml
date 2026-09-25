@@ -5,7 +5,6 @@
     <string name="nav_history">Verlauf</string>
     <string name="nav_settings">Einstellungen</string>
     <string name="install_confirm_title">KernelSU installieren?</string>
-    <string name="install_confirm_body">Die App überprüft das Support-Profil und lädt anschließend den Exploit sowie den KernelSU-Payload von GitHub und führt sie aus.</string>
     <string name="action_confirm">Bestätigen</string>
     <string name="action_cancel">Abbrechen</string>
     <string name="action_close">Schließen</string>
@@ -78,15 +77,13 @@
     <string name="install_preparing">Vorbereiten…</string>
     <string name="step_support_title">Unterstützungsprüfung</string>
     <string name="step_support_detail">Gerät und Firmware-Profil verifizieren</string>
-    <string name="step_download_title">Herunterladen</string>
-    <string name="step_download_detail">Unterstützungsmanifest laden</string>
+
     <string name="step_exploit_title">Kernel-Exploit</string>
     <string name="step_exploit_detail">Bootstrap-Root abrufen</string>
     <string name="step_ksu_title">KernelSU laden</string>
     <string name="step_ksu_detail">Modul nachträglich laden und Steuerungskanal verifizieren</string>
     <string name="phase_checking">Unterstütztes Gerät und Firmware werden geprüft</string>
     <string name="phase_ready">Bereit zur Installation</string>
-    <string name="phase_downloading">Commit-gebundene Payloads von GitHub herunterladen</string>
     <string name="phase_exploiting">Dieser Vorgang kann 10 Minuten oder länger dauern. Dein Gerät kann heiß werden oder nicht mehr reagieren.</string>
     <string name="phase_loading_ksu">KernelSU wird mit dem erhaltenen Bootstrap-Root geladen</string>
     <string name="phase_installed">KernelSU-Modul und Steuerungskanal verifiziert</string>
@@ -95,7 +92,6 @@
     <string name="status_ksu_active">KernelSU aktiv</string>
     <string name="status_not_installed">Nicht installiert</string>
     <string name="status_support_failed">Support-Check fehlgeschlagen</string>
-    <string name="status_checking_github">GitHub-Unterstützungsmanifest wird geprüft</string>
     <string name="status_downloading_payload">Payloads werden heruntergeladen</string>
     <string name="status_exploit_running">Kernel-Exploit wird ausgeführt</string>
     <string name="status_ksu_loading">KernelSU wird nachträglich geladen</string>

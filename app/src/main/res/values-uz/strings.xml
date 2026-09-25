@@ -5,7 +5,6 @@
     <string name="nav_history">Tarix</string>
     <string name="nav_settings">Sozlamalar</string>
     <string name="install_confirm_title">KernelSU o\'rnatilsinmi?</string>
-    <string name="install_confirm_body">Ilova profil mosligini tekshiradi, so\'ngra GitHub\'dan eksployt va KernelSU paketlarini yuklab olib, ishga tushiradi.</string>
     <string name="action_confirm">Tasdiqlash</string>
     <string name="action_cancel">Bekor qilish</string>
     <string name="action_close">Yopish</string>
@@ -76,15 +75,13 @@
     <string name="install_preparing">Tayyorlanmoqda…</string>
     <string name="step_support_title">Moslikni tekshirish</string>
     <string name="step_support_detail">Qurilma va proshivka profilini tasdiqlash</string>
-    <string name="step_download_title">Yuklab olish</string>
-    <string name="step_download_detail">Moslik manifestini yuklash</string>
+
     <string name="step_exploit_title">Yadro eksployti</string>
     <string name="step_exploit_detail">Boshlang\'ich (bootstrap) root huquqini olish</string>
     <string name="step_ksu_title">KernelSU\'ni yuklash</string>
     <string name="step_ksu_detail">Modulni kechiktirib yuklash va boshqaruv kanalini tekshirish</string>
     <string name="phase_checking">Mos keladigan qurilma va proshivka tekshirilmoqda</string>
     <string name="phase_ready">O\'rnatishga tayyor</string>
-    <string name="phase_downloading">GitHub\'dan maxsus tasdiqlangan (commit-pinned) paketlar yuklab olinmoqda</string>
     <string name="phase_exploiting">Bu jarayon 10 daqiqa yoki undan ko\'proq vaqt olishi mumkin. Qurilmangiz qizib ketishi yoki qotib qolishi mumkin.</string>
     <string name="phase_loading_ksu">Olingan boshlang\'ich root orqali KernelSU yuklanmoqda</string>
     <string name="phase_installed">KernelSU moduli va boshqaruv kanali muvaffaqiyatli tekshirildi</string>
@@ -93,7 +90,6 @@
     <string name="status_ksu_active">KernelSU faol</string>
     <string name="status_not_installed">O\'rnatilmagan</string>
     <string name="status_support_failed">Moslikni tekshirish muvaffaqiyatsiz yakunlandi</string>
-    <string name="status_checking_github">GitHub moslik manifesti tekshirilmoqda</string>
     <string name="status_downloading_payload">Paketlar yuklab olinmoqda</string>
     <string name="status_exploit_running">Yadro eksployti ishga tushirilmoqda</string>
     <string name="status_ksu_loading">KernelSU kechiktirib yuklanmoqda</string>
