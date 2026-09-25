@@ -412,10 +412,25 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
 
     private fun shizukuEnabled(): Boolean = activeRunShizuku ?: AppPreferences.shizukuMode(app)
 
+    /**
+     * Puts [source] at [target] with mode [mode] for the Shizuku-owned tree.
+     *
+     * Matching bytes are not the same as a usable file: a run interrupted
+     * between the write and the chmod, or a file someone dropped there by hand,
+     * would be reused with the wrong permissions and then fail to exec. Content
+     * decides whether a rewrite is needed; the mode is always asserted, and
+     * asserted against the file the way Shizuku sees it rather than through the
+     * app's own access check, which the app does not have on this directory.
+     */
     private fun shizukuStage(source: File, target: String, mode: String): File {
-        val staged = File(target)
-        if (stagedFileIsCurrent(staged, source)) return staged
         try {
+            val staged = File(target)
+            if (stagedFileIsCurrent(staged, source)) {
+                if (ShizukuController.isExecutable(target)) return staged
+                if (ShizukuController.chmod(target, mode) && ShizukuController.isExecutable(target)) {
+                    return staged
+                }
+            }
             ShizukuController.writeFile(target, mode, source.inputStream())
         } catch (error: Throwable) {
             throw IllegalStateException(
@@ -423,7 +438,7 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
                 error,
             )
         }
-        return staged
+        return File(target)
     }
 
     private fun shizukuEnvironment(

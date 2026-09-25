@@ -1,0 +1,39 @@
+{
+  "binary": "libcve43499root.so",
+  "whatItIs": "A position-independent executable stored under jniLibs with a .so name. PackageManager treats any lib/<abi>/*.so entry as a native library, extracts it to nativeLibraryDir, and marks it 0755, which is what lets the app run it with ProcessBuilder. The helper is exec'd, never loaded as a library; it is the exploit payload passed to it as argv[2] that gets dlopen'd.",
+  "source": {
+    "repository": "https://github.com/BuSung-dev/Root-My-Galaxy-Payloads",
+    "path": "src/su_daemon.c",
+    "commit": "a311cb88c28204c3902af9450ae4077199e4d71d",
+    "pullRequest": 320,
+    "refAtBuildTime": "refs/pull/320/head",
+    "gitBlob": "6565a0a85d71c0556950cd6d488040b99b4da642",
+    "sha256": "3509de28cc194b275ab6f8c254a838b1ebc55e1fa094647ae83ef56639442996"
+  },
+  "build": {
+    "command": "aarch64-linux-android35-clang -fPIE -pie -O2 -g0 -Wall -Wextra su_daemon.c -ldl -o libcve43499root.so",
+    "toolchainPath": "$ANDROID_HOME/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android35-clang",
+    "ndkPackage": "ndk;28.2.13676358",
+    "ndkRelease": "r28c",
+    "apiLevel": 35,
+    "note": "The rule above is the payloads repository Makefile ROOT_HELPER rule verbatim. The helper includes no local or target headers, so the build takes no target context. Reproduce with tools/build-helper.sh, which pins the commit and verifies every hash below.",
+    "unpackedSize": 27088,
+    "sha256": "f6da8c44bdf63fcacd8c70149e382b39f638f18a1f1f28e0e2c7c117652661a0",
+    "packedSizeAfterAgpStrip": 22264
+  },
+  "replaces": {
+    "sha256": "c6b0612b6bdbd60ded964694284f7e8d81cfff2079abeaf3b8854952c2b49eec",
+    "size": 26024,
+    "builtFrom": "an older payloads revision (79f42b0-era su_daemon.c), not from main"
+  },
+  "behaviourChanges": [
+    "late-load now first attempts `logcat late-load --ephemeral --package-name me.weishu.kernelsu`, then checks the KernelSU control interface, and retries once without --ephemeral if the module is not live. The retry exists because the Samsung-patched KernelSU 3.2.5 loader rejects --ephemeral with a usage error yet still exits 0, so the exit status alone cannot gate the fallback. The bundled loader contains no `ephemeral` string at all, so on a clean device the first attempt is expected to be rejected and the retry to do the work.",
+    "umh_main now accepts an optional fourth argument, used as the bootstrap marker path when it is absolute. The app's own calls pass three arguments, so the accepted argc values are unchanged for it.",
+    "daemon_main can now write a `uid=0` readiness marker, but only when a marker path was set. With the app's three-argument call the path is set only by load_bootstrap_marker_config(), which requires /data/local/tmp/cve43499-root-marker-path to already exist. This app never creates that file, so the marker write does not happen in its flow; if some other process left that file on the device, the helper would read and unlink it and honour the path it names."
+  ],
+  "unchangedContracts": [
+    "/data/local/tmp/ksud-s25u-kdp stays the compiled-in loader path; the app must stage the ksud under exactly that name.",
+    "/system/bin/logcat stays the bind-mount target used to exec the loader.",
+    "me.weishu.kernelsu stays the package name passed to the loader."
+  ]
+}

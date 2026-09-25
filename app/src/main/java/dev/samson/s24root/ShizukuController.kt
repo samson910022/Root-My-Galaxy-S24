@@ -100,6 +100,25 @@ object ShizukuController {
         check(exitCode == 0) { "Failed to stage $remotePath (exit $exitCode)" }
     }
 
+    /**
+     * Fixes the permissions of an already-staged file and reports whether it
+     * worked. The app cannot chmod a shell-owned file itself, so this has to
+     * go through Shizuku, and the result cannot be observed with the app's own
+     * access check because SELinux keeps the app out of this directory.
+     */
+    fun chmod(remotePath: String, mode: String): Boolean {
+        val process = exec(arrayOf("sh", "-c", "chmod $mode '$remotePath'"))
+        return try {
+            process.waitFor() == 0
+        } finally {
+            if (process.isAlive) process.destroy()
+        }
+    }
+
+    /** Asks the shell that will actually run the file whether it can. */
+    fun isExecutable(remotePath: String): Boolean =
+        capture(arrayOf("sh", "-c", "test -x '$remotePath'")).isNotEmpty()
+
     private class RemoteProcess(private val remote: IRemoteProcess) : Process() {
         private val input by lazy { ParcelFileDescriptor.AutoCloseInputStream(remote.getInputStream()) }
         private val output by lazy { ParcelFileDescriptor.AutoCloseOutputStream(remote.getOutputStream()) }
