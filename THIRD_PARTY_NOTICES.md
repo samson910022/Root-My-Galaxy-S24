@@ -45,10 +45,25 @@ the exploit source revision and its licence first.**
 
 ### KernelSU loader
 
-`ksud-e1q-S9210ZHS6DZG1-kdp` is built from KernelSU `v3.2.5`, commit
-`b0bc817b4e966aa6aa830834eaf6ef765d821d40`, as stated in the payloads
-repository's `kernelsu/README.md`. It embeds the matching
-`android14-6.1` KernelSU module.
+`ksud-e1q-S9210ZHS6DZG1-kdp` is an EXPERIMENTAL local rebuild from KernelSU
+`v3.3.0`, commit `932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e`
+(`KSU_VERSION 32601`), with the payloads repository's
+`kernelsu/patches/KernelSU-v3.3.0-samsung-kdp-rkp-defex.patch` applied. It
+embeds a freshly built exact-release `android14-6.1` module with vermagic
+`6.1.145-android14-11-33419968-abS9210ZHS6DZG1`
+(`CONFIG_KSU_SAMSUNG_KDP/RKP/DEFEX=y`, DDK
+`ghcr.io/ylarod/ddk-min:android14-6.1-20260313`, `llvm-strip -d`;
+module SHA-256 `ecb59a4d…d8c1c0b`, 407936 bytes).
+The `ksud` userspace was rebuilt with NDK r29 (`cargo ndk -t arm64-v8a
+--platform 29 build --release`, `KSU_VERSION/VERSION_CODE=32601`,
+`VERSION_NAME=3.3.0`; upstream `Kernel-SU/ksu_props` git dep substituted with
+the identical pinned-revision source because that repo is currently
+unfetchable). The bundled binary reports `3.3.0 (uapi: 2)` and carries the
+single-KMI asset `android14-6.1_kernelsu.ko`. It has NOT been
+hardware-verified on SM-S9210: the prior device test (2026-09-11) covered the
+`v3.2.5` loader (`b0bc817b4e966aa6aa830834eaf6ef765d821d40`, 4895088 bytes,
+SHA-256 `67b49cad…ee542`). Pair it with KernelSU Manager `v3.3.0` (versionCode
+`32601`); a 3.2.5 Manager will report version skew.
 
 KernelSU is licensed GPL-3.0, which is a different licence from the
 Apache-2.0 covering this repository. The payloads repository's own statement is:

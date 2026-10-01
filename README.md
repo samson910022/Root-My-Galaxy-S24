@@ -19,10 +19,17 @@ unchanged.
 | File | Size | SHA-256 |
 | --- | ---: | --- |
 | `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | 104128 | `2dc137cc…e9b4059` |
-| `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4895088 | `67b49cad…ee542` |
+| `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4992888 | `50f1d62e…bb1de7` (EXPERIMENTAL v3.3.0, see below) |
 | `app/src/main/jniLibs/arm64-v8a/libcve43499root.so` | 26040 | `b6395159…94b5bb1f` |
 
-The two payload files are byte-identical to `BuSung-dev/Root-My-Galaxy-Payloads`
+> EXPERIMENTAL: the `ksud` above is a local v3.3.0 rebuild (KernelSU
+> `v3.3.0`/`932014a`, `KSU_VERSION 32601`, exact e1q vermagic
+> `6.1.145-android14-11-33419968-abS9210ZHS6DZG1`), not the device-tested
+> v3.2.5 binary (4895088 bytes, `67b49cad…ee542`). It has not been
+> hardware-verified on SM-S9210. Pair it with KernelSU Manager v3.3.0
+> (`32601`). The exploit `.so` and the helper are unchanged.
+
+The exploit payload file is byte-identical to `BuSung-dev/Root-My-Galaxy-Payloads`
 at commit `a311cb88c28204c3902af9450ae4077199e4d71d`. The helper is not a copied
 artifact: it is compiled from that commit's `src/su_daemon.c` and then patched,
 as described below. Full provenance, including the

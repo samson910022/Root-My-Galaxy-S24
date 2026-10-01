@@ -31,9 +31,15 @@ KSUD_NAME=ksud-e1q-S9210ZHS6DZG1-kdp
 EXPLOIT_UPSTREAM="artifacts/$PROFILE/$EXPLOIT_NAME"
 KSUD_UPSTREAM="kernelsu/$KSUD_NAME"
 EXPLOIT_SHA256=2dc137cc1dca72f896ee16347f3137dd0c521ecdee56e1922fb58e733e9b4059
-KSUD_SHA256=67b49cadfbbc518ac1fca3f7e514782110e896103882e7caa5cccaa1572ee542
+# EXPERIMENTAL v3.3.0 (2026-10-02): ksud rebuilt locally from KernelSU v3.3.0
+# (932014a, KSU_VERSION 32601) + v3.3.0 Samsung patch, exact e1q release
+# 6.1.145-android14-11-33419968-abS9210ZHS6DZG1, NDK r29 platform 29.
+# The pinned upstream commit below does NOT carry this binary, so a plain
+# fetch will fail the digest check until the payloads repo publishes it.
+# --check (worktree + index vs manifest) is the supported verification.
+KSUD_SHA256=50f1d62e40dd39689c45a6ab6e767a4196d8f044cd727c761b681d854ebb1de7
 EXPLOIT_SIZE=104128
-KSUD_SIZE=4895088
+KSUD_SIZE=4992888
 
 fail() { printf 'sync-payloads: %s\n' "$*" >&2; exit 1; }
 note() { printf 'sync-payloads: %s\n' "$*"; }
