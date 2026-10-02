@@ -4,9 +4,11 @@
 # The exploit profile lives in an unmerged pull request, so this script fetches
 # it by pinned commit rather than by a branch name. The KernelSU v3.3.0 e1q
 # binary comes from the separately pinned Phase-D commit below because Payloads
-# later reverted it from main pending hardware validation. Once the PR merges,
-# set PR_MERGED=true and the exploit fetch switches to main, still requiring the
-# same content digest so a silent upstream change cannot reach the APK.
+# later reverted it from main pending broader hardware acceptance. A first
+# full-chain app/Shizuku run succeeded on 2026-10-03; see the validation record.
+# Once the PR merges, set PR_MERGED=true and the exploit fetch switches to main,
+# still requiring the same content digest so a silent upstream change cannot
+# reach the APK.
 #
 # Usage:  tools/sync-payloads.sh [--check]
 #           (default)  fetch, verify, and install into the assets tree

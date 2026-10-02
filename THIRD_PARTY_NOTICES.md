@@ -21,10 +21,11 @@ in the README, the removal of the advanced-mode UI, and the helper rebuild.
 
 ## Bundled binaries
 
-All three derive from Root-My-Galaxy-Payloads at commit
-`a311cb88c28204c3902af9450ae4077199e4d71d` (pull request #320, not merged). The
-two payload binaries are copied verbatim; the helper is compiled from that
-commit's source and then patched, as described below.
+The exploit payload is copied verbatim from Root-My-Galaxy-Payloads commit
+`a311cb88c28204c3902af9450ae4077199e4d71d` (pull request #320, not merged).
+The helper is compiled from that commit's source and then patched, as described
+below. The bundled KernelSU loader is a separate Phase-D artifact from commit
+`8236c84301282b5415412d867ab71d4a739e0809` (see its provenance below).
 
 | Artifact | Upstream path |
 | --- | --- |
@@ -48,7 +49,8 @@ the exploit source revision and its licence first.**
 `ksud-e1q-S9210ZHS6DZG1-kdp` is the EXPERIMENTAL e1q Phase-D pair recorded in
 `BuSung-dev/Root-My-Galaxy-Payloads` commit
 `8236c84301282b5415412d867ab71d4a739e0809`; Payloads main later reverted it in
-`7690b8b` pending hardware validation. It is based on KernelSU `v3.3.0`, commit
+`7690b8b`. One full-chain app/Shizuku run succeeded on SM-S9210 on 2026-10-03,
+but broader acceptance remains pending. It is based on KernelSU `v3.3.0`, commit
 `932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e` (`KSU_VERSION 32601`) with the
 Samsung KDP/RKP/DEFEX patch and the target-specific
 `CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y` configuration. The exact-release module
@@ -63,14 +65,19 @@ reports `3.3.0 (uapi: 2)` and embeds the `android14-6.1_kernelsu.ko` asset.
 Payloads’ Phase-D record documents the DDK
 `ghcr.io/ylarod/ddk-min:android14-6.1-20260313`, exact release override, and
 NDK r29 Rust build with workspace-only Cargo dependency overrides. The Phase-D
-pair is statically audited but has NOT been hardware-verified on SM-S9210; the
-prior device test (2026-09-11) covered the v3.2.5 loader
+pair is statically audited. A first full-chain Shizuku-mode run with this exact
+pair succeeded on SM-S9210 on 2026-10-03 through app v0.3.2-s24.1; the captured
+evidence and remaining validation scope are recorded in
+[`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md).
+The Manager UI status and resetprop regression suite have not been checked.
+The earlier device test (2026-09-11) covered the v3.2.5 loader
 (`b0bc817b4e966aa6aa830834eaf6ef765d821d40`, 4895088 bytes, SHA-256
 `67b49cad…ee542`). Pair v3.3.0 with Manager `32601`; a 3.2.5 Manager reports
 version skew.
 
 KernelSU is licensed GPL-3.0, which is a different licence from the
-Apache-2.0 covering this repository. The payloads repository's own statement is:
+Apache-2.0 covering this repository. The following statement from the Payloads
+README is historical and describes its v3.2.5 binaries, not this v3.3.0 loader:
 
 > The files in this directory are built from KernelSU `v3.2.5`, commit
 > `b0bc817b4e966aa6aa830834eaf6ef765d821d40`. They are not interchangeable
