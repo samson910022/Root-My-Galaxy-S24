@@ -31,7 +31,7 @@ private fun bundled(s9210: Boolean = true) = listOf(
         kernelVersions = setOf("6.1.145"),
         kernelReleases = setOf(S9210_RELEASE),
         exploit = BundledArtifact("payloads/p/cve.so", "2dc137cc1dca72f896ee16347f3137dd0c521ecdee56e1922fb58e733e9b4059", 104128),
-        kernelSu = BundledArtifact("payloads/p/ksud", "67b49cadfbbc518ac1fca3f7e514782110e896103882e7caa5cccaa1572ee542", 4895088),
+        kernelSu = BundledArtifact("payloads/p/ksud", "8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049", 4995304),
     ),
 ).filter { s9210 }
 

@@ -12,8 +12,8 @@ android {
         applicationId = "dev.samson.s24root"
         minSdk = 33
         targetSdk = 36
-        versionCode = 15
-        versionName = "0.3.1-s24.1"
+        versionCode = 16
+        versionName = "0.3.2-s24.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // This fork ships from a private repository, whose release feed is not

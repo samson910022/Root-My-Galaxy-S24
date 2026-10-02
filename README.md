@@ -19,22 +19,26 @@ unchanged.
 | File | Size | SHA-256 |
 | --- | ---: | --- |
 | `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | 104128 | `2dc137cc…e9b4059` |
-| `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4992888 | `50f1d62e…bb1de7` (EXPERIMENTAL v3.3.0, see below) |
+| `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4995304 | `88748945…dc15049` (EXPERIMENTAL v3.3.0, see below) |
 | `app/src/main/jniLibs/arm64-v8a/libcve43499root.so` | 26040 | `b6395159…94b5bb1f` |
 
-> EXPERIMENTAL: the `ksud` above is a local v3.3.0 rebuild (KernelSU
-> `v3.3.0`/`932014a`, `KSU_VERSION 32601`, exact e1q vermagic
-> `6.1.145-android14-11-33419968-abS9210ZHS6DZG1`), not the device-tested
-> v3.2.5 binary (4895088 bytes, `67b49cad…ee542`). It has not been
-> hardware-verified on SM-S9210. Pair it with KernelSU Manager v3.3.0
-> (`32601`). The exploit `.so` and the helper are unchanged.
+> EXPERIMENTAL: this is the e1q v3.3.0 Phase-D pair from Payloads commit
+> `8236c843` (KernelSU `932014a`, `KSU_VERSION 32601`), built for exact
+> vermagic `6.1.145-android14-11-33419968-abS9210ZHS6DZG1` with
+> `CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y`. Its `.ko` passed the recorded static
+> target-symbol audit with no `stop_machine` import. Payloads later reverted
+> the pair pending hardware validation; it has not been hardware-verified on
+> SM-S9210. The prior v3.2.5 pair (4895088 bytes, `67b49cad…ee542`) is the
+> device-tested version. Pair v3.3.0 with Manager `32601`. The exploit `.so`
+> and helper are unchanged.
 
 The exploit payload file is byte-identical to `BuSung-dev/Root-My-Galaxy-Payloads`
-at commit `a311cb88c28204c3902af9450ae4077199e4d71d`. The helper is not a copied
-artifact: it is compiled from that commit's `src/su_daemon.c` and then patched,
-as described below. Full provenance, including the
-exact build command and the behaviour the helper rebuild changes, is recorded
-in
+at commit `a311cb88c28204c3902af9450ae4077199e4d71d`; the v3.3.0 loader is the
+separately pinned historical Phase-D artifact from commit `8236c843`. The helper
+is not a copied artifact: it is compiled from the exploit commit's
+`src/su_daemon.c` and then patched, as described below. Full provenance,
+including the exact build command and the behaviour the helper rebuild changes,
+is recorded in
 [`libcve43499root.provenance.json`](app/src/main/jniLibs/arm64-v8a/libcve43499root.provenance.json)
 and in `app/src/main/assets/builtin-targets.json`.
 
@@ -107,11 +111,11 @@ a tampered binary cannot be blessed and then committed. A full
 `tools/helper-marker-removal.patch`, rebuilds it with the payloads Makefile's
 rule, and verifies the result.
 
-`./tools/sync-payloads.sh` refetches the two payload files, verifies their
-digests against the manifest, and installs them. It reads `refs/pull/320/head`
-while the pull request is open; once that merges, set `PR_MERGED=true` at the
-top of the script and it will read the payloads `main` branch instead, still
-refusing any content that does not match the recorded digests.
+`./tools/sync-payloads.sh` fetches the exploit payload from PR #320 (or from
+`main` after setting `PR_MERGED=true`) and fetches the experimental v3.3.0
+`ksud` from its separately pinned historical Phase-D commit. It verifies both
+against the manifest before installing them; the v3.3.0 binary is not currently
+published on Payloads `main` because it remains gated on hardware validation.
 
 ## Known limitations
 

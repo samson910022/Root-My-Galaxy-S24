@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Refreshes the bundled SM-S9210 payload from the payloads repository.
 #
-# The profile lives in an unmerged pull request, so this script fetches the
-# source by pinned commit rather than by a branch name. Once the pull request
-# merges, set PR_MERGED=true and the script switches to the payloads main
-# branch while still requiring the same content digests, so a silent upstream
-# change cannot reach the APK.
+# The exploit profile lives in an unmerged pull request, so this script fetches
+# it by pinned commit rather than by a branch name. The KernelSU v3.3.0 e1q
+# binary comes from the separately pinned Phase-D commit below because Payloads
+# later reverted it from main pending hardware validation. Once the PR merges,
+# set PR_MERGED=true and the exploit fetch switches to main, still requiring the
+# same content digest so a silent upstream change cannot reach the APK.
 #
 # Usage:  tools/sync-payloads.sh [--check]
 #           (default)  fetch, verify, and install into the assets tree
@@ -24,6 +25,10 @@ PR_NUMBER=320
 PR_MERGED=false
 PR_REF="refs/pull/$PR_NUMBER/head"
 PINNED_COMMIT=a311cb88c28204c3902af9450ae4077199e4d71d
+# The e1q v3.3.0 pair is recorded in Payloads Phase D, then intentionally
+# reverted from main until hardware validation. Pin that reviewed commit
+# independently from the unmerged exploit profile.
+KSUD_SOURCE_COMMIT=8236c84301282b5415412d867ab71d4a739e0809
 MAIN_REF=refs/heads/main
 
 EXPLOIT_NAME=cve-2026-43499-app.so
@@ -31,15 +36,12 @@ KSUD_NAME=ksud-e1q-S9210ZHS6DZG1-kdp
 EXPLOIT_UPSTREAM="artifacts/$PROFILE/$EXPLOIT_NAME"
 KSUD_UPSTREAM="kernelsu/$KSUD_NAME"
 EXPLOIT_SHA256=2dc137cc1dca72f896ee16347f3137dd0c521ecdee56e1922fb58e733e9b4059
-# EXPERIMENTAL v3.3.0 (2026-10-02): ksud rebuilt locally from KernelSU v3.3.0
-# (932014a, KSU_VERSION 32601) + v3.3.0 Samsung patch, exact e1q release
-# 6.1.145-android14-11-33419968-abS9210ZHS6DZG1, NDK r29 platform 29.
-# The pinned upstream commit below does NOT carry this binary, so a plain
-# fetch will fail the digest check until the payloads repo publishes it.
-# --check (worktree + index vs manifest) is the supported verification.
-KSUD_SHA256=50f1d62e40dd39689c45a6ab6e767a4196d8f044cd727c761b681d854ebb1de7
+# EXPERIMENTAL v3.3.0 e1q Phase-D pair from Payloads commit 8236c84.
+# It uses CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y and was statically audited, but
+# reverted from Payloads main pending SM-S9210 hardware validation.
+KSUD_SHA256=8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049
 EXPLOIT_SIZE=104128
-KSUD_SIZE=4992888
+KSUD_SIZE=4995304
 
 fail() { printf 'sync-payloads: %s\n' "$*" >&2; exit 1; }
 note() { printf 'sync-payloads: %s\n' "$*"; }
@@ -144,7 +146,7 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
 fetch() {
-  local upstream=$1 destination=$2 size=$3 digest=$4 label=$5
+  local source_commit=$1 upstream=$2 destination=$3 size=$4 digest=$5 label=$6
   curl --fail --silent --show-error --location \
     --proto '=https' --proto-redir '=https' \
     --retry 3 --connect-timeout 15 --max-time 300 \
@@ -158,12 +160,12 @@ fetch() {
 # remain separate operations, so a failure of the second could leave one
 # updated; re-running repairs it, and the manifest digests do not change in
 # between, so a partial state is detected rather than shipped.
-fetch "$EXPLOIT_UPSTREAM" "$work/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
-fetch "$KSUD_UPSTREAM" "$work/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
+fetch "$source_commit" "$EXPLOIT_UPSTREAM" "$work/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
+fetch "$KSUD_SOURCE_COMMIT" "$KSUD_UPSTREAM" "$work/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
 
 install -m 0644 "$work/$EXPLOIT_NAME" "$ASSET_DIR/$EXPLOIT_NAME"
 install -m 0644 "$work/$KSUD_NAME" "$ASSET_DIR/$KSUD_NAME"
 
 verify "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
 verify "$ASSET_DIR/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
-note "synced $PROFILE from $source_commit"
+note "synced $PROFILE exploit from $source_commit and ksud from $KSUD_SOURCE_COMMIT"

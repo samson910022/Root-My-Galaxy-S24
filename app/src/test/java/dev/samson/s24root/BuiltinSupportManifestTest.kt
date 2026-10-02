@@ -9,11 +9,11 @@ import org.junit.Test
 
 private const val S9210_RELEASE = "6.1.145-android14-11-33419968-abS9210ZHS6DZG1"
 private const val S9210_DIGEST = "2dc137cc1dca72f896ee16347f3137dd0c521ecdee56e1922fb58e733e9b4059"
-private const val KSUD_DIGEST = "67b49cadfbbc518ac1fca3f7e514782110e896103882e7caa5cccaa1572ee542"
+private const val KSUD_DIGEST = "8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049"
 
 private fun bundledManifestJson(
     exploit: String = """{"assetPath":"payloads/p/cve.so","sha256":"$S9210_DIGEST","size":104128}""",
-    kernelSu: String = """{"assetPath":"payloads/p/ksud","sha256":"$KSUD_DIGEST","size":4895088}""",
+    kernelSu: String = """{"assetPath":"payloads/p/ksud","sha256":"$KSUD_DIGEST","size":4995304}""",
     kernelReleases: String = """"kernelReleases":["$S9210_RELEASE"],""",
     profileId: String = "e1q-S9210ZHS6DZG1",
 ) = """
@@ -61,7 +61,7 @@ class BuiltinSupportManifestTest {
         val exploit = profile.exploit as BundledArtifact
         assertEquals("payloads/p/cve.so", exploit.assetPath)
         assertEquals(104128L, exploit.size)
-        assertEquals(4895088L, (profile.kernelSu as BundledArtifact).size)
+        assertEquals(4995304L, (profile.kernelSu as BundledArtifact).size)
     }
 
     @Test
