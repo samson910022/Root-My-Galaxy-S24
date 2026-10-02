@@ -27,9 +27,10 @@ PR_NUMBER=320
 PR_MERGED=false
 PR_REF="refs/pull/$PR_NUMBER/head"
 PINNED_COMMIT=a311cb88c28204c3902af9450ae4077199e4d71d
-# The e1q v3.3.0 pair is recorded in Payloads Phase D, then intentionally
-# reverted from main until hardware validation. Pin that reviewed commit
-# independently from the unmerged exploit profile.
+# The e1q v3.3.0 pair is recorded in Payloads Phase D and was reverted from
+# main before its first successful app/Shizuku run (2026-10-03). Keep the
+# published feed on v3.2.5 while broader acceptance remains pending. Pin that
+# reviewed commit independently from the unmerged exploit profile.
 KSUD_SOURCE_COMMIT=8236c84301282b5415412d867ab71d4a739e0809
 MAIN_REF=refs/heads/main
 
@@ -39,8 +40,8 @@ EXPLOIT_UPSTREAM="artifacts/$PROFILE/$EXPLOIT_NAME"
 KSUD_UPSTREAM="kernelsu/$KSUD_NAME"
 EXPLOIT_SHA256=2dc137cc1dca72f896ee16347f3137dd0c521ecdee56e1922fb58e733e9b4059
 # EXPERIMENTAL v3.3.0 e1q Phase-D pair from Payloads commit 8236c84.
-# It uses CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y and was statically audited, but
-# reverted from Payloads main pending SM-S9210 hardware validation.
+# It uses CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y, passed static audit, and has one
+# successful SM-S9210 app/Shizuku run; broader acceptance remains pending.
 KSUD_SHA256=8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049
 EXPLOIT_SIZE=104128
 KSUD_SIZE=4995304
