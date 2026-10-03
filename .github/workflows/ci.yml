@@ -62,3 +62,72 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
+
+  # End-to-end smoke test for tools/release-apk.sh with a throwaway PKCS12 key.
+  # No secret is involved: the key lives in RUNNER_TEMP and the signed APK is
+  # never uploaded. Covers assembleRelease -> zipalign -> apksigner sign ->
+  # certificate digest check -> zipalign -c, plus the negative digest case.
+  release-script-smoke:
+    name: Release script smoke (ephemeral key)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4
+        with:
+          packages: 'platform-tools platforms;android-37.0 build-tools;36.0.0 cmake;3.22.1 ndk;28.2.13676358'
+          accept-android-sdk-licenses: true
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
+
+      - name: Smoke test release-apk.sh with an ephemeral key
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_tmp="$(mktemp -d "${RUNNER_TEMP:-/tmp}/release-smoke.XXXXXX")"
+          trap 'rm -rf "${smoke_tmp:-}"' EXIT
+          pass_file="$smoke_tmp/pass.txt"
+          printf 'throwaway-pass' > "$pass_file"
+          chmod 600 "$pass_file"
+          keytool -genkeypair -keystore "$smoke_tmp/e2e.p12" -storetype PKCS12 \
+            -alias e2e -keyalg RSA -keysize 2048 -validity 3650 \
+            -dname "CN=E2E Test" \
+            -storepass "$(cat "$pass_file")" -keypass "$(cat "$pass_file")"
+          expected_digest="$(keytool -list -v -keystore "$smoke_tmp/e2e.p12" \
+            -storepass "$(cat "$pass_file")" \
+            | awk -F': ' '/SHA256:/ { gsub(/:/, "", $2); print tolower($2); exit }')"
+          [ -n "$expected_digest" ]
+          mkdir -p "$smoke_tmp/out"
+          RELEASE_KEYSTORE="$smoke_tmp/e2e.p12" RELEASE_KEY_ALIAS=e2e \
+            RELEASE_KEYSTORE_PASSWORD_FILE="$pass_file" \
+            RELEASE_CERT_SHA256="$expected_digest" \
+            RELEASE_OUTPUT_DIR="$smoke_tmp/out" \
+            ./tools/release-apk.sh
+          apk_path="$(find "$smoke_tmp/out" -maxdepth 1 -name 'roots24-*.apk' -print -quit)"
+          [ -n "$apk_path" ] && [ -f "$apk_path" ]
+          # Independent verification, not trusting the script's self-check.
+          build_tools_dir="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}/build-tools/${ANDROID_BUILD_TOOLS_VERSION:-36.0.0}"
+          "$build_tools_dir/apksigner" verify --verbose --print-certs "$apk_path"
+          "$build_tools_dir/zipalign" -c -P 16 4 "$apk_path"
+          # No dotfile orphans (e.g. stale .idsig sidecars) may leak into the
+          # output directory; the v4 sidecar must travel with the final name.
+          [ -z "$(find "$smoke_tmp/out" -mindepth 1 -maxdepth 1 -name '.*' -print -quit)" ]
+          # Negative case: a wrong expected digest must fail loudly.
+          if RELEASE_KEYSTORE="$smoke_tmp/e2e.p12" RELEASE_KEY_ALIAS=e2e \
+            RELEASE_KEYSTORE_PASSWORD_FILE="$pass_file" \
+            RELEASE_CERT_SHA256="0000000000000000000000000000000000000000000000000000000000000000" \
+            RELEASE_OUTPUT_DIR="$smoke_tmp/out-negative" \
+            ./tools/release-apk.sh; then
+            echo "release-apk.sh accepted a wrong certificate digest" >&2
+            exit 1
+          fi

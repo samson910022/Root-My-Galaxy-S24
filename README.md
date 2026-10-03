@@ -108,7 +108,16 @@ different local keystore, set `RELEASE_KEYSTORE`, `RELEASE_KEY_ALIAS`, and
 `RELEASE_KEYSTORE_PASSWORD_FILE`, and set `RELEASE_CERT_SHA256` to that
 keystore's expected signer certificate digest. `ANDROID_SDK_ROOT` (or
 `ANDROID_HOME`) must point to the Android SDK; `ANDROID_BUILD_TOOLS_VERSION`
-defaults to `36.0.0`.
+defaults to `36.0.0`. `RELEASE_OUTPUT_DIR` overrides the output directory
+(default `app/build/outputs/apk/release/`; relative paths resolve under the
+repo root).
+
+The helper follows the official manual signing order (`zipalign -P 16 -f`
+before `apksigner sign`, then `apksigner verify` plus `zipalign -c -P 16`),
+and carries the v4 `.idsig` sidecar next to the final APK when apksigner
+emits one (otherwise it removes a stale one). It runs on Linux
+and stock macOS (`/bin/bash` 3.2 compatible; `sha256sum` falls back to
+`shasum -a 256` and then `python3`).
 
 Output example: `app/build/outputs/apk/release/roots24-0.3.2-s24.1.apk`.
 
