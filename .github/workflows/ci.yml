@@ -103,7 +103,7 @@ jobs:
             -alias e2e -keyalg RSA -keysize 2048 -validity 3650 \
             -dname "CN=E2E Test" \
             -storepass "$(cat "$pass_file")" -keypass "$(cat "$pass_file")"
-          expected_digest="$(keytool -list -v -keystore "$smoke_tmp/e2e.p12" \
+          expected_digest="$(keytool -list -v -alias e2e -keystore "$smoke_tmp/e2e.p12" \
             -storepass "$(cat "$pass_file")" \
             | awk -F': ' '/SHA256:/ { gsub(/:/, "", $2); print tolower($2); exit }')"
           [ -n "$expected_digest" ]

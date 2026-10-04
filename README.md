@@ -113,11 +113,12 @@ defaults to `36.0.0`. `RELEASE_OUTPUT_DIR` overrides the output directory
 repo root).
 
 The helper follows the official manual signing order (`zipalign -P 16 -f`
-before `apksigner sign`, then `apksigner verify` plus `zipalign -c -P 16`),
+before `apksigner sign`, then `apksigner verify` plus `zipalign -c -P 16`).
+It requires build-tools 35+ for `-P 16`,
 and carries the v4 `.idsig` sidecar next to the final APK when apksigner
 emits one (otherwise it removes a stale one). It runs on Linux
 and stock macOS (`/bin/bash` 3.2 compatible; `sha256sum` falls back to
-`shasum -a 256` and then `python3`).
+`shasum -a 256 --` and then `python3`).
 
 Output example: `app/build/outputs/apk/release/roots24-0.3.2-s24.1.apk`.
 

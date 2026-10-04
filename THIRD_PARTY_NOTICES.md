@@ -69,7 +69,7 @@ pair is statically audited. A first full-chain Shizuku-mode run with this exact
 pair succeeded on SM-S9210 on 2026-10-03 through app v0.3.2-s24.1; the captured
 evidence and remaining validation scope are recorded in
 [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md).
-The Manager UI status and resetprop regression suite have not been checked.
+The Manager UI status, resetprop regression suite, repeatability, and reboot persistence have not been checked.
 The earlier device test (2026-09-11) covered the v3.2.5 loader
 (`b0bc817b4e966aa6aa830834eaf6ef765d821d40`, 4895088 bytes, SHA-256
 `67b49cad…ee542`). Pair v3.3.0 with Manager `32601`; a 3.2.5 Manager reports

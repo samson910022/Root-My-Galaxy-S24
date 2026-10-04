@@ -11,7 +11,7 @@ sha256_file() {
   if command -v sha256sum >/dev/null 2>&1; then
     sha256sum -- "$1"
   elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "$1"
+    shasum -a 256 -- "$1"
   elif command -v python3 >/dev/null 2>&1; then
     python3 - "$1" <<'PY'
 import hashlib
@@ -90,7 +90,7 @@ trap 'rm -rf "$tmp_dir"' EXIT
 # aligning after signing is not a repair path -- only a check.
 # See https://developer.android.com/build/building-cmdline#sign_cmdline
 note "aligning $version_name before signing"
-"$zipalign" -P 16 -f 4 "$unsigned_apk" "$aligned_apk"
+"$zipalign" -P 16 -f 4 "$unsigned_apk" "$aligned_apk" || fail "zipalign failed for $unsigned_apk"
 
 note "signing $version_name with alias $key_alias"
 "$apksigner" sign \
@@ -110,11 +110,11 @@ expected_cert_sha256=$(printf '%s\n' "$expected_cert_sha256" | tr -d ':' | tr '[
 [ "$actual_cert_sha256" = "$expected_cert_sha256" ] || fail "APK signer is $actual_cert_sha256; expected $expected_cert_sha256"
 
 "$zipalign" -c -P 16 4 "$signed_apk" >/dev/null || fail "APK is not zipaligned"
-mv -f "$signed_apk" "$output_apk"
+mv -f -- "$signed_apk" "$output_apk"
 # apksigner writes a v4 signature sidecar next to --out; carry it with the
 # final artifact instead of leaving a dotfile orphan in the output dir.
 if [ -f "$signed_apk.idsig" ]; then
-  mv -f "$signed_apk.idsig" "$output_apk.idsig"
+  mv -f -- "$signed_apk.idsig" "$output_apk.idsig"
 else
   # Avoid a stale v4 sidecar from a previous run masquerading as this build's.
   rm -f "$output_apk.idsig"
