@@ -27,10 +27,12 @@ unchanged.
 > vermagic `6.1.145-android14-11-33419968-abS9210ZHS6DZG1` with
 > `CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y`. Its `.ko` passed the recorded static
 > target-symbol audit with no `stop_machine` import. Payloads later reverted
-> the pair pending hardware validation; it has not been hardware-verified on
-> SM-S9210. The prior v3.2.5 pair (4895088 bytes, `67b49cad…ee542`) is the
-> device-tested version. Pair v3.3.0 with Manager `32601`. The exploit `.so`
-> and helper are unchanged.
+> the pair before this hardware run. One end-to-end Shizuku-mode run with
+> app `0.3.2-s24.1` succeeded on SM-S9210 / `S9210ZHS6DZG1` on 2026-10-03;
+> see [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md).
+> This initial result does not complete broader acceptance: Manager UI status,
+> resetprop checks, repeatability, and reboot persistence remain unverified.
+> Pair v3.3.0 with Manager `32601`. The exploit `.so` and helper are unchanged.
 
 The exploit payload file is byte-identical to `BuSung-dev/Root-My-Galaxy-Payloads`
 at commit `a311cb88c28204c3902af9450ae4077199e4d71d`; the v3.3.0 loader is the
@@ -89,6 +91,37 @@ Requirements:
 
 Output: `app/build/outputs/apk/debug/app-debug.apk`
 
+### Local signed APK
+
+This local helper builds the release variant, signs it with the upload
+keystore, verifies the signing certificate and alignment, and writes a
+versioned APK under `app/build/outputs/apk/release/`. It does not change the
+GitHub release workflow, which currently builds and uploads the debug APK.
+
+```sh
+./tools/release-apk.sh
+```
+
+By default, it reads the PKCS12 keystore and its password file from
+`$HOME/.android/keystores/`. Keep both outside the repository. To use a
+different local keystore, set `RELEASE_KEYSTORE`, `RELEASE_KEY_ALIAS`, and
+`RELEASE_KEYSTORE_PASSWORD_FILE`, and set `RELEASE_CERT_SHA256` to that
+keystore's expected signer certificate digest. `ANDROID_SDK_ROOT` (or
+`ANDROID_HOME`) must point to the Android SDK; `ANDROID_BUILD_TOOLS_VERSION`
+defaults to `36.0.0`. `RELEASE_OUTPUT_DIR` overrides the output directory
+(default `app/build/outputs/apk/release/`; relative paths resolve under the
+repo root).
+
+The helper follows the official manual signing order (`zipalign -P 16 -f`
+before `apksigner sign`, then `apksigner verify` plus `zipalign -c -P 16`).
+It requires build-tools 35+ for `-P 16`,
+and carries the v4 `.idsig` sidecar next to the final APK when apksigner
+emits one (otherwise it removes a stale one). It runs on Linux
+and stock macOS (`/bin/bash` 3.2 compatible; `sha256sum` falls back to
+`shasum -a 256 --` and then `python3`).
+
+Output example: `app/build/outputs/apk/release/roots24-0.3.2-s24.1.apk`.
+
 Unit tests:
 
 ```sh
@@ -115,7 +148,7 @@ rule, and verifies the result.
 `main` after setting `PR_MERGED=true`) and fetches the experimental v3.3.0
 `ksud` from its separately pinned historical Phase-D commit. It verifies both
 against the manifest before installing them; the v3.3.0 binary is not currently
-published on Payloads `main` because it remains gated on hardware validation.
+published on Payloads `main` because broader acceptance checks remain pending.
 
 ## Known limitations
 
