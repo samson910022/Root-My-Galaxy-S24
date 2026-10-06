@@ -21,10 +21,12 @@ in the README, the removal of the advanced-mode UI, and the helper rebuild.
 
 ## Bundled binaries
 
-The exploit payload is copied verbatim from Root-My-Galaxy-Payloads commit
-`a311cb88c28204c3902af9450ae4077199e4d71d` (pull request #320, not merged).
+The exploit payload is rebuilt from our fork main@e90759c5e4167f271ef46cc4a57835cf42a2ffc6
+(samson910022/Root-My-Galaxy-Payloads PRs #7 code and #8 artifact: PR #320
+commit `a311cb88c28204c3902af9450ae4077199e4d71d` plus the rt_mutex PI-guard
+fix), with NDK r29 API 35, bit-identical across rebuilds.
 The helper is compiled from that commit's source and then patched, as described
-below. The bundled KernelSU loader is a separate Phase-D artifact from commit
+below (from `a311cb88`'s `src/su_daemon.c`, untouched by the PI-guard fix). The bundled KernelSU loader is a separate Phase-D artifact from commit
 `8236c84301282b5415412d867ab71d4a739e0809` (see its provenance below).
 
 | Artifact | Upstream path |

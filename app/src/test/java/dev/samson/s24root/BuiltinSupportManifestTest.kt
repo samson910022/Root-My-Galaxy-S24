@@ -8,7 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 private const val S9210_RELEASE = "6.1.145-android14-11-33419968-abS9210ZHS6DZG1"
-private const val S9210_DIGEST = "2dc137cc1dca72f896ee16347f3137dd0c521ecdee56e1922fb58e733e9b4059"
+private const val S9210_DIGEST = "1da7c8cd12d1125453fcd9e14a458296a62e37530257d152c9d8f9a26415b9df"
 private const val KSUD_DIGEST = "8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049"
 
 private fun bundledManifestJson(
