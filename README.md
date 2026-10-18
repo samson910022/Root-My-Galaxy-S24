@@ -34,15 +34,16 @@ unchanged.
 > `0.3.3-s24.1`; see
 > [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md)
 > and [`docs/SM-S9210-v3.3.0-piguard-validation-20261019.md`](docs/SM-S9210-v3.3.0-piguard-validation-20261019.md).
-> This result does not complete broader acceptance: repeatability and reboot
-> persistence remain unverified. A follow-up resetprop read/set/delete pass on
-> the pinned loader succeeded, and the PI-guard run captured the Manager UI
-> status (`LKM`, working) for the first time.
+> The overall install flow has succeeded on three separate dates, so it is
+> repeatable; the PI-guard bytes themselves have one recorded success. Root is
+> RAM-only and a reboot removes it; that behaviour was verified previously and
+> is a design limitation, not an open acceptance item. A follow-up resetprop
+> read/set/delete pass on the pinned loader succeeded, and the PI-guard run
+> captured the Manager UI status (`LKM`, working) for the first time.
 > Pair v3.3.0 with Manager `32601`. The helper is unchanged; the exploit `.so`
 > is the PI-guard rebuild (`1da7c8cd…15b9df`, fork main@e90759c, NDK r29
 > API 35: `make TARGET=e1q-S9210ZHS6DZG1 ANDROID_NDK_HOME=<ndk-r29> release`),
-> which has one successful hardware run (2026-10-19) but no repeatability or
-> reboot-persistence evidence yet.
+> which has one recorded successful hardware run (2026-10-19).
 
 The exploit payload file is rebuilt from our fork main@e90759c
 (`samson910022/Root-My-Galaxy-Payloads` PRs #7 code and #8 artifact: PR #320

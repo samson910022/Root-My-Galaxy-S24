@@ -75,8 +75,10 @@ remaining validation scope are recorded in
 [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md)
 and
 [`docs/SM-S9210-v3.3.0-piguard-validation-20261019.md`](docs/SM-S9210-v3.3.0-piguard-validation-20261019.md).
-The Manager UI status was captured and the resetprop regression suite passed on
-2026-10-19; repeatability and reboot persistence have not been checked.
+The overall install flow has succeeded on three separate dates; the Manager UI
+status was captured and the resetprop regression suite passed on 2026-10-19.
+Root is RAM-only and does not survive a reboot (verified previously); no
+persistence mechanism is implemented.
 The earlier device test (2026-09-11) covered the v3.2.5 loader
 (`b0bc817b4e966aa6aa830834eaf6ef765d821d40`, 4895088 bytes, SHA-256
 `67b49cad…ee542`). Pair v3.3.0 with Manager `32601`; a 3.2.5 Manager reports
