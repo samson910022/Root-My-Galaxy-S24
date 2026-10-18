@@ -27,17 +27,21 @@ unchanged.
 > vermagic `6.1.145-android14-11-33419968-abS9210ZHS6DZG1` with
 > `CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y`. Its `.ko` passed the recorded static
 > target-symbol audit with no `stop_machine` import. Payloads later reverted
-> the pair before this hardware run. Two end-to-end Shizuku-mode runs with
-> app `0.3.2-s24.1` succeeded on SM-S9210 / `S9210ZHS6DZG1` on 2026-10-03
-> (attempt 1/24) and 2026-10-07 (attempt 11/24), both with the pre-fix bytes;
-> see [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md)
-> for the first run record.
-> This initial result does not complete broader acceptance: Manager UI status,
-> resetprop checks, repeatability, and reboot persistence remain unverified.
+> the pair before this hardware run. Three end-to-end Shizuku-mode runs in
+> this project succeeded on SM-S9210 / `S9210ZHS6DZG1`: 2026-10-03
+> (attempt 1/24) and 2026-10-07 (attempt 11/24) with the pre-fix bytes on app
+> `0.3.2-s24.1`, and 2026-10-19 (attempt 15/24) with the PI-guard bytes on app
+> `0.3.3-s24.1`; see
+> [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md)
+> and [`docs/SM-S9210-v3.3.0-piguard-validation-20261019.md`](docs/SM-S9210-v3.3.0-piguard-validation-20261019.md).
+> This result does not complete broader acceptance: resetprop checks,
+> repeatability, and reboot persistence remain unverified. The PI-guard run
+> also captured the Manager UI status (`LKM`, working) for the first time.
 > Pair v3.3.0 with Manager `32601`. The helper is unchanged; the exploit `.so`
 > is the PI-guard rebuild (`1da7c8cd…15b9df`, fork main@e90759c, NDK r29
-> API 35: `make TARGET=e1q-S9210ZHS6DZG1 ANDROID_NDK_HOME=<ndk-r29> release`)
-> with no hardware runs yet.
+> API 35: `make TARGET=e1q-S9210ZHS6DZG1 ANDROID_NDK_HOME=<ndk-r29> release`),
+> which has one successful hardware run (2026-10-19) but no repeatability or
+> reboot-persistence evidence yet.
 
 The exploit payload file is rebuilt from our fork main@e90759c
 (`samson910022/Root-My-Galaxy-Payloads` PRs #7 code and #8 artifact: PR #320
