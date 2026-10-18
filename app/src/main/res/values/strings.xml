@@ -161,6 +161,10 @@
     <string name="history_select_all">Select all</string>
     <string name="history_clear_selection">Clear selection</string>
     <string name="history_delete_selected">Delete (%1$d)</string>
+    <string name="history_export_selected">Export (%1$d)</string>
+    <string name="history_export_all">Export all logs</string>
+    <string name="export_logs_saved">Logs saved</string>
+    <string name="export_logs_failed">Unable to save the logs</string>
     <plurals name="history_delete_selected_title">
         <item quantity="one">Delete this run?</item>
         <item quantity="other">Delete %1$d runs?</item>

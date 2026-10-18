@@ -18,7 +18,7 @@ unchanged.
 
 | File | Size | SHA-256 |
 | --- | ---: | --- |
-| `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | 104128 | `2dc137cc…e9b4059` |
+| `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | 104128 | `1da7c8cd…15b9df` |
 | `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4995304 | `88748945…dc15049` (EXPERIMENTAL v3.3.0, see below) |
 | `app/src/main/jniLibs/arm64-v8a/libcve43499root.so` | 26040 | `b6395159…94b5bb1f` |
 
@@ -27,15 +27,28 @@ unchanged.
 > vermagic `6.1.145-android14-11-33419968-abS9210ZHS6DZG1` with
 > `CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y`. Its `.ko` passed the recorded static
 > target-symbol audit with no `stop_machine` import. Payloads later reverted
-> the pair before this hardware run. One end-to-end Shizuku-mode run with
-> app `0.3.2-s24.1` succeeded on SM-S9210 / `S9210ZHS6DZG1` on 2026-10-03;
-> see [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md).
-> This initial result does not complete broader acceptance: Manager UI status,
-> resetprop checks, repeatability, and reboot persistence remain unverified.
-> Pair v3.3.0 with Manager `32601`. The exploit `.so` and helper are unchanged.
+> the pair before this hardware run. Three end-to-end Shizuku-mode runs in
+> this project succeeded on SM-S9210 / `S9210ZHS6DZG1`: 2026-10-03
+> (attempt 1/24) and 2026-10-07 (attempt 11/24) with the pre-fix bytes on app
+> `0.3.2-s24.1`, and 2026-10-19 (attempt 15/24) with the PI-guard bytes on app
+> `0.3.3-s24.1`; see
+> [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md)
+> and [`docs/SM-S9210-v3.3.0-piguard-validation-20261019.md`](docs/SM-S9210-v3.3.0-piguard-validation-20261019.md).
+> The overall install flow has succeeded on three separate dates, so it is
+> repeatable; the PI-guard bytes themselves have one recorded success. Root is
+> RAM-only and a reboot removes it; that behaviour was verified previously and
+> is a design limitation, not an open acceptance item. A follow-up resetprop
+> read/set/delete pass on the pinned loader succeeded, and the PI-guard run
+> captured the Manager UI status (`LKM`, working) for the first time.
+> Pair v3.3.0 with Manager `32601`. The helper is unchanged; the exploit `.so`
+> is the PI-guard rebuild (`1da7c8cd…15b9df`, fork main@e90759c, NDK r29
+> API 35: `make TARGET=e1q-S9210ZHS6DZG1 ANDROID_NDK_HOME=<ndk-r29> release`),
+> which has one recorded successful hardware run (2026-10-19).
 
-The exploit payload file is byte-identical to `BuSung-dev/Root-My-Galaxy-Payloads`
-at commit `a311cb88c28204c3902af9450ae4077199e4d71d`; the v3.3.0 loader is the
+The exploit payload file is rebuilt from our fork main@e90759c
+(`samson910022/Root-My-Galaxy-Payloads` PRs #7 code and #8 artifact: PR #320
+commit `a311cb88c28204c3902af9450ae4077199e4d71d` plus the rt_mutex PI-guard
+fix), with NDK r29 API 35; the v3.3.0 loader is the
 separately pinned historical Phase-D artifact from commit `8236c843`. The helper
 is not a copied artifact: it is compiled from the exploit commit's
 `src/su_daemon.c` and then patched, as described below. Full provenance,
@@ -176,6 +189,12 @@ published on Payloads `main` because broader acceptance checks remain pending.
 - Force-stopping the app after the exploit can panic the device, by releasing
   retained kernel pages. Leave the app in the foreground until it reports
   success.
+- Opening the KernelSU Manager (`32601`) can replace the staged `/data/adb/ksud`
+  with the Manager APK's bundled build; on 2026-10-19 that overwrote the pinned
+  Samsung-KDP Phase-D loader (`88748945…dc15049` → `99aaa607…3b5c41`, both
+  report `3.3.0`). The app re-stages its pinned build on the next install and
+  keeps a copy at `/data/local/tmp/ksud-s25u-kdp`; the replacement mechanism is
+  inferred from timing and the digest match, not proven.
 - The exact-firmware gate means a firmware update will stop this payload from
   working. That is intentional; re-validate against the new firmware image
   before relaxing it.

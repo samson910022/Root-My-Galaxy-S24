@@ -787,10 +787,22 @@ private fun HistoryPage(
     history: List<InstallHistoryEntry>,
     onDeleteEntries: (Set<String>) -> Unit,
 ) {
+    val context = LocalContext.current
     val view = LocalView.current
     var selectedHistoryId by remember { mutableStateOf<String?>(null) }
     var selectionIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var pendingDeleteIds by remember { mutableStateOf<Set<String>?>(null) }
+    var pendingExportIds by remember { mutableStateOf<Set<String>?>(null) }
+    val exportLogsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val ids = pendingExportIds
+        pendingExportIds = null
+        result.data?.data?.let { uri ->
+            val entries = history.filter { it.id in (ids ?: emptySet()) }
+            if (entries.isNotEmpty()) saveRunLogsZip(context, uri, entries)
+        }
+    }
     val selectedEntry = history.firstOrNull { it.id == selectedHistoryId }
     val selectableIds = history
         .filter { it.result != InstallRunResult.Running }
@@ -863,6 +875,16 @@ private fun HistoryPage(
                 onClearSelection = { selectionIds = emptySet() },
                 onEntryClick = { selectedHistoryId = it.id },
                 onDeleteSelected = { pendingDeleteIds = selectionIds },
+                onExportSelected = { ids ->
+                    pendingExportIds = ids
+                    exportLogsLauncher.launch(
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/zip"
+                            putExtra(Intent.EXTRA_TITLE, bulkRunLogsFileName())
+                        },
+                    )
+                },
             )
         } else {
             HistoryDetail(
@@ -885,6 +907,7 @@ private fun HistoryList(
     onClearSelection: () -> Unit,
     onEntryClick: (InstallHistoryEntry) -> Unit,
     onDeleteSelected: () -> Unit,
+    onExportSelected: (Set<String>) -> Unit,
 ) {
     val view = LocalView.current
     val selecting = selectionIds.isNotEmpty()
@@ -939,6 +962,21 @@ private fun HistoryList(
                             }
                         }
                     }
+                    AnimatedVisibility(
+                        visible = !selecting && history.any { it.id in selectableIds },
+                        enter = fadeIn() + scaleIn(initialScale = 0.9f),
+                        exit = fadeOut() + scaleOut(targetScale = 0.9f),
+                    ) {
+                        IconButton(onClick = {
+                            clickHaptic(view)
+                            onExportSelected(selectableIds)
+                        }) {
+                            Icon(
+                                Icons.Rounded.Save,
+                                contentDescription = stringResource(R.string.history_export_all),
+                            )
+                        }
+                    }
                 }
             }
             if (history.isEmpty()) {
@@ -970,14 +1008,27 @@ private fun HistoryList(
             enter = fadeIn() + scaleIn(initialScale = 0.85f),
             exit = fadeOut() + scaleOut(targetScale = 0.85f),
         ) {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    clickHaptic(view)
-                    onDeleteSelected()
-                },
-                icon = { Icon(Icons.Rounded.Delete, contentDescription = null) },
-                text = { Text(stringResource(R.string.history_delete_selected, selectionIds.size)) },
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        clickHaptic(view)
+                        onExportSelected(selectionIds)
+                    },
+                    icon = { Icon(Icons.Rounded.Save, contentDescription = null) },
+                    text = { Text(stringResource(R.string.history_export_selected, selectionIds.size)) },
+                )
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        clickHaptic(view)
+                        onDeleteSelected()
+                    },
+                    icon = { Icon(Icons.Rounded.Delete, contentDescription = null) },
+                    text = { Text(stringResource(R.string.history_delete_selected, selectionIds.size)) },
+                )
+            }
         }
     }
 }
@@ -1271,6 +1322,53 @@ private fun saveRunLog(context: Context, uri: Uri, entry: InstallHistoryEntry) {
             context.getString(R.string.export_log_saved)
         } else {
             context.getString(R.string.export_log_failed)
+        },
+        Toast.LENGTH_LONG,
+    ).show()
+}
+
+private fun bulkRunLogsFileName(): String =
+    "RootMyGalaxy-logs-" +
+        SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date(System.currentTimeMillis())) +
+        ".zip"
+
+private fun formatRunLogForExport(entry: InstallHistoryEntry): String = buildString {
+    appendLine("id=${entry.id}")
+    appendLine("startedAtMillis=${entry.startedAtMillis}")
+    appendLine("completedAtMillis=${entry.completedAtMillis ?: ""}")
+    appendLine("result=${entry.result.name}")
+    appendLine("profileId=${entry.profileId ?: ""}")
+    appendLine("usedShizuku=${entry.usedShizuku}")
+    appendLine()
+    append(entry.log)
+}.trim().plus("\n")
+
+private fun saveRunLogsZip(context: Context, uri: Uri, entries: List<InstallHistoryEntry>) {
+    val saved = runCatching {
+        context.contentResolver.openOutputStream(uri)?.use { output ->
+            java.util.zip.ZipOutputStream(output).use { zip ->
+                val usedNames = mutableSetOf<String>()
+                entries.sortedBy(InstallHistoryEntry::startedAtMillis).forEach { entry ->
+                    var name = runLogFileName(entry)
+                    var suffix = 2
+                    while (!usedNames.add(name)) {
+                        name = name.removeSuffix(".log") + "-$suffix.log"
+                        suffix++
+                    }
+                    zip.putNextEntry(java.util.zip.ZipEntry(name))
+                    zip.write(formatRunLogForExport(entry).toByteArray(Charsets.UTF_8))
+                    zip.closeEntry()
+                }
+            }
+        } ?: error("open failed")
+        true
+    }.getOrDefault(false)
+    Toast.makeText(
+        context,
+        if (saved) {
+            context.getString(R.string.export_logs_saved)
+        } else {
+            context.getString(R.string.export_logs_failed)
         },
         Toast.LENGTH_LONG,
     ).show()

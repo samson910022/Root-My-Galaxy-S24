@@ -4,8 +4,9 @@
 # The exploit profile lives in an unmerged pull request, so this script fetches
 # it by pinned commit rather than by a branch name. The KernelSU v3.3.0 e1q
 # binary comes from the separately pinned Phase-D commit below because Payloads
-# later reverted it from main pending broader hardware acceptance. A first
-# full-chain app/Shizuku run succeeded on 2026-10-03; see the validation record.
+# later reverted it from main pending broader hardware acceptance. Full-chain
+# app/Shizuku runs succeeded on 2026-10-03, 2026-10-07, and 2026-10-19 (the
+# last with the PI-guard bytes); see the validation records.
 # Once the PR merges, set PR_MERGED=true and the exploit fetch switches to main,
 # still requiring the same content digest so a silent upstream change cannot
 # reach the APK.
@@ -38,10 +39,16 @@ EXPLOIT_NAME=cve-2026-43499-app.so
 KSUD_NAME=ksud-e1q-S9210ZHS6DZG1-kdp
 EXPLOIT_UPSTREAM="artifacts/$PROFILE/$EXPLOIT_NAME"
 KSUD_UPSTREAM="kernelsu/$KSUD_NAME"
-EXPLOIT_SHA256=2dc137cc1dca72f896ee16347f3137dd0c521ecdee56e1922fb58e733e9b4059
+# e1q exploit with the PI-guard fix, rebuilt from our fork main@e90759c
+# (PR #320 commit a311cb88 plus samson910022/Root-My-Galaxy-Payloads PRs #7
+# code and #8 artifact). Fetch mode still reads upstream PR #320, which does
+# not carry the fix, so a full sync will fail loudly at the digest check
+# until upstream merges it; --check against the vendored bytes keeps passing.
+EXPLOIT_SHA256=1da7c8cd12d1125453fcd9e14a458296a62e37530257d152c9d8f9a26415b9df
 # EXPERIMENTAL v3.3.0 e1q Phase-D pair from Payloads commit 8236c84.
-# It uses CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y, passed static audit, and has one
-# successful SM-S9210 app/Shizuku run; broader acceptance remains pending.
+# It uses CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y, passed static audit, and has three
+# successful SM-S9210 app/Shizuku runs (2026-10-03 and 2026-10-07 pre-fix,
+# 2026-10-19 with the PI-guard exploit); broader acceptance remains pending.
 KSUD_SHA256=8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049
 EXPLOIT_SIZE=104128
 KSUD_SIZE=4995304
