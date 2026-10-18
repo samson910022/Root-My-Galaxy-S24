@@ -51,8 +51,9 @@ the exploit source revision and its licence first.**
 `ksud-e1q-S9210ZHS6DZG1-kdp` is the EXPERIMENTAL e1q Phase-D pair recorded in
 `BuSung-dev/Root-My-Galaxy-Payloads` commit
 `8236c84301282b5415412d867ab71d4a739e0809`; Payloads main later reverted it in
-`7690b8b`. One full-chain app/Shizuku run succeeded on SM-S9210 on 2026-10-03,
-but broader acceptance remains pending. It is based on KernelSU `v3.3.0`, commit
+`7690b8b`. Full-chain app/Shizuku runs succeeded on SM-S9210 on 2026-10-03,
+2026-10-07 and 2026-10-19, but broader acceptance remains pending. It is based
+on KernelSU `v3.3.0`, commit
 `932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e` (`KSU_VERSION 32601`) with the
 Samsung KDP/RKP/DEFEX patch and the target-specific
 `CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y` configuration. The exact-release module
@@ -67,11 +68,15 @@ reports `3.3.0 (uapi: 2)` and embeds the `android14-6.1_kernelsu.ko` asset.
 Payloads’ Phase-D record documents the DDK
 `ghcr.io/ylarod/ddk-min:android14-6.1-20260313`, exact release override, and
 NDK r29 Rust build with workspace-only Cargo dependency overrides. The Phase-D
-pair is statically audited. A first full-chain Shizuku-mode run with this exact
-pair succeeded on SM-S9210 on 2026-10-03 through app v0.3.2-s24.1; the captured
-evidence and remaining validation scope are recorded in
-[`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md).
-The Manager UI status, resetprop regression suite, repeatability, and reboot persistence have not been checked.
+pair is statically audited. Full-chain Shizuku-mode runs with this exact pair
+succeeded on SM-S9210 on 2026-10-03, 2026-10-07 and 2026-10-19 (the last
+through app v0.3.3-s24.1 with the PI-guard exploit); the captured evidence and
+remaining validation scope are recorded in
+[`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md)
+and
+[`docs/SM-S9210-v3.3.0-piguard-validation-20261019.md`](docs/SM-S9210-v3.3.0-piguard-validation-20261019.md).
+The Manager UI status was captured and the resetprop regression suite passed on
+2026-10-19; repeatability and reboot persistence have not been checked.
 The earlier device test (2026-09-11) covered the v3.2.5 loader
 (`b0bc817b4e966aa6aa830834eaf6ef765d821d40`, 4895088 bytes, SHA-256
 `67b49cad…ee542`). Pair v3.3.0 with Manager `32601`; a 3.2.5 Manager reports

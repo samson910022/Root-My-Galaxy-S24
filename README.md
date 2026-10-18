@@ -34,9 +34,10 @@ unchanged.
 > `0.3.3-s24.1`; see
 > [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md)
 > and [`docs/SM-S9210-v3.3.0-piguard-validation-20261019.md`](docs/SM-S9210-v3.3.0-piguard-validation-20261019.md).
-> This result does not complete broader acceptance: resetprop checks,
-> repeatability, and reboot persistence remain unverified. The PI-guard run
-> also captured the Manager UI status (`LKM`, working) for the first time.
+> This result does not complete broader acceptance: repeatability and reboot
+> persistence remain unverified. A follow-up resetprop read/set/delete pass on
+> the pinned loader succeeded, and the PI-guard run captured the Manager UI
+> status (`LKM`, working) for the first time.
 > Pair v3.3.0 with Manager `32601`. The helper is unchanged; the exploit `.so`
 > is the PI-guard rebuild (`1da7c8cd…15b9df`, fork main@e90759c, NDK r29
 > API 35: `make TARGET=e1q-S9210ZHS6DZG1 ANDROID_NDK_HOME=<ndk-r29> release`),
@@ -187,6 +188,12 @@ published on Payloads `main` because broader acceptance checks remain pending.
 - Force-stopping the app after the exploit can panic the device, by releasing
   retained kernel pages. Leave the app in the foreground until it reports
   success.
+- Opening the KernelSU Manager (`32601`) can replace the staged `/data/adb/ksud`
+  with the Manager APK's bundled build; on 2026-10-19 that overwrote the pinned
+  Samsung-KDP Phase-D loader (`88748945…dc15049` → `99aaa607…3b5c41`, both
+  report `3.3.0`). The app re-stages its pinned build on the next install and
+  keeps a copy at `/data/local/tmp/ksud-s25u-kdp`; the replacement mechanism is
+  inferred from timing and the digest match, not proven.
 - The exact-firmware gate means a firmware update will stop this payload from
   working. That is intentional; re-validate against the new firmware image
   before relaxing it.
