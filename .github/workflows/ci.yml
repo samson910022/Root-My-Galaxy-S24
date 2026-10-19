@@ -66,7 +66,8 @@ jobs:
   # End-to-end smoke test for tools/release-apk.sh with a throwaway PKCS12 key.
   # No secret is involved: the key lives in RUNNER_TEMP and the signed APK is
   # never uploaded. Covers assembleRelease -> zipalign -> apksigner sign ->
-  # certificate digest check -> zipalign -c, plus the negative digest case.
+  # certificate digest check -> zipalign -c, plus the negative digest and
+  # missing-digest cases.
   release-script-smoke:
     name: Release script smoke (ephemeral key)
     runs-on: ubuntu-latest
@@ -131,3 +132,13 @@ jobs:
             echo "release-apk.sh accepted a wrong certificate digest" >&2
             exit 1
           fi
+          # Negative case: RELEASE_CERT_SHA256 is required (no built-in default).
+          if env -u RELEASE_CERT_SHA256 \
+            RELEASE_KEYSTORE="$smoke_tmp/e2e.p12" RELEASE_KEY_ALIAS=e2e \
+            RELEASE_KEYSTORE_PASSWORD_FILE="$pass_file" \
+            RELEASE_OUTPUT_DIR="$smoke_tmp/out-missing-digest" \
+            ./tools/release-apk.sh 2>"$smoke_tmp/missing-digest.err"; then
+            echo "release-apk.sh accepted a missing RELEASE_CERT_SHA256" >&2
+            exit 1
+          fi
+          grep -q 'RELEASE_CERT_SHA256' "$smoke_tmp/missing-digest.err"

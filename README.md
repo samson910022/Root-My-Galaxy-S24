@@ -112,14 +112,18 @@ versioned APK under `app/build/outputs/apk/release/`. It does not change the
 GitHub release workflow, which currently builds and uploads the debug APK.
 
 ```sh
+export RELEASE_CERT_SHA256=<expected signer certificate SHA-256>
 ./tools/release-apk.sh
 ```
 
-By default, it reads the PKCS12 keystore and its password file from
-`$HOME/.android/keystores/`. Keep both outside the repository. To use a
-different local keystore, set `RELEASE_KEYSTORE`, `RELEASE_KEY_ALIAS`, and
-`RELEASE_KEYSTORE_PASSWORD_FILE`, and set `RELEASE_CERT_SHA256` to that
-keystore's expected signer certificate digest. `ANDROID_SDK_ROOT` (or
+`RELEASE_CERT_SHA256` is required (the helper ships no built-in default, so
+a fork cannot silently verify against another project's certificate); set
+it to the expected signer certificate digest, which `keytool -list -v`
+prints as the `SHA256:` fingerprint. By default, the helper reads the
+PKCS12 keystore and its password file from `$HOME/.android/keystores/`.
+Keep both outside the repository. To use a different local keystore, set
+`RELEASE_KEYSTORE`, `RELEASE_KEY_ALIAS`, and
+`RELEASE_KEYSTORE_PASSWORD_FILE`. `ANDROID_SDK_ROOT` (or
 `ANDROID_HOME`) must point to the Android SDK; `ANDROID_BUILD_TOOLS_VERSION`
 defaults to `36.0.0`. `RELEASE_OUTPUT_DIR` overrides the output directory
 (default `app/build/outputs/apk/release/`; relative paths resolve under the
