@@ -15,7 +15,7 @@ import java.net.URL
 internal object HttpsRedirects {
     private const val MAX_REDIRECTS = 5
 
-    /** The codes [HttpURLConnection] would itself follow when redirects are enabled. */
+    /** Redirect codes followed here: only 301/302/303/307/308; 300/304 are not. */
     private val REDIRECT_CODES = setOf(
         HttpURLConnection.HTTP_MOVED_PERM, // 301
         HttpURLConnection.HTTP_MOVED_TEMP, // 302
@@ -35,8 +35,16 @@ internal object HttpsRedirects {
         readTimeoutMillis: Int,
         userAgent: String,
         headers: Map<String, String> = emptyMap(),
+        connectionFactory: (URL) -> HttpURLConnection = { it.openConnection() as HttpURLConnection },
     ): HttpURLConnection {
-        var connection = connect(requireHttps(URL(url)), connectTimeoutMillis, readTimeoutMillis, userAgent, headers)
+        var connection = connect(
+            requireHttps(URL(url)),
+            connectTimeoutMillis,
+            readTimeoutMillis,
+            userAgent,
+            headers,
+            connectionFactory,
+        )
         try {
             var redirects = 0
             while (true) {
@@ -51,7 +59,14 @@ internal object HttpsRedirects {
                 }
                 val next = resolveHttps(connection.url, location)
                 connection.disconnect()
-                connection = connect(next, connectTimeoutMillis, readTimeoutMillis, userAgent, headers)
+                connection = connect(
+                    next,
+                    connectTimeoutMillis,
+                    readTimeoutMillis,
+                    userAgent,
+                    headers,
+                    connectionFactory,
+                )
                 redirects++
             }
         } catch (error: Throwable) {
@@ -84,7 +99,8 @@ internal object HttpsRedirects {
         readTimeoutMillis: Int,
         userAgent: String,
         headers: Map<String, String>,
-    ): HttpURLConnection = (url.openConnection() as HttpURLConnection).apply {
+        connectionFactory: (URL) -> HttpURLConnection,
+    ): HttpURLConnection = connectionFactory(url).apply {
         connectTimeout = connectTimeoutMillis
         readTimeout = readTimeoutMillis
         instanceFollowRedirects = false

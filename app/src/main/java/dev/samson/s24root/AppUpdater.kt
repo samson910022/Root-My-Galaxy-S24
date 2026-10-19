@@ -109,6 +109,12 @@ object AppUpdater {
         }
     }
 
+    // NOTE: A non-privileged app targeting API 26+ must declare
+    // REQUEST_INSTALL_PACKAGES; without it InstallStart aborts this intent
+    // without showing any UI. If the permission is declared but the "install
+    // unknown apps" app-op is not granted, the package-installer UI prompts for
+    // it instead. This returns true when the activity launches, not when the
+    // package is installed.
     fun installApk(context: Context, apk: File): Boolean {
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", apk)
         return try {

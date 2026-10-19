@@ -16,11 +16,14 @@ android {
         versionName = "0.3.4-s24.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Self-update is intentionally off: the updater downloads a release APK
-        // and hands it to the system installer, but it verifies neither the
-        // published digest nor the installed app's signer, and the flow has not
-        // been validated end to end. Re-enable only with a complete, verified
-        // update flow.
+        // Self-update is intentionally off. The updater downloads a release APK,
+        // but the app does not declare REQUEST_INSTALL_PACKAGES, so the system
+        // package installer aborts the hand-off (targetSdk 36 >= 26). It also
+        // does not verify the downloaded APK against a published digest, nor
+        // whether its signer matches the installed app's signer, and the flow
+        // has not been validated end to end. Re-enabling the flag alone is not
+        // enough: add the permission, obtain the user's "install unknown apps"
+        // grant, and complete a verified update flow first.
         buildConfigField("boolean", "SELF_UPDATE_ENABLED", "false")
 
         ndk {

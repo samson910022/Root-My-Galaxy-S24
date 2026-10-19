@@ -52,14 +52,14 @@ install it, and read [Known limitations](#known-limitations) and
 > read/set/delete pass on the pinned loader succeeded, and the PI-guard run
 > captured the Manager UI status (`LKM`, working) for the first time.
 > Pair v3.3.0 with Manager `32601`. The helper is unchanged; the exploit `.so`
-> is the PI-guard rebuild (`1da7c8cd…15b9df`, fork main@e90759c, NDK r29
+> is the PI-guard rebuild (`1da7c8cd…15b9df`, fork commit e90759c, NDK r29
 > API 35: `make TARGET=e1q-S9210ZHS6DZG1 ANDROID_NDK_HOME=<ndk-r29> release`),
 > which has one recorded successful hardware run (2026-10-19).
 
-The exploit payload file is rebuilt from our fork main@e90759c
-(`samson910022/Root-My-Galaxy-Payloads` PRs #7 code and #8 artifact: PR #320
-commit `a311cb88c28204c3902af9450ae4077199e4d71d` plus the rt_mutex PI-guard
-fix), with NDK r29 API 35; the v3.3.0 loader is the
+The exploit payload file is rebuilt from fork commit e90759c (the fork main
+at build time) (`samson910022/Root-My-Galaxy-Payloads` PRs #7 code and #8
+artifact: PR #320 commit `a311cb88c28204c3902af9450ae4077199e4d71d` plus the
+rt_mutex PI-guard fix), with NDK r29 API 35; the v3.3.0 loader is the
 separately pinned historical Phase-D artifact from commit `8236c843`. The helper
 is not a copied artifact: it is compiled from the exploit commit's
 `src/su_daemon.c` and then patched, as described below. Full provenance,
@@ -180,11 +180,21 @@ rule, and verifies the result.
 
 `./tools/sync-payloads.sh` fetches the exploit payload from the
 `samson910022/Root-My-Galaxy-Payloads` fork at pinned commit `e90759c`
-(upstream PR #320 code plus the rt_mutex PI-guard fix) and the experimental
-v3.3.0 `ksud` from its separately pinned historical Phase-D commit. It
-verifies both against the manifest before installing them; the v3.3.0 binary
-is not currently published on Payloads `main` because broader acceptance
-checks remain pending.
+(based on the open PR #320 head plus the rt_mutex PI-guard fix) and the
+experimental v3.3.0 `ksud` from `BuSung-dev/Root-My-Galaxy-Payloads` at pinned
+commit `8236c84`. It verifies both against the manifest before installing them;
+the v3.3.0 binary is not currently published on Payloads `main` because broader
+acceptance checks remain pending.
+
+Refreshing the assets (the default mode) needs both repositories to stay
+publicly readable at those commits. The pinned exploit is not on upstream
+`main` (or any upstream branch): `BuSung-dev/Root-My-Galaxy-Payloads` `main`
+does not contain the file, and the head of open PR #320 (`a311cb88`) has
+different, pre-fix bytes. The fork is the source `sync-payloads.sh` currently
+uses; if it is removed or made private, the script cannot refetch the exploit
+until `EXPLOIT_RAW_BASE` is repointed at another copy. `--check` is unaffected:
+it is fully offline and compares the worktree copy and the Git index against
+`app/src/main/assets/builtin-targets.json`.
 
 ## Known limitations
 
@@ -223,12 +233,16 @@ checks remain pending.
   before relaxing it.
 - The upstream online path is not digest-verified. See above.
 - Only `arm64-v8a` is built.
-- Self-update is disabled. The updater can download a release APK, but it does
-  not verify the download against the published digest or the installed app's
-  signer, and the install flow has not been validated end to end; updates are
-  installed manually from the releases page. `SELF_UPDATE_ENABLED` in
-  `app/build.gradle.kts` should be re-enabled only together with a complete,
-  verified update flow.
+- Self-update is disabled, and the in-app installer cannot work as shipped: the
+  app does not declare `REQUEST_INSTALL_PACKAGES`, so on Android 8.0+ the system
+  package installer rejects the hand-off from a non-privileged app (AOSP
+  `InstallStart` aborts callers with targetSdk >= 26 that do not request it).
+  The updater also does not verify the downloaded APK against a published
+  digest, nor whether its signer matches the installed app's signer, and the
+  flow has not been validated end to end; install updates manually from the
+  releases page. Re-enabling `SELF_UPDATE_ENABLED` in `app/build.gradle.kts`
+  requires adding the permission, obtaining the user's "install unknown apps"
+  grant, and completing a verified update flow.
 - All 11 bundled locales (`de`, `fr`, `ja`, `ko`, `pt-BR`, `ru`, `tr`, `uz`,
   `vi`, `zh-CN`, `zh-TW`) carry every translatable string, including the
   S24-branding and bundled-payload messages this fork added. `fr` is registered
