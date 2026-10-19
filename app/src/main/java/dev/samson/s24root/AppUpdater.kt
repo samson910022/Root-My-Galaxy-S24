@@ -10,7 +10,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
-import java.net.URL
 
 data class UpdateInfo(
     val versionName: String,
@@ -27,13 +26,14 @@ object AppUpdater {
 
     suspend fun fetchLatestRelease(): UpdateInfo? = withContext(Dispatchers.IO) {
         try {
-            val connection = URL("$GITHUB_API/releases/latest").openConnection() as HttpURLConnection
+            val connection = HttpsRedirects.open(
+                url = "$GITHUB_API/releases/latest",
+                connectTimeoutMillis = 10_000,
+                readTimeoutMillis = 10_000,
+                userAgent = "RootMyGalaxyS24/${BuildConfig.VERSION_NAME}",
+                headers = mapOf("Accept" to "application/vnd.github+json"),
+            )
             try {
-                connection.requestMethod = "GET"
-                connection.setRequestProperty("User-Agent", "RootMyGalaxyS24/${BuildConfig.VERSION_NAME}")
-                connection.setRequestProperty("Accept", "application/vnd.github+json")
-                connection.connectTimeout = 10_000
-                connection.readTimeout = 10_000
                 if (connection.responseCode != HttpURLConnection.HTTP_OK) return@withContext null
                 val body = connection.inputStream.bufferedReader().use { it.readText() }
 
@@ -74,12 +74,13 @@ object AppUpdater {
         val dir = File(context.cacheDir, "updates").apply { mkdirs() }
         val target = File(dir, "update.apk")
         try {
-            val connection = URL(url).openConnection() as HttpURLConnection
+            val connection = HttpsRedirects.open(
+                url = url,
+                connectTimeoutMillis = 15_000,
+                readTimeoutMillis = 30_000,
+                userAgent = "RootMyGalaxyS24/${BuildConfig.VERSION_NAME}",
+            )
             try {
-                connection.requestMethod = "GET"
-                connection.setRequestProperty("User-Agent", "RootMyGalaxyS24/${BuildConfig.VERSION_NAME}")
-                connection.connectTimeout = 15_000
-                connection.readTimeout = 30_000
                 if (connection.responseCode != HttpURLConnection.HTTP_OK) return@withContext null
                 val total = connection.contentLength
                 val buffer = ByteArray(64 * 1024)

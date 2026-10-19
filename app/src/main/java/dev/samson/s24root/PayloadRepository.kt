@@ -7,7 +7,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.net.URL
 import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -297,15 +296,22 @@ class PayloadRepository(
         return bytes
     }
 
-    private fun open(url: String): HttpURLConnection =
-        (URL(url).openConnection() as HttpURLConnection).apply {
-            connectTimeout = 15_000
-            readTimeout = 60_000
-            instanceFollowRedirects = true
-            setRequestProperty("User-Agent", "RootMyGalaxyS24/${BuildConfig.VERSION_NAME}")
-            connect()
-            require(responseCode == HttpURLConnection.HTTP_OK) { "HTTP $responseCode" }
+    private fun open(url: String): HttpURLConnection {
+        val connection = HttpsRedirects.open(
+            url = url,
+            connectTimeoutMillis = 15_000,
+            readTimeoutMillis = 60_000,
+            userAgent = "RootMyGalaxyS24/${BuildConfig.VERSION_NAME}",
+        )
+        try {
+            val code = connection.responseCode
+            require(code == HttpURLConnection.HTTP_OK) { "HTTP $code" }
+        } catch (error: Throwable) {
+            connection.disconnect()
+            throw error
         }
+        return connection
+    }
 
     companion object {
         private const val COMMIT_API_URL =

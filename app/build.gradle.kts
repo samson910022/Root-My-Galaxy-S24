@@ -16,9 +16,10 @@ android {
         versionName = "0.3.3-s24.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // This fork ships from a private repository, whose release feed is not
-        // readable without an Authorization header. Self-update stays off until
-        // a token-free distribution endpoint exists.
+        // Self-update is intentionally off: the app does not request
+        // REQUEST_INSTALL_PACKAGES, so the updater could never install the APK
+        // it downloads. Re-enable only together with a complete, verified
+        // update flow.
         buildConfigField("boolean", "SELF_UPDATE_ENABLED", "false")
 
         ndk {
