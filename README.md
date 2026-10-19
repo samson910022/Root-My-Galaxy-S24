@@ -1,6 +1,6 @@
 # Root My Galaxy S24
 
-Personal build of [Root My Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy)
+Unofficial build of [Root My Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy)
 targeting the **Galaxy S24 China, `SM-S9210`** (codename `e1q`) on firmware
 `S9210ZHS6DZG1`, kernel `6.1.145-android14-11-33419968-abS9210ZHS6DZG1`.
 
@@ -13,6 +13,16 @@ a manifest that ships alongside them.
 
 Every other device still goes through the upstream online support feed
 unchanged.
+
+## Getting started
+
+The app needs Android 13 or newer (`minSdk` 33) and, for the bundled path,
+exactly the SM-S9210 firmware named above; any other profile is refused. The
+recorded hardware validation used Shizuku as the transport — install and
+authorize Shizuku before selecting that mode. Download the signed APK from the
+[releases page](https://github.com/samson910022/Root-My-Galaxy-S24/releases),
+install it, and read [Known limitations](#known-limitations) and
+[Risks and disclaimer](#risks-and-disclaimer) before running anything.
 
 ## What is bundled
 
@@ -34,21 +44,22 @@ unchanged.
 > `0.3.3-s24.1`; see
 > [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md)
 > and [`docs/SM-S9210-v3.3.0-piguard-validation-20261019.md`](docs/SM-S9210-v3.3.0-piguard-validation-20261019.md).
-> The overall install flow has succeeded on three separate dates, so it is
-> repeatable; the PI-guard bytes themselves have one recorded success. Root is
+> The overall install flow has succeeded on three separate dates; repeatability
+> of a given build remains limited, and the PI-guard bytes themselves have one
+> recorded success. Root is
 > RAM-only and a reboot removes it; that behaviour was verified previously and
 > is a design limitation, not an open acceptance item. A follow-up resetprop
 > read/set/delete pass on the pinned loader succeeded, and the PI-guard run
 > captured the Manager UI status (`LKM`, working) for the first time.
 > Pair v3.3.0 with Manager `32601`. The helper is unchanged; the exploit `.so`
-> is the PI-guard rebuild (`1da7c8cd…15b9df`, fork main@e90759c, NDK r29
+> is the PI-guard rebuild (`1da7c8cd…15b9df`, fork commit e90759c, NDK r29
 > API 35: `make TARGET=e1q-S9210ZHS6DZG1 ANDROID_NDK_HOME=<ndk-r29> release`),
 > which has one recorded successful hardware run (2026-10-19).
 
-The exploit payload file is rebuilt from our fork main@e90759c
-(`samson910022/Root-My-Galaxy-Payloads` PRs #7 code and #8 artifact: PR #320
-commit `a311cb88c28204c3902af9450ae4077199e4d71d` plus the rt_mutex PI-guard
-fix), with NDK r29 API 35; the v3.3.0 loader is the
+The exploit payload file is rebuilt from fork commit e90759c (the fork main
+at build time) (`samson910022/Root-My-Galaxy-Payloads` PRs #7 code and #8
+artifact: PR #320 commit `a311cb88c28204c3902af9450ae4077199e4d71d` plus the
+rt_mutex PI-guard fix), with NDK r29 API 35; the v3.3.0 loader is the
 separately pinned historical Phase-D artifact from commit `8236c843`. The helper
 is not a copied artifact: it is compiled from the exploit commit's
 `src/su_daemon.c` and then patched, as described below. Full provenance,
@@ -108,18 +119,22 @@ Output: `app/build/outputs/apk/debug/app-debug.apk`
 
 This local helper builds the release variant, signs it with the upload
 keystore, verifies the signing certificate and alignment, and writes a
-versioned APK under `app/build/outputs/apk/release/`. It does not change the
-GitHub release workflow, which currently builds and uploads the debug APK.
+versioned APK under `app/build/outputs/apk/release/`. The GitHub release
+workflow runs the same helper from the tag it publishes.
 
 ```sh
+export RELEASE_CERT_SHA256=<expected signer certificate SHA-256>
 ./tools/release-apk.sh
 ```
 
-By default, it reads the PKCS12 keystore and its password file from
-`$HOME/.android/keystores/`. Keep both outside the repository. To use a
-different local keystore, set `RELEASE_KEYSTORE`, `RELEASE_KEY_ALIAS`, and
-`RELEASE_KEYSTORE_PASSWORD_FILE`, and set `RELEASE_CERT_SHA256` to that
-keystore's expected signer certificate digest. `ANDROID_SDK_ROOT` (or
+`RELEASE_CERT_SHA256` is required (the helper ships no built-in default, so
+a fork cannot silently verify against another project's certificate); set
+it to the expected signer certificate digest, which `keytool -list -v`
+prints as the `SHA256:` fingerprint. By default, the helper reads the
+PKCS12 keystore and its password file from `$HOME/.android/keystores/`.
+Keep both outside the repository. To use a different local keystore, set
+`RELEASE_KEYSTORE`, `RELEASE_KEY_ALIAS`, and
+`RELEASE_KEYSTORE_PASSWORD_FILE`. `ANDROID_SDK_ROOT` (or
 `ANDROID_HOME`) must point to the Android SDK; `ANDROID_BUILD_TOOLS_VERSION`
 defaults to `36.0.0`. `RELEASE_OUTPUT_DIR` overrides the output directory
 (default `app/build/outputs/apk/release/`; relative paths resolve under the
@@ -133,7 +148,13 @@ emits one (otherwise it removes a stale one). It runs on Linux
 and stock macOS (`/bin/bash` 3.2 compatible; `sha256sum` falls back to
 `shasum -a 256 --` and then `python3`).
 
-Output example: `app/build/outputs/apk/release/roots24-0.3.2-s24.1.apk`.
+The release workflow reads the signing material from repository secrets:
+`RELEASE_KEYSTORE_BASE64` (base64 of the PKCS12 keystore),
+`RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, and
+`RELEASE_CERT_SHA256` (the expected signer digest). Configure them in the
+repository settings only; never commit them.
+
+Output example: `app/build/outputs/apk/release/roots24-0.3.4-s24.1.apk`.
 
 Unit tests:
 
@@ -157,11 +178,23 @@ a tampered binary cannot be blessed and then committed. A full
 `tools/helper-marker-removal.patch`, rebuilds it with the payloads Makefile's
 rule, and verifies the result.
 
-`./tools/sync-payloads.sh` fetches the exploit payload from PR #320 (or from
-`main` after setting `PR_MERGED=true`) and fetches the experimental v3.3.0
-`ksud` from its separately pinned historical Phase-D commit. It verifies both
-against the manifest before installing them; the v3.3.0 binary is not currently
-published on Payloads `main` because broader acceptance checks remain pending.
+`./tools/sync-payloads.sh` fetches the exploit payload from the
+`samson910022/Root-My-Galaxy-Payloads` fork at pinned commit `e90759c`
+(based on the open PR #320 head plus the rt_mutex PI-guard fix) and the
+experimental v3.3.0 `ksud` from `BuSung-dev/Root-My-Galaxy-Payloads` at pinned
+commit `8236c84`. It verifies both against the manifest before installing them;
+the v3.3.0 binary is not currently published on Payloads `main` because broader
+acceptance checks remain pending.
+
+Refreshing the assets (the default mode) needs both repositories to stay
+publicly readable at those commits. The pinned exploit is not on upstream
+`main` (or any upstream branch): `BuSung-dev/Root-My-Galaxy-Payloads` `main`
+does not contain the file, and the head of open PR #320 (`a311cb88`) has
+different, pre-fix bytes. The fork is the source `sync-payloads.sh` currently
+uses; if it is removed or made private, the script cannot refetch the exploit
+until `EXPLOIT_RAW_BASE` is repointed at another copy. `--check` is unaffected:
+it is fully offline and compares the worktree copy and the Git index against
+`app/src/main/assets/builtin-targets.json`.
 
 ## Known limitations
 
@@ -200,16 +233,22 @@ published on Payloads `main` because broader acceptance checks remain pending.
   before relaxing it.
 - The upstream online path is not digest-verified. See above.
 - Only `arm64-v8a` is built.
-- Self-update is disabled. This repository is private, so its release feed is
-  not readable without an `Authorization` header; the in-app updater would only
-  ever report failure. `SELF_UPDATE_ENABLED` in `app/build.gradle.kts` turns the
-  feature back on once a token-free distribution endpoint exists.
-- Translations are partial. The S24 branding and the bundled-payload messages
-  are translated for `zh-TW` and most for `zh-CN`; every locale keeps its existing
-  upstream translations and falls back to English for keys it lacks, which is
-  between 13 and 26 of the 161 keys depending on locale. `fr` is registered as
-  an app locale but has no entry in the in-app language picker, so it is
-  reachable only through Android's per-app language settings.
+- Self-update is disabled, and the in-app installer cannot work as shipped: the
+  app does not declare `REQUEST_INSTALL_PACKAGES`, so on Android 8.0+ the system
+  package installer rejects the hand-off from a non-privileged app (AOSP
+  `InstallStart` aborts callers with targetSdk >= 26 that do not request it).
+  The updater also does not verify the downloaded APK against a published
+  digest, nor whether its signer matches the installed app's signer, and the
+  flow has not been validated end to end; install updates manually from the
+  releases page. Re-enabling `SELF_UPDATE_ENABLED` in `app/build.gradle.kts`
+  requires adding the permission, obtaining the user's "install unknown apps"
+  grant, and completing a verified update flow.
+- All 11 bundled locales (`de`, `fr`, `ja`, `ko`, `pt-BR`, `ru`, `tr`, `uz`,
+  `vi`, `zh-CN`, `zh-TW`) carry every translatable string, including the
+  S24-branding and bundled-payload messages this fork added. `fr` is registered
+  as an app locale but has no entry in the in-app language picker, so it can be
+  selected through Android's per-app language settings or by using French as the
+  system language.
 - The on-device exploit harness lives in `app/src/androidTest/.../ExploitUidTest.kt`
   and is run with `./gradlew connectedAndroidTest`. It still accepts a P0 offset
   as an explicit argument
@@ -228,8 +267,26 @@ published on Payloads `main` because broader acceptance checks remain pending.
 
 ## Licensing and attribution
 
-This repository is a derivative work and is private. See
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the components it contains
-and their terms. Root My Galaxy and Root-My-Galaxy-Payloads are Apache-2.0.
+This repository is a derivative work of
+[Root My Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy) and is not
+affiliated with or endorsed by the upstream projects or Samsung. The project's
+own code is Apache-2.0 ([`LICENSE`](LICENSE)), as are the upstream repositories
+it derives from. Full third-party licence texts are in
+[`LICENSES/`](LICENSES/): Apache-2.0; GPL-3.0 for the `ksud` userspace loader
+and GPL-2.0 for the kernel module embedded in it; and MIT for MaterialKolor,
+Shizuku API, and Colormath. Attribution and the GPL Corresponding Source offer
+are in [`NOTICE`](NOTICE); per-component details, including the vendored helper
+patch, are in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). The same files
+ship inside the APK under `assets/licenses/`.
 
-Use only on devices you own or are explicitly authorized to test.
+## Risks and disclaimer
+
+This is an experimental kernel exploit. Rooting this way is inherently
+dangerous: a failed or interrupted run can panic the kernel, corrupt data, or
+in the worst case leave the phone needing a reflash. While root is active the
+device may fail Play Integrity and similar root-detection checks, so banking,
+payment, and other Knox-protected apps may refuse to run. Root lives in RAM
+only and disappears on reboot. Use it only on a device you own or are
+explicitly authorized to test, only where rooting is legal where you live, and
+back up first. The software is provided as is, without warranty of any kind;
+the authors are not liable for any damage, data loss, or legal consequences.

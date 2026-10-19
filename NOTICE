@@ -1,0 +1,52 @@
+Root My Galaxy S24
+Copyright 2026 samson910022
+
+This repository and the binaries it produces are a derivative of:
+
+  Root My Galaxy            https://github.com/BuSung-dev/Root-My-Galaxy
+  Root My Galaxy Payloads   https://github.com/BuSung-dev/Root-My-Galaxy-Payloads
+
+both licensed under the Apache License, Version 2.0.
+
+The project's own code is licensed under the Apache License, Version 2.0.
+The full text is in LICENSE and LICENSES/Apache-2.0.txt, and is packaged
+inside the APK at assets/licenses/LICENSE-APACHE-2.0.txt. The APK also
+conveys the third-party components listed below under their own licences.
+
+This product bundles KernelSU (https://github.com/tiann/KernelSU) in object
+form: the "ksud" userspace loader (GPL-3.0-or-later, used here under GPL-3.0)
+and the kernel module embedded in it (GPL-2.0-only). The loader and module are
+built from KernelSU v3.3.0, commit
+932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e, with the Samsung KDP/RKP/DEFEX
+patch set (kernelsu/patches/KernelSU-v3.3.0-samsung-kdp-rkp-defex.patch,
+2026-10-01) and CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y; the build record is
+Root-My-Galaxy-Payloads commit 8236c84301282b5415412d867ab71d4a739e0809.
+The full GPL-3.0 and GPL-2.0 texts ship with this notice
+(LICENSES/GPL-3.0.txt and LICENSES/GPL-2.0.txt; also packaged inside the APK
+at assets/licenses/LICENSE-GPL-3.0.txt and
+assets/licenses/LICENSE-GPL-2.0.txt).
+
+Corresponding Source for the bundled loader and the kernel module embedded in
+it is available at:
+
+  KernelSU base (userspace/ for ksud, kernel/ for the kernel module)
+    https://github.com/tiann/KernelSU at commit
+    932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e
+  Samsung patch set and build record
+    https://github.com/BuSung-dev/Root-My-Galaxy-Payloads at commit
+    8236c84301282b5415412d867ab71d4a739e0809
+
+If you received a binary distribution of this software and cannot obtain the
+Corresponding Source from those locations, request it via
+https://github.com/samson910022/Root-My-Galaxy-S24/issues and it will be
+provided free of charge. This offer is valid for three years from the date
+the binary distribution was conveyed.
+
+This product also includes a port of the CVE-2026-43499 exploit published
+by NebuSec in the CyberMeowfia research repository
+(https://github.com/NebuSec/CyberMeowfia), licensed Apache-2.0, pinned at
+commit 2fb9d24e1408f5567bbeb5d7fa2d36ce808c5a1a.
+
+MIT-licensed components: MaterialKolor (Copyright (c) 2025 Jordon de Hoog),
+Shizuku API (Copyright (c) 2021 RikkaW), and Colormath (Copyright 2021 AJ
+Alt); see LICENSES/MIT.txt.

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - '**'
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -63,10 +64,34 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  # The licence texts and notices ship twice: at the repository root and inside
+  # the APK under assets/licenses/. Keep the copies byte-identical.
+  licences:
+    name: Licence copies
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Verify the licence copies match
+        run: |
+          set -euo pipefail
+          cmp LICENSE LICENSES/Apache-2.0.txt
+          cmp LICENSE app/src/main/assets/licenses/LICENSE-APACHE-2.0.txt
+          cmp LICENSES/GPL-2.0.txt app/src/main/assets/licenses/LICENSE-GPL-2.0.txt
+          cmp LICENSES/GPL-3.0.txt app/src/main/assets/licenses/LICENSE-GPL-3.0.txt
+          cmp LICENSES/MIT.txt app/src/main/assets/licenses/LICENSE-MIT.txt
+          cmp NOTICE app/src/main/assets/licenses/NOTICE.txt
+          cmp THIRD_PARTY_NOTICES.md app/src/main/assets/licenses/THIRD_PARTY_NOTICES.md
+      - name: Verify the canonical Apache-2.0 text
+        run: |
+          echo "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30  LICENSE" | sha256sum -c -
+
   # End-to-end smoke test for tools/release-apk.sh with a throwaway PKCS12 key.
   # No secret is involved: the key lives in RUNNER_TEMP and the signed APK is
   # never uploaded. Covers assembleRelease -> zipalign -> apksigner sign ->
-  # certificate digest check -> zipalign -c, plus the negative digest case.
+  # certificate digest check -> zipalign -c, plus the negative digest and
+  # missing-digest cases.
   release-script-smoke:
     name: Release script smoke (ephemeral key)
     runs-on: ubuntu-latest
@@ -131,3 +156,13 @@ jobs:
             echo "release-apk.sh accepted a wrong certificate digest" >&2
             exit 1
           fi
+          # Negative case: RELEASE_CERT_SHA256 is required (no built-in default).
+          if env -u RELEASE_CERT_SHA256 \
+            RELEASE_KEYSTORE="$smoke_tmp/e2e.p12" RELEASE_KEY_ALIAS=e2e \
+            RELEASE_KEYSTORE_PASSWORD_FILE="$pass_file" \
+            RELEASE_OUTPUT_DIR="$smoke_tmp/out-missing-digest" \
+            ./tools/release-apk.sh 2>"$smoke_tmp/missing-digest.err"; then
+            echo "release-apk.sh accepted a missing RELEASE_CERT_SHA256" >&2
+            exit 1
+          fi
+          grep -q 'RELEASE_CERT_SHA256' "$smoke_tmp/missing-digest.err"

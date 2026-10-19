@@ -41,10 +41,13 @@ zipalign="$build_tools/zipalign"
 keystore=${RELEASE_KEYSTORE:-"$HOME/.android/keystores/root-my-galaxy-s24-upload.p12"}
 key_alias=${RELEASE_KEY_ALIAS:-root-my-galaxy-s24-upload}
 password_file=${RELEASE_KEYSTORE_PASSWORD_FILE:-"$HOME/.android/keystores/root-my-galaxy-s24-upload.password"}
-expected_cert_sha256=${RELEASE_CERT_SHA256:-4256991b32a612cf6ec3e5d8730f135fc8afb082082def192b1abb04f9ff2e93}
+# No built-in default: forks must not silently verify against this repo's
+# signing certificate, so the expected signer is explicit-only.
+expected_cert_sha256=${RELEASE_CERT_SHA256:-}
 
 [ -r "$keystore" ] || fail "release keystore is missing or unreadable: $keystore"
 [ -r "$password_file" ] || fail "keystore password file is missing or unreadable: $password_file"
+[ -n "$expected_cert_sha256" ] || fail "RELEASE_CERT_SHA256 is not set; export the expected APK signer certificate SHA-256 digest"
 
 note "building release APK"
 "$root/gradlew" --no-daemon :app:assembleRelease

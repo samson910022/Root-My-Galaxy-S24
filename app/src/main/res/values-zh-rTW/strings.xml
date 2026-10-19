@@ -77,19 +77,20 @@
     <string name="log_ksu_staged">[+] KernelSU 暫存完成</string>
     <string name="log_ksu_control_verified">[+] KernelSU 控制通道已驗證</string>
     <string name="error_helper_unavailable">無法執行 bootstrap helper</string>
-    <string name="error_exploit_stalled">helper 已停止，但 payload 以分離狀態執行，可能仍在寫入核心。請讓應用程式保持前景執行，並在重試前檢查裝置。</string>
-    <string name="error_exploit_timeout">helper 已停止，但 payload 以分離狀態執行，可能仍在寫入核心。請讓應用程式保持前景執行，並在重試前檢查裝置。</string>
+    <string name="error_exploit_stalled">長時間沒有 exploit 輸出。helper 已停止，但 payload 以分離狀態執行，可能仍在寫入核心。請讓應用程式保持前景執行，並在重試前檢查裝置。</string>
+    <string name="error_exploit_timeout">exploit 超出了時間預算。helper 已停止，但 payload 以分離狀態執行，可能仍在寫入核心。請讓應用程式保持前景執行，並在重試前檢查裝置。</string>
     <string name="error_payload_exit">Payload 執行錯誤：%1$d%2$s</string>
     <string name="error_success_marker">未找到 exploit 成功標記</string>
     <string name="error_ksu_stage">KernelSU 暫存失敗：%1$s</string>
     <string name="error_ksu_verify">KernelSU late-load 或控制驗證失敗 (rc=%1$d)：%2$s</string>
+    <string name="error_helper_timeout">KernelSU helper 未在 120 秒內結束%1$s</string>
     <string name="error_boot_id">無法讀取目前的 boot_id</string>
-    <string name="error_receipt">無法儲存安裝驗證結果</string>
+    <string name="error_receipt">無法儲存安裝驗證憑證</string>
     <string name="artifact_exploit">exploit</string>
     <string name="artifact_kernelsu">KernelSU</string>
-    <string name="repo_builtin_unavailable">此型號的內建 payload 已不在應用程式中，因此不會改從線上來源下載。請重新安裝應用程式，或改用已發布於該來源的支援設定檔。</string>
+    <string name="repo_builtin_unavailable">應用程式未包含此型號的內建 payload，因此不會改從線上來源下載。請重新安裝應用程式，或改用已發布於該來源的支援設定檔。</string>
     <string name="repo_no_profile">沒有支援此型號與核心版本的相容 payload</string>
-    <string name="repo_firmware_unsupported">內建 payload 是為韌體 %1$s 而建，但此裝置回報 %2$s。核心位址取自特定韌體，因此無法在不同的版本上執行。</string>
+    <string name="repo_firmware_unsupported">內建 payload 是為韌體 %1$s 而建，但此裝置回報 %2$s。核心偏移取自特定韌體，因此無法在不同的版本上執行。</string>
     <string name="repo_staging">正在解開內建的 %1$s</string>
     <string name="repo_staged_current">內建的 %1$s 已驗證</string>
     <string name="repo_digest_mismatch">%1$s 與內建支援清單的雜湊不符</string>
@@ -113,7 +114,7 @@
     <string name="action_download_shizuku">下載 Shizuku</string>
     <string name="error_shizuku_unavailable">Shizuku 未在執行，請先透過 adb 或 root 啟動 Shizuku。</string>
     <string name="error_shizuku_permission">未授予 Shizuku 權限</string>
-    <string name="error_shizuku_stage">無法透過 Shizuku 部署 %1$s：%2$s</string>
+    <string name="error_shizuku_stage">無法透過 Shizuku 暫存 %1$s：%2$s</string>
     <string name="log_shizuku_prepare">[*] 正在準備 Shizuku 執行</string>
     <string name="log_shizuku_permission">[+] 已授予 Shizuku 權限</string>
     <string name="about">關於</string>
@@ -134,6 +135,7 @@
     <string name="export_logs_failed">無法儲存日誌</string>
     <string name="install_tap_open_manager">點擊開啟 KernelSU Manager</string>
     <string name="how_it_works">運作原理</string>
+    <string name="kernelsu_card_title">KernelSU</string>
     <string name="kernelsu_card_description">以核心為基礎的 Android Root 解決方案</string>
     <string name="history_shizuku_used">已使用 Shizuku</string>
     <string name="history_shizuku_not_used">未使用 Shizuku</string>

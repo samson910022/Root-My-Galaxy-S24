@@ -307,6 +307,15 @@ class InstallViewModel(application: Application) : AndroidViewModel(application)
                 delay(500.milliseconds)
                 if (process.isAlive) process.destroyForcibly()
             }
+            if (shizuku) {
+                // The run's output was already drained from the process, so the
+                // file has no reader left and must not stay in world-readable
+                // /data/local/tmp. The binder may be gone by now, so this is
+                // best-effort cleanup.
+                runCatching {
+                    ShizukuController.exec(arrayOf("rm", "-f", SHIZUKU_LOG_PATH)).waitFor()
+                }
+            }
         }
         appendLog(app.getString(R.string.log_bootstrap_root))
     }

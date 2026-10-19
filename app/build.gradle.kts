@@ -12,13 +12,18 @@ android {
         applicationId = "dev.samson.s24root"
         minSdk = 33
         targetSdk = 36
-        versionCode = 17
-        versionName = "0.3.3-s24.1"
+        versionCode = 18
+        versionName = "0.3.4-s24.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // This fork ships from a private repository, whose release feed is not
-        // readable without an Authorization header. Self-update stays off until
-        // a token-free distribution endpoint exists.
+        // Self-update is intentionally off. The updater downloads a release APK,
+        // but the app does not declare REQUEST_INSTALL_PACKAGES, so the system
+        // package installer aborts the hand-off (targetSdk 36 >= 26). It also
+        // does not verify the downloaded APK against a published digest, nor
+        // whether its signer matches the installed app's signer, and the flow
+        // has not been validated end to end. Re-enabling the flag alone is not
+        // enough: add the permission, obtain the user's "install unknown apps"
+        // grant, and complete a verified update flow first.
         buildConfigField("boolean", "SELF_UPDATE_ENABLED", "false")
 
         ndk {

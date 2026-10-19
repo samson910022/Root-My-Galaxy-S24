@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # Refreshes the bundled SM-S9210 payload from the payloads repository.
 #
-# The exploit profile lives in an unmerged pull request, so this script fetches
-# it by pinned commit rather than by a branch name. The KernelSU v3.3.0 e1q
-# binary comes from the separately pinned Phase-D commit below because Payloads
-# later reverted it from main pending broader hardware acceptance. Full-chain
-# app/Shizuku runs succeeded on 2026-10-03, 2026-10-07, and 2026-10-19 (the
-# last with the PI-guard bytes); see the validation records.
-# Once the PR merges, set PR_MERGED=true and the exploit fetch switches to main,
-# still requiring the same content digest so a silent upstream change cannot
-# reach the APK.
+# The exploit profile comes from the samson910022/Root-My-Galaxy-Payloads fork
+# at a pinned commit: upstream PR #320 code plus the rt_mutex PI-guard fix.
+# The KernelSU v3.3.0 e1q binary comes from the separately pinned Phase-D commit
+# in BuSung-dev/Root-My-Galaxy-Payloads because Payloads later reverted it from
+# main pending broader hardware acceptance. Full-chain app/Shizuku runs
+# succeeded on 2026-10-03, 2026-10-07, and 2026-10-19 (the last with the
+# PI-guard bytes); see the validation records.
+#
+# Both artifacts are fetched by immutable commit rather than by branch or ref,
+# and both are verified against the digests in the bundled manifest, so a
+# silent upstream change cannot reach the APK.
 #
 # Usage:  tools/sync-payloads.sh [--check]
 #           (default)  fetch, verify, and install into the assets tree
@@ -20,30 +22,22 @@ SCRIPT=tools/sync-payloads.sh
 PROVENANCE=app/src/main/assets/builtin-targets.json
 ASSET_DIR=app/src/main/assets/payloads/e1q-S9210ZHS6DZG1
 PROFILE=e1q-S9210ZHS6DZG1
-REPO_SLUG=BuSung-dev/Root-My-Galaxy-Payloads
-RAW_BASE=https://raw.githubusercontent.com/BuSung-dev/Root-My-Galaxy-Payloads
-PR_NUMBER=320
-# Set to true once the pull request is merged; the payloads main branch then
-# carries the profile and is used instead of the pull request ref.
-PR_MERGED=false
-PR_REF="refs/pull/$PR_NUMBER/head"
-PINNED_COMMIT=a311cb88c28204c3902af9450ae4077199e4d71d
+EXPLOIT_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads
+EXPLOIT_SOURCE_COMMIT=e90759c5e4167f271ef46cc4a57835cf42a2ffc6
+KSUD_RAW_BASE=https://raw.githubusercontent.com/BuSung-dev/Root-My-Galaxy-Payloads
 # The e1q v3.3.0 pair is recorded in Payloads Phase D and was reverted from
 # main before its first successful app/Shizuku run (2026-10-03). Keep the
 # published feed on v3.2.5 while broader acceptance remains pending. Pin that
-# reviewed commit independently from the unmerged exploit profile.
+# reviewed commit independently from the exploit profile.
 KSUD_SOURCE_COMMIT=8236c84301282b5415412d867ab71d4a739e0809
-MAIN_REF=refs/heads/main
 
 EXPLOIT_NAME=cve-2026-43499-app.so
 KSUD_NAME=ksud-e1q-S9210ZHS6DZG1-kdp
 EXPLOIT_UPSTREAM="artifacts/$PROFILE/$EXPLOIT_NAME"
 KSUD_UPSTREAM="kernelsu/$KSUD_NAME"
-# e1q exploit with the PI-guard fix, rebuilt from our fork main@e90759c
-# (PR #320 commit a311cb88 plus samson910022/Root-My-Galaxy-Payloads PRs #7
-# code and #8 artifact). Fetch mode still reads upstream PR #320, which does
-# not carry the fix, so a full sync will fail loudly at the digest check
-# until upstream merges it; --check against the vendored bytes keeps passing.
+# e1q exploit with the PI-guard fix, built from the fork at
+# samson910022/Root-My-Galaxy-Payloads commit e90759c (upstream PR #320 code
+# plus the PI-guard fix). Pinned by commit because the fork's main has moved on.
 EXPLOIT_SHA256=1da7c8cd12d1125453fcd9e14a458296a62e37530257d152c9d8f9a26415b9df
 # EXPERIMENTAL v3.3.0 e1q Phase-D pair from Payloads commit 8236c84.
 # It uses CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y, passed static audit, and has three
@@ -136,32 +130,16 @@ for tool in git curl sha256sum python3; do
   command -v "$tool" >/dev/null 2>&1 || fail "required tool not found: $tool"
 done
 
-if [ "$PR_MERGED" = true ]; then
-  SOURCE_REF=$MAIN_REF
-  EXPECTED_COMMIT=""
-  note "reading from the payloads main branch"
-else
-  SOURCE_REF=$PR_REF
-  EXPECTED_COMMIT=$PINNED_COMMIT
-  note "reading from $PR_REF"
-fi
-
-source_commit=$(git ls-remote "https://github.com/$REPO_SLUG.git" "$SOURCE_REF" | cut -f1)
-[ -n "$source_commit" ] || fail "could not resolve $SOURCE_REF"
-if [ -n "$EXPECTED_COMMIT" ] && [ "$source_commit" != "$EXPECTED_COMMIT" ]; then
-  fail "$SOURCE_REF is $source_commit, expected $EXPECTED_COMMIT (the pull request head moved)"
-fi
-
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
 fetch() {
-  local source_commit=$1 upstream=$2 destination=$3 size=$4 digest=$5 label=$6
+  local raw_base=$1 source_commit=$2 upstream=$3 destination=$4 size=$5 digest=$6 label=$7
   curl --fail --silent --show-error --location \
     --proto '=https' --proto-redir '=https' \
     --retry 3 --connect-timeout 15 --max-time 300 \
     --output "$destination" \
-    "$RAW_BASE/$source_commit/$upstream" ||
+    "$raw_base/$source_commit/$upstream" ||
     fail "$label download failed: $upstream"
   verify "$destination" "$size" "$digest" "$label (downloaded)"
 }
@@ -170,12 +148,12 @@ fetch() {
 # remain separate operations, so a failure of the second could leave one
 # updated; re-running repairs it, and the manifest digests do not change in
 # between, so a partial state is detected rather than shipped.
-fetch "$source_commit" "$EXPLOIT_UPSTREAM" "$work/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
-fetch "$KSUD_SOURCE_COMMIT" "$KSUD_UPSTREAM" "$work/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
+fetch "$EXPLOIT_RAW_BASE" "$EXPLOIT_SOURCE_COMMIT" "$EXPLOIT_UPSTREAM" "$work/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
+fetch "$KSUD_RAW_BASE" "$KSUD_SOURCE_COMMIT" "$KSUD_UPSTREAM" "$work/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
 
 install -m 0644 "$work/$EXPLOIT_NAME" "$ASSET_DIR/$EXPLOIT_NAME"
 install -m 0644 "$work/$KSUD_NAME" "$ASSET_DIR/$KSUD_NAME"
 
 verify "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
 verify "$ASSET_DIR/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
-note "synced $PROFILE exploit from $source_commit and ksud from $KSUD_SOURCE_COMMIT"
+note "synced $PROFILE exploit from samson910022/Root-My-Galaxy-Payloads@$EXPLOIT_SOURCE_COMMIT and ksud from BuSung-dev/Root-My-Galaxy-Payloads@$KSUD_SOURCE_COMMIT"

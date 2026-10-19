@@ -13,7 +13,9 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Publishing is not a check: let an in-flight release finish rather than
+  # cancelling it midway through tagging and uploading.
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -112,8 +114,45 @@ jobs:
           ./tools/build-helper.sh --check
           ./tools/sync-payloads.sh --check
 
-      - name: Build Debug APK and run unit tests
-        run: ./gradlew testDebugUnitTest compileDebugAndroidTestKotlin assembleDebug --no-daemon
+      # Restore the signing material from repository secrets into RUNNER_TEMP
+      # so the keystore never touches the workspace. Nothing here is echoed.
+      - name: Write signing material
+        shell: bash
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+
+          KEYSTORE_PATH="$RUNNER_TEMP/release.p12"
+          PASSWORD_PATH="$RUNNER_TEMP/release-password.txt"
+
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          chmod 600 "$KEYSTORE_PATH"
+          [ -s "$KEYSTORE_PATH" ] || {
+            echo "RELEASE_KEYSTORE_BASE64 did not decode to a non-empty keystore" >&2
+            exit 1
+          }
+
+          printf '%s' "$RELEASE_KEYSTORE_PASSWORD" > "$PASSWORD_PATH"
+          chmod 600 "$PASSWORD_PATH"
+          [ -s "$PASSWORD_PATH" ] || {
+            echo "RELEASE_KEYSTORE_PASSWORD is empty" >&2
+            exit 1
+          }
+
+      - name: Build signed release APK and run unit tests
+        shell: bash
+        env:
+          RELEASE_KEYSTORE: ${{ runner.temp }}/release.p12
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEYSTORE_PASSWORD_FILE: ${{ runner.temp }}/release-password.txt
+          RELEASE_CERT_SHA256: ${{ secrets.RELEASE_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+          ./gradlew testDebugUnitTest --no-daemon
+          ./tools/release-apk.sh
 
       # Deliberately after the build: a tag is what a release is cut from, so
       # it must not exist unless the build it names actually succeeded.
@@ -161,17 +200,24 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ steps.release_tag.outputs.tag_name }}
+          VERSION_NAME: ${{ steps.release_tag.outputs.version_name }}
         run: |
           set -euo pipefail
+
+          APK_PATH="app/build/outputs/apk/release/roots24-${VERSION_NAME}.apk"
+          [ -f "$APK_PATH" ] || {
+            echo "signed release APK not found: $APK_PATH" >&2
+            exit 1
+          }
 
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
             gh release edit "$TAG_NAME" \
               --title "Release $TAG_NAME" \
               --notes-file release-notes.md \
               --latest
-            gh release upload "$TAG_NAME" app/build/outputs/apk/debug/*.apk --clobber
+            gh release upload "$TAG_NAME" "$APK_PATH" --clobber
           else
-            gh release create "$TAG_NAME" app/build/outputs/apk/debug/*.apk \
+            gh release create "$TAG_NAME" "$APK_PATH" \
               --title "Release $TAG_NAME" \
               --notes-file release-notes.md \
               --latest

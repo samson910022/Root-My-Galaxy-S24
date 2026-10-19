@@ -6,3 +6,13 @@ local.properties
 **/build/
 captures/
 *.iml
+
+# Local signing material and secrets
+*.jks
+*.keystore
+*.p12
+*.pepk
+*.p8
+keystore.properties
+signing.properties
+*.password
