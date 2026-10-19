@@ -108,8 +108,8 @@ Output: `app/build/outputs/apk/debug/app-debug.apk`
 
 This local helper builds the release variant, signs it with the upload
 keystore, verifies the signing certificate and alignment, and writes a
-versioned APK under `app/build/outputs/apk/release/`. It does not change the
-GitHub release workflow, which currently builds and uploads the debug APK.
+versioned APK under `app/build/outputs/apk/release/`. The GitHub release
+workflow runs the same helper from the tag it publishes.
 
 ```sh
 export RELEASE_CERT_SHA256=<expected signer certificate SHA-256>
@@ -137,7 +137,13 @@ emits one (otherwise it removes a stale one). It runs on Linux
 and stock macOS (`/bin/bash` 3.2 compatible; `sha256sum` falls back to
 `shasum -a 256 --` and then `python3`).
 
-Output example: `app/build/outputs/apk/release/roots24-0.3.3-s24.1.apk`.
+The release workflow reads the signing material from repository secrets:
+`RELEASE_KEYSTORE_BASE64` (base64 of the PKCS12 keystore),
+`RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, and
+`RELEASE_CERT_SHA256` (the expected signer digest). Configure them in the
+repository settings only; never commit them.
+
+Output example: `app/build/outputs/apk/release/roots24-0.3.4-s24.1.apk`.
 
 Unit tests:
 
@@ -161,11 +167,13 @@ a tampered binary cannot be blessed and then committed. A full
 `tools/helper-marker-removal.patch`, rebuilds it with the payloads Makefile's
 rule, and verifies the result.
 
-`./tools/sync-payloads.sh` fetches the exploit payload from PR #320 (or from
-`main` after setting `PR_MERGED=true`) and fetches the experimental v3.3.0
-`ksud` from its separately pinned historical Phase-D commit. It verifies both
-against the manifest before installing them; the v3.3.0 binary is not currently
-published on Payloads `main` because broader acceptance checks remain pending.
+`./tools/sync-payloads.sh` fetches the exploit payload from the
+`samson910022/Root-My-Galaxy-Payloads` fork at pinned commit `e90759c`
+(upstream PR #320 code plus the rt_mutex PI-guard fix) and the experimental
+v3.3.0 `ksud` from its separately pinned historical Phase-D commit. It
+verifies both against the manifest before installing them; the v3.3.0 binary
+is not currently published on Payloads `main` because broader acceptance
+checks remain pending.
 
 ## Known limitations
 
