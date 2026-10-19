@@ -64,6 +64,26 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  # The licence texts and notices ship twice: at the repository root and inside
+  # the APK under assets/licenses/. Keep the copies byte-identical.
+  licences:
+    name: Licence copies
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Verify the licence copies match
+        run: |
+          set -euo pipefail
+          cmp LICENSE LICENSES/Apache-2.0.txt
+          cmp LICENSE app/src/main/assets/licenses/LICENSE-APACHE-2.0.txt
+          cmp LICENSES/GPL-2.0.txt app/src/main/assets/licenses/LICENSE-GPL-2.0.txt
+          cmp LICENSES/GPL-3.0.txt app/src/main/assets/licenses/LICENSE-GPL-3.0.txt
+          cmp LICENSES/MIT.txt app/src/main/assets/licenses/LICENSE-MIT.txt
+          cmp NOTICE app/src/main/assets/licenses/NOTICE.txt
+          cmp THIRD_PARTY_NOTICES.md app/src/main/assets/licenses/THIRD_PARTY_NOTICES.md
+
   # End-to-end smoke test for tools/release-apk.sh with a throwaway PKCS12 key.
   # No secret is involved: the key lives in RUNNER_TEMP and the signed APK is
   # never uploaded. Covers assembleRelease -> zipalign -> apksigner sign ->

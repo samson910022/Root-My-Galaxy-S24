@@ -9,22 +9,33 @@ This repository and the binaries it produces are a derivative of:
 both licensed under the Apache License, Version 2.0.
 
 This product bundles KernelSU (https://github.com/tiann/KernelSU) in object
-form: the "ksud" loader, including the kernel module asset embedded in it.
-KernelSU is licensed under the GNU General Public License, version 3. The
-bundled loader is built from KernelSU v3.3.0, commit
+form: the "ksud" userspace loader (GPL-3.0-or-later, used here under GPL-3.0)
+and the kernel module embedded in it (GPL-2.0-only). The loader and module are
+built from KernelSU v3.3.0, commit
 932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e, with the Samsung KDP/RKP/DEFEX
-patch set and CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y; the build record is
+patch set (kernelsu/patches/KernelSU-v3.3.0-samsung-kdp-rkp-defex.patch,
+2026-10-01) and CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y; the build record is
 Root-My-Galaxy-Payloads commit 8236c84301282b5415412d867ab71d4a739e0809.
-The full GPL-3.0 text ships with this notice (LICENSES/GPL-3.0.txt; also
-packaged inside the APK at assets/licenses/LICENSE-GPL-3.0.txt).
+The full GPL-3.0 and GPL-2.0 texts ship with this notice
+(LICENSES/GPL-3.0.txt and LICENSES/GPL-2.0.txt; also packaged inside the APK
+at assets/licenses/LICENSE-GPL-3.0.txt and
+assets/licenses/LICENSE-GPL-2.0.txt).
 
-Corresponding Source for the bundled loader is available at the two
-repositories above, at the exact commits named. If you received a binary
-distribution of this software and cannot obtain the Corresponding Source
-from those locations, request it via
+Corresponding Source for the bundled loader and the kernel module embedded in
+it is available at:
+
+  KernelSU base (userspace/ for ksud, kernel/ for the kernel module)
+    https://github.com/tiann/KernelSU at commit
+    932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e
+  Samsung patch set and build record
+    https://github.com/BuSung-dev/Root-My-Galaxy-Payloads at commit
+    8236c84301282b5415412d867ab71d4a739e0809
+
+If you received a binary distribution of this software and cannot obtain the
+Corresponding Source from those locations, request it via
 https://github.com/samson910022/Root-My-Galaxy-S24/issues and it will be
-provided. This offer is valid for three years from the date the binary
-distribution was conveyed.
+provided free of charge. This offer is valid for three years from the date
+the binary distribution was conveyed.
 
 This product also includes a port of the CVE-2026-43499 exploit published
 by NebuSec in the CyberMeowfia research repository
@@ -32,4 +43,5 @@ by NebuSec in the CyberMeowfia research repository
 commit 2fb9d24e1408f5567bbeb5d7fa2d36ce808c5a1a.
 
 MIT-licensed components: MaterialKolor (Copyright (c) 2025 Jordon de Hoog),
-Shizuku API (Copyright (c) 2021 RikkaW); see LICENSES/MIT.txt.
+Shizuku API (Copyright (c) 2021 RikkaW), and Colormath (Copyright 2021 AJ
+Alt); see LICENSES/MIT.txt.

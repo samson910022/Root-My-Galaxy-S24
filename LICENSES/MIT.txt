@@ -6,6 +6,8 @@ Applies to the following components:
                    https://github.com/jordond/materialkolor
   Shizuku API      Copyright (c) 2021 RikkaW
                    https://github.com/RikkaApps/Shizuku-API
+  Colormath        Copyright 2021 AJ Alt
+                   https://github.com/ajalt/colormath
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

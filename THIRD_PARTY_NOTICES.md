@@ -4,6 +4,10 @@ This repository is a derivative work of the components below. The Apache-2.0
 licence covering the application source is in [LICENSE](LICENSE); the terms of
 each component still apply to that component.
 
+In the repository the licence texts are under `LICENSES/` and the notices sit
+next to this file; inside the APK the same files are packaged under
+`assets/licenses/`.
+
 ## Application source
 
 | Component | Source | Licence |
@@ -34,6 +38,12 @@ below (from `a311cb88`'s `src/su_daemon.c`, untouched by the PI-guard fix). The 
 | `assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | `artifacts/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` |
 | `assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | `kernelsu/ksud-e1q-S9210ZHS6DZG1-kdp` |
 | `jniLibs/arm64-v8a/libcve43499root.so` | built from `src/su_daemon.c` |
+
+The helper is checked in unstripped (26,040 bytes, SHA-256
+`b63951595d631fc7f259ce2ae596da121bd62765e2c016d460fb61b694b5bb1f`); AGP
+strips it to 21,480 bytes, SHA-256
+`1818103f4345b9049741fbdc1b5379f9cc48a69a3e3f5cc07c69c51f145278fe`, inside
+the APK.
 
 ### Exploit payload
 
@@ -83,20 +93,33 @@ The earlier device test (2026-09-11) covered the v3.2.5 loader
 `67b49cad…ee542`). Pair v3.3.0 with Manager `32601`; a 3.2.5 Manager reports
 version skew.
 
-KernelSU is licensed GPL-3.0, which is a different licence from the
-Apache-2.0 covering this repository. The GPL-3.0 obligations for the bundled
-loader are discharged in this repository:
+KernelSU is licensed under two different GNU GPL versions depending on the
+part, and neither is the Apache-2.0 licence covering this repository. The
+`ksud` userspace loader is GPL-3.0-or-later (used here under GPL-3.0), and the
+kernel module embedded inside `ksud` (`android14-6.1_kernelsu.ko`) is
+GPL-2.0-only. The obligations for both are discharged in this repository:
 
-- The full GPL-3.0 text is checked in at
-  [LICENSES/GPL-3.0.txt](LICENSES/GPL-3.0.txt) and packaged inside the APK at
-  `assets/licenses/LICENSE-GPL-3.0.txt`.
+- The full GPL-3.0 and GPL-2.0 texts are checked in at
+  [LICENSES/GPL-3.0.txt](LICENSES/GPL-3.0.txt) and
+  [LICENSES/GPL-2.0.txt](LICENSES/GPL-2.0.txt), and packaged inside the APK at
+  `assets/licenses/LICENSE-GPL-3.0.txt` and
+  `assets/licenses/LICENSE-GPL-2.0.txt`.
+- The Samsung patch file
+  (`kernelsu/patches/KernelSU-v3.3.0-samsung-kdp-rkp-defex.patch`, dated
+  2026-10-01 in Payloads Phase-D commit `8236c843`) records the changes made to
+  KernelSU before the loader and module were built.
 - The [NOTICE](NOTICE) file records the Corresponding Source pointers (the
-  KernelSU commit and the Payloads build record) together with a written offer
-  to provide the Corresponding Source on request.
+  KernelSU base commit for `userspace/` and `kernel/`, and the Payloads commit
+  for the patch set and build record) together with a written offer to provide
+  the Corresponding Source free of charge on request.
+
+The GPL terms apply to `ksud` and its embedded kernel module only. The
+Apache-2.0 app is a separate program that executes `ksud`; the APK is an
+aggregate, not a combined work.
 
 The following statement from `kernelsu/README.md` in the upstream payloads
 repository is historical and describes its v3.2.5 binaries, not this v3.3.0
-loader; this fork's copy of that file was rewritten for v3.3.0:
+loader; the fork's copy of that file was rewritten for v3.3.0:
 
 > The files in this directory are built from KernelSU `v3.2.5`, commit
 > `b0bc817b4e966aa6aa830834eaf6ef765d821d40`. They are not interchangeable
@@ -108,10 +131,10 @@ and:
 > downloads the corresponding `ksud-*` file because `ksud late-load` loads its
 > embedded `<kmi>_kernelsu.ko` asset.
 
-An Apache-2.0 licence on the surrounding repository does not remove GPL-3.0
-obligations for an embedded GPL-3.0 binary, which is why the loader is conveyed
-with the GPL-3.0 text, its attribution and the Corresponding Source pointers
-recorded above.
+An Apache-2.0 licence on the surrounding repository does not remove the GPL
+obligations for the embedded GPL-3.0 and GPL-2.0 binaries, which is why the
+loader and module are conveyed with both licence texts, their attribution and
+the Corresponding Source pointers recorded above.
 
 ### Root helper
 
@@ -157,10 +180,14 @@ Apache-2.0 licence covering this repository's own work.
 Resolved at build time, not vendored:
 
 - Android Gradle Plugin 9.2.1, Kotlin 2.4.0, Gradle 9.5.1 — Apache-2.0
-- Jetpack Compose, AndroidX, Material Color Utilities — Apache-2.0
+- Jetpack Compose, AndroidX — Apache-2.0
 - `com.materialkolor:material-kolor:4.1.1` — MIT
+- `com.materialkolor:material-color-utilities:4.1.1` — MIT (POM); includes an
+  Apache-2.0 port of Google's Material Color Utilities
+- `com.github.ajalt:colormath:3.6.1` — MIT, Copyright 2021 AJ Alt (transitive
+  dependency of MaterialKolor)
 - `dev.rikka.shizuku:api:13.1.5`, `dev.rikka.shizuku:provider:13.1.5` — MIT
-- `org.json:json:20250517` (test only) — public domain / JSON licence
+- `org.json:json:20250517` (test only) — JSON License
 - `junit:junit:4.13.2` — Eclipse Public License 1.0 (test only; not conveyed in
   distributed binaries)
 
@@ -173,7 +200,13 @@ the distributed binaries are checked in under [LICENSES/](LICENSES/) and
 
 - Root My Galaxy and Root-My-Galaxy-Payloads are copyright their authors and
   are used under Apache-2.0.
-- KernelSU is copyright its authors and is used under GPL-3.0.
+- KernelSU is copyright its authors and is used under GPL-3.0-or-later for
+  `ksud` and GPL-2.0-only for the kernel module embedded in it.
 - The CVE-2026-43499 exploit is based on work published by NebuSec in
   <https://github.com/NebuSec/CyberMeowfia>, licensed Apache-2.0 and pinned at
   commit `2fb9d24e1408f5567bbeb5d7fa2d36ce808c5a1a`.
+
+The licence texts and notices for the conveyed MIT, GPL-2.0 and GPL-3.0
+components are checked in under [LICENSES/](LICENSES/) and
+[NOTICE](NOTICE), and the same files (including this notice) are packaged
+inside the APK under `assets/licenses/`.

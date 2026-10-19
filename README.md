@@ -14,6 +14,16 @@ a manifest that ships alongside them.
 Every other device still goes through the upstream online support feed
 unchanged.
 
+## Getting started
+
+The app needs Android 13 or newer (`minSdk` 33) and, for the bundled path,
+exactly the SM-S9210 firmware named above; any other profile is refused. The
+recorded hardware validation used Shizuku as the transport — install and
+authorize Shizuku before selecting that mode. Download the signed APK from the
+[releases page](https://github.com/samson910022/Root-My-Galaxy-S24/releases),
+install it, and read [Known limitations](#known-limitations) and
+[Risks and disclaimer](#risks-and-disclaimer) before running anything.
+
 ## What is bundled
 
 | File | Size | SHA-256 |
@@ -34,8 +44,9 @@ unchanged.
 > `0.3.3-s24.1`; see
 > [`docs/SM-S9210-v3.3.0-validation-20261003.md`](docs/SM-S9210-v3.3.0-validation-20261003.md)
 > and [`docs/SM-S9210-v3.3.0-piguard-validation-20261019.md`](docs/SM-S9210-v3.3.0-piguard-validation-20261019.md).
-> The overall install flow has succeeded on three separate dates, so it is
-> repeatable; the PI-guard bytes themselves have one recorded success. Root is
+> The overall install flow has succeeded on three separate dates; repeatability
+> of a given build remains limited, and the PI-guard bytes themselves have one
+> recorded success. Root is
 > RAM-only and a reboot removes it; that behaviour was verified previously and
 > is a design limitation, not an open acceptance item. A follow-up resetprop
 > read/set/delete pass on the pinned loader succeeded, and the PI-guard run
@@ -212,11 +223,12 @@ checks remain pending.
   before relaxing it.
 - The upstream online path is not digest-verified. See above.
 - Only `arm64-v8a` is built.
-- Self-update is disabled. The app deliberately does not request the
-  install-apps permission, so the in-app updater could never install an APK it
-  downloads; updates are installed manually from the releases page.
-  `SELF_UPDATE_ENABLED` in `app/build.gradle.kts` should be re-enabled only
-  together with a complete, verified update flow.
+- Self-update is disabled. The updater can download a release APK, but it does
+  not verify the download against the published digest or the installed app's
+  signer, and the install flow has not been validated end to end; updates are
+  installed manually from the releases page. `SELF_UPDATE_ENABLED` in
+  `app/build.gradle.kts` should be re-enabled only together with a complete,
+  verified update flow.
 - All 11 bundled locales (`de`, `fr`, `ja`, `ko`, `pt-BR`, `ru`, `tr`, `uz`,
   `vi`, `zh-CN`, `zh-TW`) carry every translatable string, including the
   S24-branding and bundled-payload messages this fork added. `fr` is registered
@@ -246,11 +258,12 @@ This repository is a derivative work of
 affiliated with or endorsed by the upstream projects or Samsung. The project's
 own code is Apache-2.0 ([`LICENSE`](LICENSE)), as are the upstream repositories
 it derives from. Full third-party licence texts are in
-[`LICENSES/`](LICENSES/); attribution and the KernelSU GPL-3.0 Corresponding
-Source offer are in [`NOTICE`](NOTICE). Per-component details, including the
-vendored helper patch, are in
-[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). The same licence texts ship
-inside the APK under `assets/licenses/`.
+[`LICENSES/`](LICENSES/): Apache-2.0; GPL-3.0 for the `ksud` userspace loader
+and GPL-2.0 for the kernel module embedded in it; and MIT for MaterialKolor,
+Shizuku API, and Colormath. Attribution and the GPL Corresponding Source offer
+are in [`NOTICE`](NOTICE); per-component details, including the vendored helper
+patch, are in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). The same files
+ship inside the APK under `assets/licenses/`.
 
 ## Risks and disclaimer
 

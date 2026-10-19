@@ -103,7 +103,7 @@
     <string name="repo_firmware_unsupported">La charge utile intégrée est compilée pour le firmware %1$s, mais cet appareil signale %2$s. Les décalages du noyau sont spécifiques au firmware, elle ne s\'exécutera donc pas sur une autre version.</string>
     <string name="repo_downloading">Téléchargement de %1$s</string>
     <string name="repo_staging">Décompactage de la version intégrée de %1$s</string>
-    <string name="repo_staged_current">Version intégrée de %1$s déjà vérifiée</string>
+    <string name="repo_staged_current">La version intégrée de %1$s est déjà vérifiée</string>
     <string name="repo_digest_mismatch">%1$s ne correspond pas à l\'empreinte du manifeste intégré</string>
     <string name="repo_size_mismatch">La taille de %1$s ne correspond pas au manifeste de compatibilité</string>
     <string name="repo_size_exceeded">%1$s a dépassé la taille déclarée</string>

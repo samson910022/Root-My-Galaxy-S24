@@ -209,10 +209,13 @@ This repository and the binaries it produces are primarily licensed under
 the Apache License, Version 2.0 (above). It also conveys third-party
 components under their own licences:
 
-  - KernelSU (bundled "ksud" loader) - GNU General Public License v3
-  - MaterialKolor, Shizuku API - MIT License
+  - KernelSU (bundled "ksud" loader) - GNU General Public License v3.0 for
+    the userspace loader; GNU General Public License v2.0 for the kernel
+    module embedded in it
+  - MaterialKolor, Shizuku API, Colormath - MIT License
 
 The full texts, attributions and the Corresponding Source pointers are in
-THIRD_PARTY_NOTICES.md, NOTICE and LICENSES/.
+THIRD_PARTY_NOTICES.md, NOTICE and LICENSES/. Inside the APK, the same files
+ship under assets/licenses/.
 
 Copyright 2026 samson910022

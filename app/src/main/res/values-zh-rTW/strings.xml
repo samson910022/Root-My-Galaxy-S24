@@ -88,7 +88,7 @@
     <string name="error_receipt">無法儲存安裝驗證憑證</string>
     <string name="artifact_exploit">exploit</string>
     <string name="artifact_kernelsu">KernelSU</string>
-    <string name="repo_builtin_unavailable">此型號的內建 payload 已不在應用程式中，因此不會改從線上來源下載。請重新安裝應用程式，或改用已發布於該來源的支援設定檔。</string>
+    <string name="repo_builtin_unavailable">應用程式未包含此型號的內建 payload，因此不會改從線上來源下載。請重新安裝應用程式，或改用已發布於該來源的支援設定檔。</string>
     <string name="repo_no_profile">沒有支援此型號與核心版本的相容 payload</string>
     <string name="repo_firmware_unsupported">內建 payload 是為韌體 %1$s 而建，但此裝置回報 %2$s。核心偏移取自特定韌體，因此無法在不同的版本上執行。</string>
     <string name="repo_staging">正在解開內建的 %1$s</string>

@@ -16,9 +16,10 @@ android {
         versionName = "0.3.4-s24.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Self-update is intentionally off: the app does not request
-        // REQUEST_INSTALL_PACKAGES, so the updater could never install the APK
-        // it downloads. Re-enable only together with a complete, verified
+        // Self-update is intentionally off: the updater downloads a release APK
+        // and hands it to the system installer, but it verifies neither the
+        // published digest nor the installed app's signer, and the flow has not
+        // been validated end to end. Re-enable only with a complete, verified
         // update flow.
         buildConfigField("boolean", "SELF_UPDATE_ENABLED", "false")
 
