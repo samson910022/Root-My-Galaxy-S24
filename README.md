@@ -1,6 +1,6 @@
 # Root My Galaxy S24
 
-Personal build of [Root My Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy)
+Unofficial build of [Root My Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy)
 targeting the **Galaxy S24 China, `SM-S9210`** (codename `e1q`) on firmware
 `S9210ZHS6DZG1`, kernel `6.1.145-android14-11-33419968-abS9210ZHS6DZG1`.
 
@@ -137,7 +137,7 @@ emits one (otherwise it removes a stale one). It runs on Linux
 and stock macOS (`/bin/bash` 3.2 compatible; `sha256sum` falls back to
 `shasum -a 256 --` and then `python3`).
 
-Output example: `app/build/outputs/apk/release/roots24-0.3.2-s24.1.apk`.
+Output example: `app/build/outputs/apk/release/roots24-0.3.3-s24.1.apk`.
 
 Unit tests:
 
@@ -204,16 +204,17 @@ published on Payloads `main` because broader acceptance checks remain pending.
   before relaxing it.
 - The upstream online path is not digest-verified. See above.
 - Only `arm64-v8a` is built.
-- Self-update is disabled. This repository is private, so its release feed is
-  not readable without an `Authorization` header; the in-app updater would only
-  ever report failure. `SELF_UPDATE_ENABLED` in `app/build.gradle.kts` turns the
-  feature back on once a token-free distribution endpoint exists.
-- Translations are partial. The S24 branding and the bundled-payload messages
-  are translated for `zh-TW` and most for `zh-CN`; every locale keeps its existing
-  upstream translations and falls back to English for keys it lacks, which is
-  between 13 and 26 of the 161 keys depending on locale. `fr` is registered as
-  an app locale but has no entry in the in-app language picker, so it is
-  reachable only through Android's per-app language settings.
+- Self-update is disabled. The app deliberately does not request the
+  install-apps permission, so the in-app updater could never install an APK it
+  downloads; updates are installed manually from the releases page.
+  `SELF_UPDATE_ENABLED` in `app/build.gradle.kts` should be re-enabled only
+  together with a complete, verified update flow.
+- All 11 bundled locales (`de`, `fr`, `ja`, `ko`, `pt-BR`, `ru`, `tr`, `uz`,
+  `vi`, `zh-CN`, `zh-TW`) carry every translatable string, including the
+  S24-branding and bundled-payload messages this fork added. `fr` is registered
+  as an app locale but has no entry in the in-app language picker, so it can be
+  selected through Android's per-app language settings or by using French as the
+  system language.
 - The on-device exploit harness lives in `app/src/androidTest/.../ExploitUidTest.kt`
   and is run with `./gradlew connectedAndroidTest`. It still accepts a P0 offset
   as an explicit argument
@@ -232,8 +233,25 @@ published on Payloads `main` because broader acceptance checks remain pending.
 
 ## Licensing and attribution
 
-This repository is a derivative work and is private. See
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the components it contains
-and their terms. Root My Galaxy and Root-My-Galaxy-Payloads are Apache-2.0.
+This repository is a derivative work of
+[Root My Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy) and is not
+affiliated with or endorsed by the upstream projects or Samsung. The project's
+own code is Apache-2.0 ([`LICENSE`](LICENSE)), as are the upstream repositories
+it derives from. Full third-party licence texts are in
+[`LICENSES/`](LICENSES/); attribution and the KernelSU GPL-3.0 Corresponding
+Source offer are in [`NOTICE`](NOTICE). Per-component details, including the
+vendored helper patch, are in
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). The same licence texts ship
+inside the APK under `assets/licenses/`.
 
-Use only on devices you own or are explicitly authorized to test.
+## Risks and disclaimer
+
+This is an experimental kernel exploit. Rooting this way is inherently
+dangerous: a failed or interrupted run can panic the kernel, corrupt data, or
+in the worst case leave the phone needing a reflash. While root is active the
+device may fail Play Integrity and similar root-detection checks, so banking,
+payment, and other Knox-protected apps may refuse to run. Root lives in RAM
+only and disappears on reboot. Use it only on a device you own or are
+explicitly authorized to test, only where rooting is legal where you live, and
+back up first. The software is provided as is, without warranty of any kind;
+the authors are not liable for any damage, data loss, or legal consequences.
