@@ -1,0 +1,35 @@
+Root My Galaxy S24
+Copyright 2026 samson910022
+
+This repository and the binaries it produces are a derivative of:
+
+  Root My Galaxy            https://github.com/BuSung-dev/Root-My-Galaxy
+  Root My Galaxy Payloads   https://github.com/BuSung-dev/Root-My-Galaxy-Payloads
+
+both licensed under the Apache License, Version 2.0.
+
+This product bundles KernelSU (https://github.com/tiann/KernelSU) in object
+form: the "ksud" loader, including the kernel module asset embedded in it.
+KernelSU is licensed under the GNU General Public License, version 3. The
+bundled loader is built from KernelSU v3.3.0, commit
+932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e, with the Samsung KDP/RKP/DEFEX
+patch set and CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y; the build record is
+Root-My-Galaxy-Payloads commit 8236c84301282b5415412d867ab71d4a739e0809.
+The full GPL-3.0 text ships with this notice (LICENSES/GPL-3.0.txt; also
+packaged inside the APK at assets/licenses/LICENSE-GPL-3.0.txt).
+
+Corresponding Source for the bundled loader is available at the two
+repositories above, at the exact commits named. If you received a binary
+distribution of this software and cannot obtain the Corresponding Source
+from those locations, request it via
+https://github.com/samson910022/Root-My-Galaxy-S24/issues and it will be
+provided. This offer is valid for three years from the date the binary
+distribution was conveyed.
+
+This product also includes a port of the CVE-2026-43499 exploit published
+by NebuSec in the CyberMeowfia research repository
+(https://github.com/NebuSec/CyberMeowfia), licensed Apache-2.0, pinned at
+commit 2fb9d24e1408f5567bbeb5d7fa2d36ce808c5a1a.
+
+MIT-licensed components: MaterialKolor (Copyright (c) 2025 Jordon de Hoog),
+Shizuku API (Copyright (c) 2021 RikkaW); see LICENSES/MIT.txt.

@@ -1,8 +1,8 @@
 # Third-party notices
 
-This repository is a private derivative work. It contains or derives from the
-components below. The Apache-2.0 licence covering the application source is in
-[LICENSE](LICENSE); the terms of each component still apply to that component.
+This repository is a derivative work of the components below. The Apache-2.0
+licence covering the application source is in [LICENSE](LICENSE); the terms of
+each component still apply to that component.
 
 ## Application source
 
@@ -40,11 +40,10 @@ below (from `a311cb88`'s `src/su_daemon.c`, untouched by the PI-guard fix). The 
 Root-My-Galaxy-Payloads states that the port is based on exploit source
 published at
 <https://github.com/NebuSec/CyberMeowfia/tree/main/IonStack/CVE-2026-43499/exploit>.
-That upstream is referenced by a mutable `main` branch rather than a pinned
-commit, so the exact revision used here is not recorded anywhere in either
-repository. The licence of that upstream has not been audited as part of this
-work. **If this repository is ever shared beyond its owner, resolve and record
-the exploit source revision and its licence first.**
+That upstream is licensed Apache-2.0, and the revision used here is pinned at
+commit `2fb9d24e1408f5567bbeb5d7fa2d36ce808c5a1a`, which is recorded alongside
+the licence in this repository. The MIT-licensed components and all other
+attributions are in [NOTICE](NOTICE) and [LICENSES/](LICENSES/).
 
 ### KernelSU loader
 
@@ -85,8 +84,19 @@ The earlier device test (2026-09-11) covered the v3.2.5 loader
 version skew.
 
 KernelSU is licensed GPL-3.0, which is a different licence from the
-Apache-2.0 covering this repository. The following statement from the Payloads
-README is historical and describes its v3.2.5 binaries, not this v3.3.0 loader:
+Apache-2.0 covering this repository. The GPL-3.0 obligations for the bundled
+loader are discharged in this repository:
+
+- The full GPL-3.0 text is checked in at
+  [LICENSES/GPL-3.0.txt](LICENSES/GPL-3.0.txt) and packaged inside the APK at
+  `assets/licenses/LICENSE-GPL-3.0.txt`.
+- The [NOTICE](NOTICE) file records the Corresponding Source pointers (the
+  KernelSU commit and the Payloads build record) together with a written offer
+  to provide the Corresponding Source on request.
+
+The following statement from `kernelsu/README.md` in the upstream payloads
+repository is historical and describes its v3.2.5 binaries, not this v3.3.0
+loader; this fork's copy of that file was rewritten for v3.3.0:
 
 > The files in this directory are built from KernelSU `v3.2.5`, commit
 > `b0bc817b4e966aa6aa830834eaf6ef765d821d40`. They are not interchangeable
@@ -99,12 +109,9 @@ and:
 > embedded `<kmi>_kernelsu.ko` asset.
 
 An Apache-2.0 licence on the surrounding repository does not remove GPL-3.0
-obligations for an embedded GPL-3.0 binary. GPL-3.0 section 6 governs
-conveying object code, and the corresponding-source obligations are not
-discharged by this file. **This has not been resolved here.** Before the APK or
-this repository is conveyed to anyone else, either satisfy GPL-3.0 section 6
-for the KernelSU component, including offering the corresponding source, or
-remove it.
+obligations for an embedded GPL-3.0 binary, which is why the loader is conveyed
+with the GPL-3.0 text, its attribution and the Corresponding Source pointers
+recorded above.
 
 ### Root helper
 
@@ -127,18 +134,23 @@ only to carry the marker path. No other source line is changed, so the
 target and the package name are byte-identical to upstream.
 
 Apache-2.0 section 4(b) requires modified files to carry prominent notices of
-the change. This repository ships the change as a unified diff, not as the
-modified `su_daemon.c` itself, and the diff has no modification notice in its
-header. Whether that discharges 4(b) for any future conveyance is a
-distributional question that has not been settled here; carry the patched
-source with an explicit notice if this is ever shared.
+the change. This repository ships the change as a unified diff, and the diff
+header now carries a section 4(b) modification notice naming the modified file,
+the pinned source commit (`a311cb88` in Root-My-Galaxy-Payloads) and the
+change; the same provenance is recorded in the helper's provenance file.
+`tools/build-helper.sh` pins the upstream commit, applies the patch and
+verifies both the original source hash and the patched source hash, so the
+notice and the change it describes travel together with the reproducible
+build.
 
 ### Samsung-derived material
 
 The kernel offsets, the BTF-derived structures and the P0 fingerprint table
-encode information extracted from Samsung firmware images. Samsung's firmware
-licence terms are separate from any licence on the repositories above and have
-not been audited as part of this work.
+encode information extracted from Samsung firmware images. No Samsung firmware
+is redistributed by this repository or by the binaries it produces; the
+constants and structures are derived information. Samsung's firmware licence
+terms are separate from the licences in this repository and do not affect the
+Apache-2.0 licence covering this repository's own work.
 
 ## Build-time dependencies
 
@@ -149,15 +161,19 @@ Resolved at build time, not vendored:
 - `com.materialkolor:material-kolor:4.1.1` — MIT
 - `dev.rikka.shizuku:api:13.1.5`, `dev.rikka.shizuku:provider:13.1.5` — MIT
 - `org.json:json:20250517` (test only) — public domain / JSON licence
-- `junit:junit:4.13.2` — Eclipse Public License 1.0
+- `junit:junit:4.13.2` — Eclipse Public License 1.0 (test only; not conveyed in
+  distributed binaries)
 
-The MIT-licensed components require the licence text and copyright notice to
-travel with the binary distributions; their POMs carry those, and Gradle's
-cached metadata retains them, but no copy is checked into this repository.
+The licence texts and attributions for the MIT-licensed components conveyed in
+the distributed binaries are checked in under [LICENSES/](LICENSES/) and
+[NOTICE](NOTICE), and the same files are packaged inside the APK at
+`assets/licenses/`.
 
 ## Attribution retained from upstream
 
 - Root My Galaxy and Root-My-Galaxy-Payloads are copyright their authors and
   are used under Apache-2.0.
 - KernelSU is copyright its authors and is used under GPL-3.0.
-- The CVE-2026-43499 exploit is based on work published by NebuSec.
+- The CVE-2026-43499 exploit is based on work published by NebuSec in
+  <https://github.com/NebuSec/CyberMeowfia>, licensed Apache-2.0 and pinned at
+  commit `2fb9d24e1408f5567bbeb5d7fa2d36ce808c5a1a`.

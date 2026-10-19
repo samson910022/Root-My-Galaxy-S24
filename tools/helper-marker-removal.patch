@@ -1,3 +1,13 @@
+Apache-2.0 section 4(b) modification notice
+
+File changed: src/su_daemon.c
+Source: Root-My-Galaxy-Payloads commit a311cb88c28204c3902af9450ae4077199e4d71d
+Change: removes the bootstrap readiness marker feature (a root-write
+primitive reading /data/local/tmp/cve43499-root-marker-path with no
+validation) and restores umh_main's original three-argument check. No other
+source line is changed; see the provenance file
+app/src/main/jniLibs/arm64-v8a/libcve43499root.provenance.json.
+
 --- a/src/su_daemon.c
 +++ b/src/su_daemon.c
 @@ -29,11 +29,8 @@
