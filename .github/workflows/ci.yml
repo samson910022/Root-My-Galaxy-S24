@@ -28,6 +28,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          check-latest: true
 
       # The platform is versioned by minor now, so the package is android-37.0
       # rather than android-37. Installing the wrong one only works by relying
@@ -105,6 +106,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          check-latest: true
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4
