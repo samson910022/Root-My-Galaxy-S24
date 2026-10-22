@@ -104,7 +104,7 @@ is digest-checked and release-gated.
 
 Requirements:
 
-- JDK 21
+- JDK 21 (latest security update recommended for CVE-2026-91403 JSSE fix)
 - Android SDK Platform 37.0, Build Tools 36.0.0
 - Android NDK 28.2.13676358 (`ndk;28.2.13676358`)
 - CMake 3.22.1
