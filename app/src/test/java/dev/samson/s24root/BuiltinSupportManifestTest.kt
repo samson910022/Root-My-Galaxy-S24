@@ -10,6 +10,9 @@ import org.junit.Test
 private const val S9210_RELEASE = "6.1.145-android14-11-33419968-abS9210ZHS6DZG1"
 private const val S9210_DIGEST = "1da7c8cd12d1125453fcd9e14a458296a62e37530257d152c9d8f9a26415b9df"
 private const val KSUD_DIGEST = "8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049"
+private const val EZIF_RELEASE = "6.1.162-android14-11-34343818-abS9210ZHU6EZIF"
+private const val EZIF_EXPLOIT_DIGEST = "7b68f38d9c3836c83cfc5af3af454036fe6d3f5f455c504df5670c44c22e30cb"
+private const val EZIF_KSUD_DIGEST = "fde99b5a129e5714fe6f598cf8276c76d2cbaf1a7f4e6ce9ae69d5ebca0abe61"
 
 private fun bundledManifestJson(
     exploit: String = """{"assetPath":"payloads/p/cve.so","sha256":"$S9210_DIGEST","size":104128}""",
@@ -272,17 +275,34 @@ class BuiltinSupportManifestTest {
         val shipped = locate("src/main/assets/builtin-targets.json")
         assertNotNull("could not locate the bundled manifest from ${File(".").absolutePath}", shipped)
         val manifest = BuiltinSupportManifest.parse(shipped!!.readBytes())
-        val profile = manifest.targets.single()
-        assertEquals("e1q-S9210ZHS6DZG1", profile.profileId)
-        assertEquals(setOf("SM-S9210"), profile.models)
-        assertEquals(S9210_RELEASE, profile.supportedKernelReleases)
-        assertTrue(profile.bundled)
-        for (artifact in listOf(profile.exploit, profile.kernelSu)) {
-            val bundled = artifact as BundledArtifact
-            val file = File(shipped.parentFile, bundled.assetPath)
-            assertTrue("missing asset ${bundled.assetPath}", file.isFile)
-            assertEquals(bundled.size, file.length())
-            assertEquals(bundled.sha256, sha256OrNull(file))
+        assertEquals(2, manifest.targets.size)
+        val byId = manifest.targets.associateBy { it.profileId }
+        val dzg1 = byId["e1q-S9210ZHS6DZG1"]
+        assertNotNull("missing e1q-S9210ZHS6DZG1 entry", dzg1)
+        assertEquals(setOf("SM-S9210"), dzg1!!.models)
+        assertEquals(S9210_RELEASE, dzg1.supportedKernelReleases)
+        assertTrue(dzg1.bundled)
+        val ezif = byId["e1q-S9210ZHU6EZIF"]
+        assertNotNull("missing e1q-S9210ZHU6EZIF entry", ezif)
+        assertEquals(setOf("SM-S9210"), ezif!!.models)
+        assertEquals(setOf("6.1.162"), ezif.kernelVersions)
+        assertEquals(EZIF_RELEASE, ezif.supportedKernelReleases)
+        assertTrue(ezif.bundled)
+        val ezifExploit = ezif.exploit as BundledArtifact
+        val ezifKsud = ezif.kernelSu as BundledArtifact
+        assertEquals(EZIF_EXPLOIT_DIGEST, ezifExploit.sha256)
+        assertEquals(104128L, ezifExploit.size)
+        assertEquals(EZIF_KSUD_DIGEST, ezifKsud.sha256)
+        assertEquals(5065680L, ezifKsud.size)
+        for (profile in manifest.targets) {
+            assertTrue(profile.bundled)
+            for (artifact in listOf(profile.exploit, profile.kernelSu)) {
+                val bundled = artifact as BundledArtifact
+                val file = File(shipped.parentFile, bundled.assetPath)
+                assertTrue("missing asset ${bundled.assetPath}", file.isFile)
+                assertEquals(bundled.size, file.length())
+                assertEquals(bundled.sha256, sha256OrNull(file))
+            }
         }
     }
 

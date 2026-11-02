@@ -31,6 +31,25 @@
         "sha256": "8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049",
         "size": 4995304
       }
+    },
+    {
+      "payloadId": "e1q-S9210ZHU6EZIF",
+      "displayName": "Galaxy S24 China | Kernel 6.1.162 (S9210ZHU6EZIF) [candidate: KernelSU v3.3.1]",
+      "source": "BUILTIN",
+      "models": ["SM-S9210"],
+      "kernelVersions": ["6.1.162"],
+      "kernelReleases": ["6.1.162-android14-11-34343818-abS9210ZHU6EZIF"],
+      "requiresFreshP0Session": true,
+      "exploit": {
+        "assetPath": "payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so",
+        "sha256": "7b68f38d9c3836c83cfc5af3af454036fe6d3f5f455c504df5670c44c22e30cb",
+        "size": 104128
+      },
+      "kernelsu": {
+        "assetPath": "payloads/e1q-S9210ZHU6EZIF/ksud-e1q-S9210ZHU6EZIF-kdp",
+        "sha256": "fde99b5a129e5714fe6f598cf8276c76d2cbaf1a7f4e6ce9ae69d5ebca0abe61",
+        "size": 5065680
+      }
     }
   ]
 }
