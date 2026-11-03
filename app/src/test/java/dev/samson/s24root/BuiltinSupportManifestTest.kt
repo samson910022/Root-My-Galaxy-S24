@@ -280,8 +280,15 @@ class BuiltinSupportManifestTest {
         val dzg1 = byId["e1q-S9210ZHS6DZG1"]
         assertNotNull("missing e1q-S9210ZHS6DZG1 entry", dzg1)
         assertEquals(setOf("SM-S9210"), dzg1!!.models)
+        assertEquals(setOf("6.1.145"), dzg1.kernelVersions)
         assertEquals(S9210_RELEASE, dzg1.supportedKernelReleases)
         assertTrue(dzg1.bundled)
+        val dzg1Exploit = dzg1.exploit as BundledArtifact
+        val dzg1Ksud = dzg1.kernelSu as BundledArtifact
+        assertEquals(S9210_DIGEST, dzg1Exploit.sha256)
+        assertEquals(104128L, dzg1Exploit.size)
+        assertEquals(KSUD_DIGEST, dzg1Ksud.sha256)
+        assertEquals(4995304L, dzg1Ksud.size)
         val ezif = byId["e1q-S9210ZHU6EZIF"]
         assertNotNull("missing e1q-S9210ZHU6EZIF entry", ezif)
         assertEquals(setOf("SM-S9210"), ezif!!.models)

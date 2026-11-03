@@ -54,6 +54,8 @@ KSUD_SIZE=4995304
 # pair (a v3.3.0 fallback pair ships alongside in the payloads repo but this
 # profile does not use it). Both artifacts live only in the fork, so both
 # RAW_BASE values point there; do not use BuSung-dev for EZIF.
+# Verified 2026-11-04: both raw URLs return HTTP 200 at this commit with
+# matching SHA-256/size (see docs/SM-S9210-EZIF-validation-20261102.md).
 EZIF_PROFILE=e1q-S9210ZHU6EZIF
 EZIF_EXPLOIT_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads
 EZIF_EXPLOIT_SOURCE_COMMIT=58a677281ab2aa8ae43cfb15619628c2ab2e48b3
@@ -131,7 +133,15 @@ EZIF_KSUD_ASSET_PATH=$(read_manifest "$EZIF_PROFILE" kernelsu | cut -d' ' -f3)
 verify() {
   local file=$1 size=$2 digest=$3 label=$4
   [ -f "$file" ] || fail "$label is missing: $file"
-  [ "$(stat -c %s "$file")" = "$size" ] || fail "$label is $(stat -c %s "$file") bytes, expected $size"
+  local actual_size
+  if actual_size=$(stat -c %s "$file" 2>/dev/null); then
+    :
+  elif actual_size=$(stat -f%z "$file" 2>/dev/null); then
+    :
+  else
+    actual_size=$(wc -c <"$file" | tr -d '[:space:]')
+  fi
+  [ "$actual_size" = "$size" ] || fail "$label is $actual_size bytes, expected $size"
   local got
   got=$(sha256sum "$file" | cut -d' ' -f1)
   [ "$got" = "$digest" ] || fail "$label digest $got, expected $digest"
@@ -175,7 +185,7 @@ fetch() {
   local raw_base=$1 source_commit=$2 upstream=$3 destination=$4 size=$5 digest=$6 label=$7
   curl --fail --silent --show-error --location \
     --proto '=https' --proto-redir '=https' \
-    --retry 3 --connect-timeout 15 --max-time 300 \
+    --retry 3 --retry-all-errors --max-redirs 5 --connect-timeout 15 --max-time 300 \
     --output "$destination" \
     "$raw_base/$source_commit/$upstream" ||
     fail "$label download failed: $upstream"
@@ -186,16 +196,19 @@ fetch() {
 # installs remain separate operations, so a failure of a later one could leave
 # an earlier one updated; re-running repairs it, and the manifest digests do
 # not change in between, so a partial state is detected rather than shipped.
-fetch "$EXPLOIT_RAW_BASE" "$EXPLOIT_SOURCE_COMMIT" "$EXPLOIT_UPSTREAM" "$work/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
-fetch "$KSUD_RAW_BASE" "$KSUD_SOURCE_COMMIT" "$KSUD_UPSTREAM" "$work/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
-fetch "$EZIF_EXPLOIT_RAW_BASE" "$EZIF_EXPLOIT_SOURCE_COMMIT" "$EZIF_EXPLOIT_UPSTREAM" "$work/$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
-fetch "$EZIF_KSUD_RAW_BASE" "$EZIF_KSUD_SOURCE_COMMIT" "$EZIF_KSUD_UPSTREAM" "$work/$EZIF_KSUD_NAME" "$EZIF_KSUD_SIZE" "$EZIF_KSUD_SHA256" "EZIF ksud"
+# Temp names are profile-prefixed: both exploits share the same basename
+# (cve-2026-43499-app.so), so unprefixed $work names would collide and the
+# second fetch would clobber the first.
+fetch "$EXPLOIT_RAW_BASE" "$EXPLOIT_SOURCE_COMMIT" "$EXPLOIT_UPSTREAM" "$work/$PROFILE-$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
+fetch "$KSUD_RAW_BASE" "$KSUD_SOURCE_COMMIT" "$KSUD_UPSTREAM" "$work/$PROFILE-$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
+fetch "$EZIF_EXPLOIT_RAW_BASE" "$EZIF_EXPLOIT_SOURCE_COMMIT" "$EZIF_EXPLOIT_UPSTREAM" "$work/$EZIF_PROFILE-$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
+fetch "$EZIF_KSUD_RAW_BASE" "$EZIF_KSUD_SOURCE_COMMIT" "$EZIF_KSUD_UPSTREAM" "$work/$EZIF_PROFILE-$EZIF_KSUD_NAME" "$EZIF_KSUD_SIZE" "$EZIF_KSUD_SHA256" "EZIF ksud"
 
-install -m 0644 "$work/$EXPLOIT_NAME" "$ASSET_DIR/$EXPLOIT_NAME"
-install -m 0644 "$work/$KSUD_NAME" "$ASSET_DIR/$KSUD_NAME"
-mkdir -p "$EZIF_ASSET_DIR"
-install -m 0644 "$work/$EZIF_EXPLOIT_NAME" "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME"
-install -m 0644 "$work/$EZIF_KSUD_NAME" "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME"
+mkdir -p "$ASSET_DIR" "$EZIF_ASSET_DIR"
+install -m 0644 "$work/$PROFILE-$EXPLOIT_NAME" "$ASSET_DIR/$EXPLOIT_NAME"
+install -m 0644 "$work/$PROFILE-$KSUD_NAME" "$ASSET_DIR/$KSUD_NAME"
+install -m 0644 "$work/$EZIF_PROFILE-$EZIF_EXPLOIT_NAME" "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME"
+install -m 0644 "$work/$EZIF_PROFILE-$EZIF_KSUD_NAME" "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME"
 
 verify "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
 verify "$ASSET_DIR/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud

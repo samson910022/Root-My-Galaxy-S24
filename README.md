@@ -30,6 +30,8 @@ install it, and read [Known limitations](#known-limitations) and
 | --- | ---: | --- |
 | `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | 104128 | `1da7c8cd…15b9df` |
 | `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4995304 | `88748945…dc15049` (EXPERIMENTAL v3.3.0, see below) |
+| `app/src/main/assets/payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so` | 104128 | `7b68f38d…22e30cb` (candidate, EZIF only) |
+| `app/src/main/assets/payloads/e1q-S9210ZHU6EZIF/ksud-e1q-S9210ZHU6EZIF-kdp` | 5065680 | `fde99b5a…ca0abe61` (candidate KernelSU v3.3.1, EZIF only) |
 | `app/src/main/jniLibs/arm64-v8a/libcve43499root.so` | 26040 | `b6395159…94b5bb1f` |
 
 > EXPERIMENTAL: this is the e1q v3.3.0 Phase-D pair from Payloads commit
@@ -184,7 +186,10 @@ rule, and verifies the result.
 experimental v3.3.0 `ksud` from `BuSung-dev/Root-My-Galaxy-Payloads` at pinned
 commit `8236c84`. It verifies both against the manifest before installing them;
 the v3.3.0 binary is not currently published on Payloads `main` because broader
-acceptance checks remain pending.
+acceptance checks remain pending. The second (candidate) profile,
+`e1q-S9210ZHU6EZIF` (EZIF / KernelSU v3.3.1), is fetched from the same fork at
+pinned commit `58a67728` (`feature/e1q-S9210ZHU6EZIF-port`, fork-only);
+see `docs/SM-S9210-EZIF-validation-20261102.md` for its validation scope.
 
 Refreshing the assets (the default mode) needs both repositories to stay
 publicly readable at those commits. The pinned exploit is not on upstream
