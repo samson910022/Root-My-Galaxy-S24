@@ -174,4 +174,8 @@
         <item quantity="other">Diese Durchläufe und ihre Protokolle werden unwiderruflich gelöscht.</item>
     </plurals>
     <string name="install_already_running">Es läuft bereits eine Installation. Bitte warte, bis sie beendet ist.</string>
+    <string name="repo_candidate_optin_required">Dieses Gerät passt zum Kandidatenprofil %1$s, das noch nicht für die Veröffentlichung freigegeben ist. Aktiviere Kandidatenprofile in den Einstellungen, um fortzufahren.</string>
+    <string name="candidate_profiles">Kandidatenprofile</string>
+    <string name="candidate_profiles_description">Experimentelle Kandidaten-Payloads zulassen. Standardmäßig aus.</string>
+    <string name="install_confirm_candidate_note">Dieses Gerät passt zu einem Kandidatenprofil, das noch nicht freigegeben ist. Nur zur Validierung fortfahren.</string>
 </resources>

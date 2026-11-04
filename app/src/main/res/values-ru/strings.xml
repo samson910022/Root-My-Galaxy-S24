@@ -173,4 +173,8 @@
     </plurals>
     <string name="history_delete">Удалить</string>
     <string name="install_already_running">Установка уже выполняется. Дождитесь её завершения.</string>
+    <string name="repo_candidate_optin_required">Это устройство соответствует профилю-кандидату %1$s, ещё не допущенному к выпуску. Чтобы продолжить, включите профили-кандидаты в настройках.</string>
+    <string name="candidate_profiles">Профили-кандидаты</string>
+    <string name="candidate_profiles_description">Разрешить экспериментальные payload кандидатов. По умолчанию выключено.</string>
+    <string name="install_confirm_candidate_note">Это устройство соответствует ещё не допущенному профилю-кандидату. Продолжайте только для проверки.</string>
 </resources>

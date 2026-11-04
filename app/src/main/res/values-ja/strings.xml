@@ -75,4 +75,8 @@
     </plurals>
     <string name="history_delete">削除</string>
     <string name="install_already_running">インストールはすでに実行中です。終了までお待ちください。</string>
+    <string name="repo_candidate_optin_required">このデバイスは候補プロファイル%1$sに一致しますが、まだリリース承認されていません。続行するには設定で候補プロファイルを有効にしてください。</string>
+    <string name="candidate_profiles">候補プロファイル</string>
+    <string name="candidate_profiles_description">実験的な候補ペイロードを許可する。既定ではオフ。</string>
+    <string name="install_confirm_candidate_note">このデバイスは未承認の候補プロファイルに一致します。検証目的でのみ続行してください。</string>
 </resources>

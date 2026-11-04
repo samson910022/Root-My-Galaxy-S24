@@ -59,10 +59,18 @@ class PayloadRepository(
     /**
      * Bundled profiles are consulted first and the online feed is loaded lazily,
      * so the device this fork targets resolves with no connectivity at all.
-     * The decision itself is the pure [resolveProfile].
+     * The decision itself is the pure [resolveProfile]. Candidate profiles only
+     * resolve when the user has opted in via Settings.
      */
     fun resolveTarget(snapshot: DeviceSnapshot): TargetProfile =
-        when (val resolution = resolveProfile(snapshot, loadBuiltinTargets(), ::loadTargets)) {
+        when (
+            val resolution = resolveProfile(
+                snapshot,
+                loadBuiltinTargets(),
+                ::loadTargets,
+                allowCandidates = AppPreferences.allowCandidateProfiles(context),
+            )
+        ) {
             is Resolution.Found -> resolution.profile
             is Resolution.Failed -> error(messageFor(resolution.failure, snapshot))
         }
@@ -72,6 +80,10 @@ class PayloadRepository(
             R.string.repo_firmware_unsupported,
             failure.supportedRelease,
             snapshot.kernelRelease,
+        )
+        is ResolutionFailure.CandidateRequiresOptIn -> context.getString(
+            R.string.repo_candidate_optin_required,
+            failure.profileId,
         )
         ResolutionFailure.ReservedModelWithoutBundledPayload ->
             context.getString(R.string.repo_builtin_unavailable)
@@ -107,6 +119,11 @@ class PayloadRepository(
     }
 
     private fun requireCompatible(profile: TargetProfile) {
+        // Defense in depth: automatic resolution already gates candidates, but
+        // acquire is also reachable with a caller-picked profile.
+        if (isCandidateProfile(profile) && !AppPreferences.allowCandidateProfiles(context)) {
+            error(context.getString(R.string.repo_candidate_optin_required, profile.profileId))
+        }
         val snapshot = deviceSnapshot()
         if (profile.passesFirmwareGate(snapshot)) return
         error(

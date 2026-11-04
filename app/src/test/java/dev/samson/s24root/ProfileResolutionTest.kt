@@ -7,6 +7,7 @@ import org.junit.Test
 
 private const val S9210_RELEASE = "6.1.145-android14-11-33419968-abS9210ZHS6DZG1"
 private const val S9280_RELEASE = "6.1.145-android14-11-33419968-abS9280ZCS6DZF2"
+private const val EZIF_RELEASE = "6.1.162-android14-11-34343818-abS9210ZHU6EZIF"
 
 private fun snapshot(model: String, kernelRelease: String) = DeviceSnapshot(
     manufacturer = "samsung",
@@ -34,6 +35,16 @@ private fun bundled(s9210: Boolean = true) = listOf(
         kernelSu = BundledArtifact("payloads/p/ksud", "8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049", 4995304),
     ),
 ).filter { s9210 }
+
+private fun candidateProfile() = TargetProfile(
+    profileId = "e1q-S9210ZHU6EZIF",
+    displayName = "Galaxy S24 China [candidate]",
+    models = setOf("SM-S9210"),
+    kernelVersions = setOf("6.1.162"),
+    kernelReleases = setOf(EZIF_RELEASE),
+    exploit = BundledArtifact("payloads/e/cve.so", "2dc137cc1dca72f896ee16347f3137dd0c521ecdee56e1922fb58e733e9b4059", 104128),
+    kernelSu = BundledArtifact("payloads/e/ksud", "8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049", 4995304),
+)
 
 private fun remote(vararg models: String) = models.map { model ->
     TargetProfile(
@@ -165,5 +176,77 @@ class ProfileResolutionTest {
                 (resolution as Resolution.Failed).failure,
             )
         }
+    }
+
+    @Test
+    fun candidateProfileResolvesWhenOptedInWithoutLoadingTheRemoteFeed() {
+        var remoteLoads = 0
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+            bundled = bundled() + candidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+            allowCandidates = true,
+        )
+        assertTrue(resolution is Resolution.Found)
+        assertEquals("e1q-S9210ZHU6EZIF", (resolution as Resolution.Found).profile.profileId)
+        assertEquals("the online feed must not be touched at all", 0, remoteLoads)
+    }
+
+    @Test
+    fun candidateProfileWithoutOptInReportsOptInRatherThanAFirmwareMismatch() {
+        var remoteLoads = 0
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+            bundled = bundled() + candidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+        )
+        assertTrue(resolution is Resolution.Failed)
+        val failure = (resolution as Resolution.Failed).failure
+        assertTrue("expected CandidateRequiresOptIn, got $failure", failure is ResolutionFailure.CandidateRequiresOptIn)
+        assertEquals("e1q-S9210ZHU6EZIF", (failure as ResolutionFailure.CandidateRequiresOptIn).profileId)
+        assertEquals("the reserved model must not reach the online feed", 0, remoteLoads)
+    }
+
+    @Test
+    fun stableProfileStillResolvesWithDefaultFlagWhenACandidateIsPresent() {
+        var remoteLoads = 0
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", S9210_RELEASE),
+            bundled = bundled() + candidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+        )
+        assertTrue(resolution is Resolution.Found)
+        assertEquals("e1q-S9210ZHS6DZG1", (resolution as Resolution.Found).profile.profileId)
+        assertEquals(0, remoteLoads)
+    }
+
+    @Test
+    fun remoteCandidateEntryNeverResolvesWithoutOptIn() {
+        // A remote entry reusing a candidate profile id must not resolve while
+        // opt-in is off, even for a non-reserved model whose firmware matches.
+        val candidateRemote = TargetProfile(
+            profileId = "e1q-S9210ZHU6EZIF",
+            displayName = "Remote candidate",
+            models = setOf("SM-S9280"),
+            kernelVersions = setOf("6.1.145"),
+            exploit = RemoteArtifact("https://example.invalid/e", 1),
+            kernelSu = RemoteArtifact("https://example.invalid/k", 1),
+        )
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9280", S9280_RELEASE),
+            bundled = bundled(),
+            remote = { listOf(candidateRemote) },
+        )
+        assertTrue("expected no resolution, got $resolution", resolution is Resolution.Failed)
+        assertEquals(ResolutionFailure.NoProfile, (resolution as Resolution.Failed).failure)
     }
 }

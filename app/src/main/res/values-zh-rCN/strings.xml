@@ -61,4 +61,8 @@
     </plurals>
     <string name="history_delete">删除</string>
     <string name="install_already_running">已有一个安装任务正在进行中，请等待其结束。</string>
+    <string name="repo_candidate_optin_required">此设备匹配候选配置 %1$s，该配置尚未获准发布。如需继续，请在设置中启用候选配置。</string>
+    <string name="candidate_profiles">候选配置</string>
+    <string name="candidate_profiles_description">允许实验性候选 payload。默认关闭。</string>
+    <string name="install_confirm_candidate_note">此设备匹配尚未获准发布的候选配置，仅建议为验证目的继续。</string>
 </resources>

@@ -162,4 +162,8 @@
     </plurals>
     <string name="history_delete">Xóa</string>
     <string name="install_already_running">Đã có tiến trình cài đặt đang chạy. Hãy đợi nó kết thúc.</string>
+    <string name="repo_candidate_optin_required">Thiết bị này khớp với hồ sơ ứng viên %1$s, chưa được chấp thuận phát hành. Hãy bật hồ sơ ứng viên trong Cài đặt để tiếp tục.</string>
+    <string name="candidate_profiles">Hồ sơ ứng viên</string>
+    <string name="candidate_profiles_description">Cho phép payload ứng viên thử nghiệm. Mặc định tắt.</string>
+    <string name="install_confirm_candidate_note">Thiết bị này khớp với hồ sơ ứng viên chưa được phê duyệt. Chỉ tiếp tục để kiểm chứng.</string>
 </resources>

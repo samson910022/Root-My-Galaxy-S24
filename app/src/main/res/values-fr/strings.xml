@@ -168,4 +168,8 @@
     </plurals>
     <string name="history_delete">Supprimer</string>
     <string name="install_already_running">Une installation est déjà en cours. Attendez qu\'elle se termine.</string>
+    <string name="repo_candidate_optin_required">Cet appareil correspond au profil candidat %1$s, pas encore validé pour la publication. Activez les profils candidats dans les réglages pour continuer.</string>
+    <string name="candidate_profiles">Profils candidats</string>
+    <string name="candidate_profiles_description">Autoriser les payloads candidats expérimentaux. Désactivé par défaut.</string>
+    <string name="install_confirm_candidate_note">Cet appareil correspond à un profil candidat non encore validé. Ne continuez que pour la validation.</string>
 </resources>

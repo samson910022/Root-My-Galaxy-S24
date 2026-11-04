@@ -172,4 +172,8 @@
     </plurals>
     <string name="history_delete">O\'chirish</string>
     <string name="install_already_running">O\'rnatish allaqachon davom etmoqda. Tugashini kutib turing.</string>
+    <string name="repo_candidate_optin_required">Bu qurilma hali chiqarishga tasdiqlanmagan nomzod profil %1$s ga mos keladi. Davom etish uchun Sozlamalarda nomzod profillarni yoqing.</string>
+    <string name="candidate_profiles">Nomzod profillar</string>
+    <string name="candidate_profiles_description">Eksperimental nomzod payload\'larga ruxsat berish. Standartda o\'chiq.</string>
+    <string name="install_confirm_candidate_note">Bu qurilma hali tasdiqlanmagan nomzod profilga mos keladi. Faqat tekshirish uchun davom eting.</string>
 </resources>

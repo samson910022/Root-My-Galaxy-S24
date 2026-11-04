@@ -162,4 +162,8 @@
     </plurals>
     <string name="history_delete">刪除</string>
     <string name="install_already_running">已有一個安裝工作正在進行中，請等待其結束。</string>
+    <string name="repo_candidate_optin_required">此裝置符合候選設定 %1$s，該設定尚未核准發佈。如需繼續，請在設定中啟用候選設定。</string>
+    <string name="candidate_profiles">候選設定</string>
+    <string name="candidate_profiles_description">允許實驗性候選 payload。預設為關閉。</string>
+    <string name="install_confirm_candidate_note">此裝置符合尚未核准發佈的候選設定，僅建議為驗證目的繼續。</string>
 </resources>

@@ -76,4 +76,8 @@
     </plurals>
     <string name="history_delete">삭제</string>
     <string name="install_already_running">이미 설치가 진행 중입니다. 끝날 때까지 기다려 주세요.</string>
+    <string name="repo_candidate_optin_required">이 기기는 아직 릴리스 승인이 되지 않은 후보 프로필 %1$s과 일치합니다. 계속하려면 설정에서 후보 프로필을 활성화하세요.</string>
+    <string name="candidate_profiles">후보 프로필</string>
+    <string name="candidate_profiles_description">실험적인 후보 페이로드를 허용합니다. 기본값은 꺼짐.</string>
+    <string name="install_confirm_candidate_note">이 기기는 아직 승인되지 않은 후보 프로필과 일치합니다. 검증 목적으로만 계속하세요.</string>
 </resources>

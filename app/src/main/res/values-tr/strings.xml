@@ -162,4 +162,8 @@
     </plurals>
     <string name="history_delete">Sil</string>
     <string name="install_already_running">Zaten bir kurulum çalışıyor. Bitmesini bekleyin.</string>
+    <string name="repo_candidate_optin_required">Bu cihaz, henüz yayına onaylanmamış aday profil %1$s ile eşleşiyor. Devam etmek için Ayarlar\'da aday profilleri etkinleştirin.</string>
+    <string name="candidate_profiles">Aday profiller</string>
+    <string name="candidate_profiles_description">Deneysel aday payload\'lara izin ver. Varsayılan olarak kapalı.</string>
+    <string name="install_confirm_candidate_note">Bu cihaz henüz onaylanmamış bir aday profille eşleşiyor. Yalnızca doğrulama için devam edin.</string>
 </resources>

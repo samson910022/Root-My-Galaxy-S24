@@ -313,6 +313,23 @@ class BuiltinSupportManifestTest {
         }
     }
 
+    @Test
+    fun everyNonStableBundledPayloadIsAPinnedCandidate() {
+        // The candidate set must stay pinned to the manifest: any bundled
+        // payload beyond the known-stable DZG1 entry has to be an opt-in
+        // candidate, so a newly added payload cannot resolve by default.
+        val shipped = locate("src/main/assets/builtin-targets.json")
+        assertNotNull("could not locate the bundled manifest from ${File(".").absolutePath}", shipped)
+        val manifest = BuiltinSupportManifest.parse(shipped!!.readBytes())
+        for (profile in manifest.targets) {
+            if (profile.profileId == "e1q-S9210ZHS6DZG1") continue
+            assertTrue(
+                "bundled payload ${profile.profileId} must be pinned in CANDIDATE_PROFILE_IDS",
+                profile.profileId in CANDIDATE_PROFILE_IDS,
+            )
+        }
+    }
+
     /** Walks up from the working directory so the test does not depend on it. */
     private fun locate(relative: String): File? {
         var directory: File? = File(".").absoluteFile

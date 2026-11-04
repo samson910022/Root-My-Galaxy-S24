@@ -79,6 +79,7 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
@@ -156,6 +157,7 @@ class MainActivity : ComponentActivity() {
     private var accentColor by mutableStateOf(AccentColor.Dynamic)
     private var themeMode by mutableStateOf(AppThemeMode.System)
     private var shizukuMode by mutableStateOf(false)
+    private var candidateProfiles by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -164,6 +166,7 @@ class MainActivity : ComponentActivity() {
         accentColor = AppPreferences.accentColor(this)
         themeMode = AppPreferences.themeMode(this)
         shizukuMode = AppPreferences.shizukuMode(this)
+        candidateProfiles = AppPreferences.allowCandidateProfiles(this)
         setContent {
             RootMyGalaxyTheme(accentColor = accentColor, themeMode = themeMode) {
                 RootApp(
@@ -171,6 +174,7 @@ class MainActivity : ComponentActivity() {
                     accentColor = accentColor,
                     themeMode = themeMode,
                     shizukuMode = shizukuMode,
+                    candidateProfiles = candidateProfiles,
                     onAccentColorChanged = { color ->
                         AppPreferences.setAccentColor(this, color)
                         accentColor = color
@@ -182,6 +186,10 @@ class MainActivity : ComponentActivity() {
                     onShizukuModeChanged = { enabled ->
                         AppPreferences.setShizukuMode(this, enabled)
                         shizukuMode = enabled
+                    },
+                    onCandidateProfilesChanged = { enabled ->
+                        AppPreferences.setAllowCandidateProfiles(this, enabled)
+                        candidateProfiles = enabled
                     },
                     openInstaller = {
                         startActivity(
@@ -251,15 +259,33 @@ private fun openShizukuManager(context: Context) {
     }
 }
 
+/**
+ * Whether this device passes a candidate profile's exact firmware gate.
+ * Read from the bundled manifest only, so the install confirmation can warn
+ * without touching the network.
+ */
+private fun deviceMatchesCandidateProfile(context: Context, device: DeviceSnapshot): Boolean {
+    return try {
+        val bytes = context.assets.open("builtin-targets.json").use { it.readBytes() }
+        BuiltinSupportManifest.parse(bytes).targets
+            .filter(::isCandidateProfile)
+            .any { it.passesFirmwareGate(device) }
+    } catch (_: Exception) {
+        false
+    }
+}
+
 @Composable
 private fun RootApp(
     installViewModel: InstallViewModel,
     accentColor: AccentColor,
     themeMode: AppThemeMode,
     shizukuMode: Boolean,
+    candidateProfiles: Boolean,
     onAccentColorChanged: (AccentColor) -> Unit,
     onThemeModeChanged: (AppThemeMode) -> Unit,
     onShizukuModeChanged: (Boolean) -> Unit,
+    onCandidateProfilesChanged: (Boolean) -> Unit,
     openInstaller: () -> Unit,
 ) {
     val installState by installViewModel.state.collectAsStateWithLifecycle()
@@ -307,6 +333,9 @@ private fun RootApp(
     LaunchedEffect(Unit) { checkForUpdate() }
 
     if (showInstallConfirmation) {
+        // Warn when this device would run a not-yet-accepted candidate payload.
+        // Resolved from the bundled manifest only, so no network is touched.
+        val candidateDevice = remember(device) { deviceMatchesCandidateProfile(context, device) }
         AlertDialog(
             onDismissRequest = { showInstallConfirmation = false },
             icon = { Icon(Icons.Rounded.Security, contentDescription = null) },
@@ -314,7 +343,14 @@ private fun RootApp(
                 DialogDimAmount(0.34f)
                 Text(stringResource(R.string.install_confirm_title))
             },
-            text = { Text(stringResource(R.string.install_confirm_body)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.install_confirm_body))
+                    if (candidateDevice) {
+                        Text(stringResource(R.string.install_confirm_candidate_note))
+                    }
+                }
+            },
             confirmButton = {
                 FilledTonalButton(onClick = {
                     clickHaptic(view)
@@ -381,12 +417,14 @@ private fun RootApp(
                     accentColor = accentColor,
                     themeMode = themeMode,
                     shizukuMode = shizukuMode,
+                    candidateProfiles = candidateProfiles,
                     updateStatus = updateStatus,
                     onCheckForUpdate = checkForUpdate,
                     onStartDownload = startDownload,
                     onAccentColorChanged = onAccentColorChanged,
                     onThemeModeChanged = onThemeModeChanged,
                     onShizukuModeChanged = onShizukuModeChanged,
+                    onCandidateProfilesChanged = onCandidateProfilesChanged,
                 )
             }
         }
@@ -1380,12 +1418,14 @@ private fun SettingsPage(
     accentColor: AccentColor,
     themeMode: AppThemeMode,
     shizukuMode: Boolean,
+    candidateProfiles: Boolean,
     updateStatus: UpdateStatus,
     onCheckForUpdate: () -> Unit,
     onStartDownload: (UpdateInfo) -> Unit,
     onAccentColorChanged: (AccentColor) -> Unit,
     onThemeModeChanged: (AppThemeMode) -> Unit,
     onShizukuModeChanged: (Boolean) -> Unit,
+    onCandidateProfilesChanged: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -1513,7 +1553,7 @@ private fun SettingsPage(
                     title = stringResource(R.string.shizuku_mode),
                     description = stringResource(R.string.shizuku_mode_description),
                     checked = shizukuMode,
-                    position = SettingsCardPosition.Bottom,
+                    position = SettingsCardPosition.Middle,
                     onCheckedChange = { enabled ->
                         clickHaptic(view)
                         if (!enabled) {
@@ -1531,6 +1571,17 @@ private fun SettingsPage(
                                 }
                             }
                         }
+                    },
+                )
+                SettingsSwitchCard(
+                    icon = Icons.Rounded.Science,
+                    title = stringResource(R.string.candidate_profiles),
+                    description = stringResource(R.string.candidate_profiles_description),
+                    checked = candidateProfiles,
+                    position = SettingsCardPosition.Bottom,
+                    onCheckedChange = { enabled ->
+                        clickHaptic(view)
+                        onCandidateProfilesChanged(enabled)
                     },
                 )
             }
