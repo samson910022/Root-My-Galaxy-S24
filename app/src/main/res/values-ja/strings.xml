@@ -28,7 +28,7 @@
     <string name="repo_staging">同梱の%1$sを展開中</string>
     <string name="repo_staged_current">同梱の%1$sは検証済み</string>
     <string name="repo_digest_mismatch">%1$sが同梱マニフェストのダイジェストと一致しません</string>
-    <string name="repo_firmware_unsupported">同梱payloadはファームウェア %1$s 用にビルドされていますが、このデバイスは %2$s を報告しています。カーネルオフセットはファームウェア固有のため、別のビルドでは実行されません。</string>
+    <string name="repo_firmware_unsupported">同梱payloadはファームウェア（%1$s のいずれか）用にビルドされていますが、このデバイスは %2$s を報告しています。カーネルオフセットはファームウェア固有のため、別のビルドでは実行されません。</string>
     <string name="repo_builtin_unavailable">このモデル用の同梱payloadがアプリに含まれていないため、オンラインフィードからは取得されません。アプリを再インストールするか、そこで公開されているプロファイルを使用してください。</string>
     <string name="open_github">GitHubを開く</string>
     <string name="github_card_title">Root My Galaxyについて</string>

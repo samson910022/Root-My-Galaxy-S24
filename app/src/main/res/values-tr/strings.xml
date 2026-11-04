@@ -94,7 +94,7 @@
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_builtin_unavailable">Bu modele ait paket içindeki payload uygulamada yok, bu nedenle çevrimiçi akıştan alınmayacak. Uygulamayı yeniden yükleyin veya akışta yayınlanan bir profil kullanın.</string>
     <string name="repo_no_profile">Bu model ve kernel sürümünü destekleyen uyumlu payload bulunamadı</string>
-    <string name="repo_firmware_unsupported">Paket içindeki payload %1$s yazılımı için derlenmiştir, ancak bu cihaz %2$s bildiriyor. Çekirdek ofsetleri yazılıma özeldir, bu nedenle farklı bir derlemede çalışmaz.</string>
+    <string name="repo_firmware_unsupported">Paket içindeki payload şu yazılımlardan biri için derlenmiştir: %1$s, ancak bu cihaz %2$s bildiriyor. Çekirdek ofsetleri yazılıma özeldir, bu nedenle farklı bir derlemede çalışmaz.</string>
     <string name="repo_downloading">%1$s indiriliyor</string>
     <string name="repo_staging">Paket içindeki %1$s açılıyor</string>
     <string name="repo_staged_current">Paket içindeki %1$s zaten doğrulandı</string>

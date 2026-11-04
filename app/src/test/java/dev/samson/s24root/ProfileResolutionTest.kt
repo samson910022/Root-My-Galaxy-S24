@@ -8,6 +8,7 @@ import org.junit.Test
 private const val S9210_RELEASE = "6.1.145-android14-11-33419968-abS9210ZHS6DZG1"
 private const val S9280_RELEASE = "6.1.145-android14-11-33419968-abS9280ZCS6DZF2"
 private const val EZIF_RELEASE = "6.1.162-android14-11-34343818-abS9210ZHU6EZIF"
+private const val UNKNOWN_S9210_RELEASE = "6.1.200-android14-11-99999999-abS9210ZHS6XXXX"
 
 private fun snapshot(model: String, kernelRelease: String) = DeviceSnapshot(
     manufacturer = "samsung",
@@ -101,8 +102,50 @@ class ProfileResolutionTest {
         assertTrue(resolution is Resolution.Failed)
         val failure = (resolution as Resolution.Failed).failure
         assertTrue(failure is ResolutionFailure.WrongFirmware)
-        assertEquals(S9210_RELEASE, (failure as ResolutionFailure.WrongFirmware).supportedRelease)
+        assertEquals(S9210_RELEASE, (failure as ResolutionFailure.WrongFirmware).supportedReleases)
         assertEquals(0, remoteLoads)
+    }
+
+    @Test
+    fun unknownFirmwareWithOptInListsBothBundledReleasesWithoutLoadingTheFeed() {
+        var remoteLoads = 0
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", UNKNOWN_S9210_RELEASE),
+            bundled = bundled() + candidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+            allowCandidates = true,
+        )
+        assertTrue(resolution is Resolution.Failed)
+        val failure = (resolution as Resolution.Failed).failure
+        assertTrue("expected WrongFirmware, got $failure", failure is ResolutionFailure.WrongFirmware)
+        val releases = (failure as ResolutionFailure.WrongFirmware).supportedReleases
+        assertEquals(listOf(S9210_RELEASE, EZIF_RELEASE).sorted().joinToString(), releases)
+        assertTrue(releases.contains(S9210_RELEASE))
+        assertTrue(releases.contains(EZIF_RELEASE))
+        assertEquals(0, remoteLoads)
+    }
+
+    @Test
+    fun unknownFirmwareWithoutOptInListsOnlyTheStableRelease() {
+        var remoteLoads = 0
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", UNKNOWN_S9210_RELEASE),
+            bundled = bundled() + candidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+        )
+        assertTrue(resolution is Resolution.Failed)
+        val failure = (resolution as Resolution.Failed).failure
+        assertTrue("expected WrongFirmware, got $failure", failure is ResolutionFailure.WrongFirmware)
+        val releases = (failure as ResolutionFailure.WrongFirmware).supportedReleases
+        assertEquals(S9210_RELEASE, releases)
+        assertFalse(releases.contains(EZIF_RELEASE))
+        assertEquals("the reserved model must not reach the online feed", 0, remoteLoads)
     }
 
     @Test

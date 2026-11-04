@@ -78,7 +78,7 @@ class PayloadRepository(
     private fun messageFor(failure: ResolutionFailure, snapshot: DeviceSnapshot): String = when (failure) {
         is ResolutionFailure.WrongFirmware -> context.getString(
             R.string.repo_firmware_unsupported,
-            failure.supportedRelease,
+            failure.supportedReleases,
             snapshot.kernelRelease,
         )
         is ResolutionFailure.CandidateRequiresOptIn -> context.getString(

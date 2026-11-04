@@ -120,7 +120,7 @@
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_builtin_unavailable">Die mitgelieferte Payload für dieses Modell fehlt in der App und wird daher nicht aus dem Online-Feed geladen. Installieren Sie die App neu oder verwenden Sie ein dort veröffentlichtes Profil.</string>
     <string name="repo_no_profile">Keine kompatible Payload für dieses Modell und diese Kernel-Version gefunden</string>
-    <string name="repo_firmware_unsupported">Die mitgelieferte Payload ist für die Firmware %1$s gebaut, aber dieses Gerät meldet %2$s. Die Kernel-Offsets sind firmwareabhängig, daher läuft sie nicht auf einem anderen Build.</string>
+    <string name="repo_firmware_unsupported">Die mitgelieferte Payload ist für eine der Firmwares gebaut: %1$s, aber dieses Gerät meldet %2$s. Die Kernel-Offsets sind firmwareabhängig, daher läuft sie nicht auf einem anderen Build.</string>
     <string name="repo_downloading">Download von %1$s</string>
     <string name="repo_staging">Die mitgelieferte Komponente %1$s wird entpackt</string>
     <string name="repo_staged_current">Die mitgelieferte Komponente %1$s wurde bereits verifiziert</string>

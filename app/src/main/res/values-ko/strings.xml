@@ -29,7 +29,7 @@
     <string name="repo_staging">내장된 %1$s 압축 해제 중</string>
     <string name="repo_staged_current">내장된 %1$s은(는) 이미 검증되었습니다</string>
     <string name="repo_digest_mismatch">%1$s이(가) 내장 매니페스트의 다이제스트와 일치하지 않습니다</string>
-    <string name="repo_firmware_unsupported">내장 payload는 펌웨어 %1$s용으로 빌드되었지만 이 기기는 %2$s을(를) 보고합니다. 커널 오프셋은 펌웨어에 따라 다르므로 다른 빌드에서는 실행되지 않습니다.</string>
+    <string name="repo_firmware_unsupported">내장 payload는 펌웨어(%1$s 중 하나)용으로 빌드되었지만 이 기기는 %2$s을(를) 보고합니다. 커널 오프셋은 펌웨어에 따라 다르므로 다른 빌드에서는 실행되지 않습니다.</string>
     <string name="repo_builtin_unavailable">이 모델용 내장 payload가 앱에 없어서 온라인 피드에서 가져오지 않습니다. 앱을 다시 설치하거나 피드에 게시된 프로필을 사용하세요.</string>
     <string name="open_github">GitHub 열기</string>
     <string name="github_card_title">Root My Galaxy 알아보기</string>

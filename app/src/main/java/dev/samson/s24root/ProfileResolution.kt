@@ -13,7 +13,7 @@ internal fun isReservedModel(model: String): Boolean =
 /** Why [resolveProfile] could not pick a payload, or null when it picked one. */
 internal sealed interface ResolutionFailure {
     /** The device matches a bundled profile's model but not its pinned firmware. */
-    data class WrongFirmware(val supportedRelease: String) : ResolutionFailure
+    data class WrongFirmware(val supportedReleases: String) : ResolutionFailure
 
     /**
      * The device matches a candidate profile's exact firmware, but candidate
@@ -82,9 +82,14 @@ internal fun resolveProfile(
     // Same model, different firmware: say so rather than probing with offsets
     // derived from another build. Without opt-in only stable profiles count
     // here, so a gated-off candidate never supplies the mismatch text; with
-    // opt-in the full bundled list counts and the first device match wins.
-    (if (allowCandidates) bundled else stable).firstOrNull { it.matchesDevice(snapshot) }?.let {
-        return Resolution.Failed(ResolutionFailure.WrongFirmware(it.supportedKernelReleases))
+    // opt-in the full bundled list counts. All same-model releases are
+    // listed (sorted, comma-joined), so an unknown SM-S9210 build sees both
+    // DZG1 and EZIF instead of only the first match.
+    val relevant = if (allowCandidates) bundled else stable
+    val sameModel = relevant.filter { it.matchesDevice(snapshot) }
+    if (sameModel.isNotEmpty()) {
+        val releases = sameModel.flatMap { it.kernelReleases }.distinct().sorted().joinToString()
+        return Resolution.Failed(ResolutionFailure.WrongFirmware(releases))
     }
     // A reserved model is served only by the bundled manifest, so once the
     // bundled checks above have not answered for it, stop. An empty or

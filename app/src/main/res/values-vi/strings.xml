@@ -94,7 +94,7 @@
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_builtin_unavailable">Payload đi kèm cho mẫu máy này không có trong ứng dụng, nên nó sẽ không được tải từ nguồn trực tuyến. Hãy cài đặt lại ứng dụng hoặc dùng hồ sơ được công bố ở đó.</string>
     <string name="repo_no_profile">Không có payload tương thích nào hỗ trợ mẫu và phiên bản kernel này</string>
-    <string name="repo_firmware_unsupported">Payload đi kèm được xây dựng cho firmware %1$s, nhưng thiết bị này báo cáo %2$s. Phần bù kernel dành riêng cho firmware, nên nó sẽ không chạy trên bản dựng khác.</string>
+    <string name="repo_firmware_unsupported">Payload đi kèm được xây dựng cho một trong các firmware: %1$s, nhưng thiết bị này báo cáo %2$s. Phần bù kernel dành riêng cho firmware, nên nó sẽ không chạy trên bản dựng khác.</string>
     <string name="repo_downloading">Đang tải %1$s</string>
     <string name="repo_staging">Đang giải nén %1$s đi kèm</string>
     <string name="repo_staged_current">%1$s đi kèm đã được xác minh</string>
