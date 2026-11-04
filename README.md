@@ -188,7 +188,10 @@ commit `8236c84`. It verifies both against the manifest before installing them;
 the v3.3.0 binary is not currently published on Payloads `main` because broader
 acceptance checks remain pending. The second (candidate) profile,
 `e1q-S9210ZHU6EZIF` (EZIF / KernelSU v3.3.1), is fetched from the same fork at
-pinned commit `58a67728` (`feature/e1q-S9210ZHU6EZIF-port`, fork-only);
+pinned commit `58a67728` (`feature/e1q-S9210ZHU6EZIF-port`, fork-only) —
+that snapshot is the validated/released one for this PR even though Payloads
+PR #10 head has since moved; it resolves only with the Settings
+candidate-profiles opt-in enabled (default off);
 see `docs/SM-S9210-EZIF-validation-20261102.md` for its validation scope.
 
 Refreshing the assets (the default mode) needs both repositories to stay

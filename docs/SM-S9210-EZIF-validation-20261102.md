@@ -7,11 +7,22 @@
 
 One read-only post-install evidence collection succeeded on a physical
 SM-S9210 on 2026-11-03 (~05:45–05:46 +08:00,
-`2026-11-02T21:45:04Z–21:46:53Z` UTC). This validates the installed state
-of the exact e1q candidate pair, not repeatability or the full
-post-install regression suite. The collection ran read-only checks via
+`2026-11-02T21:45:04Z–21:46:53Z` UTC). The collection ran read-only checks via
 `ssh <host> "adb ..."` and did not reboot, re-run the exploit, or
 otherwise modify the phone.
+
+What this established (single run only — not repeatability, not the full
+post-install regression suite): bootstrap root (`su -c id` → `uid=0`),
+SELinux `Enforcing` on both the root and non-root sides, the `kernelsu`
+module `Live` in `/proc/modules`, a `dmesg handle_setresuid` stream,
+`ksud --version` reporting `3.3.1 (uapi: 5)`, and the Manager package at
+`v3.3.1` / versionCode `32680`.
+
+What it did NOT establish: byte-identity of the running daemon against the
+APK-bundled bytes (the version string and package version do not prove which
+bytes are executing — see the byte-identity note below), the Manager UI
+`Working` status, `resetprop` behaviour, repeatability (one evidence run),
+or reboot persistence.
 
 | Item | Observed value |
 | --- | --- |
@@ -55,8 +66,41 @@ off-repo raw files named below (not committed).
   `e01_dumpsys_s24root.log`):
   Manager `versionName=v3.3.1` / `versionCode=32680`;
   app `versionName=0.3.4-s24.1` / `versionCode=18`.
+  (Package/version lines only — they do not identify the running daemon
+  bytes; see the byte-identity note below.)
+
+## Daemon byte-identity: known unresolved discrepancy
+
+Three distinct byte sets must not be conflated:
+
+(a) APK-bundled bytes (this repo at payloads snapshot `58a6772`):
+exploit `7b68f38d…22e30cb` (104128 bytes),
+`ksud` `fde99b5a…ca0abe61` (5065680 bytes).
+(b) The late-load-time staged loader copied to the device during install.
+(c) The on-device daemon present at verification time (`/data/adb/ksud`).
+
+The Payloads-side evidence for this run records on-device `/data/adb/ksud`
+as 4,990,848 bytes — differing from the pinned 5,065,680-byte `ksud` in
+(a). This discrepancy is UNRESOLVED: no on-device `sha256sum` of
+`/data/adb/ksud` or of the staged loader was captured, so nothing here
+adjudicates which bytes were executing. A plausible mechanism exists (the
+KernelSU Manager can replace `/data/adb/ksud` with its own bundled build —
+on 2026-10-19 Manager `32601` overwrote the DZG1 staged loader
+`88748945…dc15049` → `99aaa607…3b5c41`; see README), but that analogy does
+not prove what happened on this EZIF run. Verdict: the root,
+module-live, `dmesg`, `ksud --version`, and Manager package-version lines
+stand as observed; byte-identity of the running daemon against the
+APK-bundled bytes does not.
 
 ## Artifacts
+
+> Validated/released snapshot for THIS PR is fork commit `58a6772`
+> (`samson910022/Root-My-Galaxy-Payloads`,
+> `feature/e1q-S9210ZHU6EZIF-port`). Payloads PR #10 head has since moved
+> (`a62f118`) with a different exploit artifact — results from #10 head
+> must not be read as results of this APK. Keeping the pinned `58a6772`
+> bytes is deliberate; bumping to a newer head requires
+> manifest + script + binaries + regression evidence together.
 
 - Exploit: `cve-2026-43499-app.so`, 104128 bytes, SHA-256
   `7b68f38d9c3836c83cfc5af3af454036fe6d3f5f455c504df5670c44c22e30cb`,
@@ -92,8 +136,9 @@ off-repo raw files named below (not committed).
   reboot persistence (RAM-only root is expected to vanish on reboot;
   not re-tested on this firmware).
 - Release caution: this profile is `source: BUILTIN`, so merging this PR
-  ships the candidate to every EZIF device on the next release build
-  (only the exact `kernelReleases` string gates it; the
+  ships the candidate inside every release build. Since Phase 1 it resolves
+  only on the exact `kernelReleases` string AND with the Settings >
+  candidate-profiles opt-in enabled (default off; the
   `[candidate: KernelSU v3.3.1]` display text is not a gate). Hold the
   `v0.3.4-s24.1` tag until the PENDING items clear or the risk is
   explicitly accepted. Companion dependency: payloads fork branch

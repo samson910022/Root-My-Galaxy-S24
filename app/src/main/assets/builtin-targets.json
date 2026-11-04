@@ -17,7 +17,7 @@
       "forkRef": "refs/heads/feature/e1q-S9210ZHU6EZIF-port",
       "forkCommit": "58a677281ab2aa8ae43cfb15619628c2ab2e48b3",
       "kernelsu": "v3.3.1 KDP (ksud-e1q-S9210ZHU6EZIF-kdp, 5065680 bytes)",
-      "note": "EZIF exploit rebuild plus v3.3.1 KDP pair, fork-only (not on BuSung-dev main). A v3.3.0 fallback pair and reference .ko ship alongside in the payloads repo but are not used by this profile. Single read-only post-install evidence collection only; Manager UI Working screenshot, resetprop regressions, repeatability and reboot persistence remain pending (see docs/SM-S9210-EZIF-validation-20261102.md). Candidate: ships as BUILTIN once merged, gated only by the exact kernelReleases string."
+      "note": "EZIF exploit rebuild plus v3.3.1 KDP pair, fork-only (not on BuSung-dev main). Validated/released snapshot is fork commit 58a6772; payloads PR #10 head has since moved with a different exploit artifact — #10 head results are not this APK's results. A v3.3.0 fallback pair and reference .ko ship alongside in the payloads repo but are not used by this profile. Single read-only post-install evidence collection only; Manager UI Working screenshot, resetprop regressions, repeatability and reboot persistence remain pending; on-device /data/adb/ksud (4,990,848 B) differs from the pinned 5,065,680 B ksud — daemon byte-identity unresolved (see docs/SM-S9210-EZIF-validation-20261102.md). Candidate: ships as BUILTIN once merged but resolves only on the exact kernelReleases string with the Settings candidate-profiles opt-in enabled (default off)."
     }
   },
   "payloads": [
