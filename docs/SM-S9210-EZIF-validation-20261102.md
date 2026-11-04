@@ -21,8 +21,9 @@ module `Live` in `/proc/modules`, a `dmesg handle_setresuid` stream,
 What it did NOT establish: byte-identity of the running daemon against the
 APK-bundled bytes (the version string and package version do not prove which
 bytes are executing — see the byte-identity note below), the Manager UI
-`Working` status, `resetprop` behaviour, repeatability (one evidence run),
-or reboot persistence.
+`Working` status, `resetprop` behaviour, or repeatability (one evidence run).
+Reboot persistence is now tested separately (2026-11-04, non-persistent as
+expected — see the reboot note in Validation scope).
 
 | Item | Observed value |
 | --- | --- |
@@ -36,7 +37,8 @@ or reboot persistence.
 | Bundled `ksud` | 5065680 bytes, SHA-256 `fde99b5a…ca0abe61` (`payloads/e1q-S9210ZHU6EZIF/ksud-e1q-S9210ZHU6EZIF-kdp`, KernelSU v3.3.1 candidate) |
 | Pair provenance | Payloads fork `samson910022/Root-My-Galaxy-Payloads` commit `58a677281ab2aa8ae43cfb15619628c2ab2e48b3` (`feature/e1q-S9210ZHU6EZIF-port`); both artifacts fetched from the fork (`RAW_BASE` fork x2; EZIF exists only there). Reference `.ko` `android14-6.1_kernelsu-e1q-S9210ZHU6EZIF-kdp.ko` (432656 bytes, `af640cda…`) and the v3.3.0 fallback `ksud-e1q-S9210ZHU6EZIF-v3.3.0-kdp` ship alongside in the payloads repo but are not used by this profile. |
 | KernelSU Manager package | `me.weishu.kernelsu`, `v3.3.1`, versionCode `32680` |
-| `boot_id` (truncated) | `de00aae0-…` (full value retained off-repo; per-boot random, no validation value) |
+| `boot_id` (truncated) | `de00aae0-…` (full value retained off-repo; per-boot random, no validation value; App-root success boot on 2026-11-03) |
+| `boot_id` post-reboot (2026-11-04) | `2f39dbe6-…` (full `2f39dbe6-446b-4928-a9af-79cd4895174d`; `su` absent, `Enforcing`, no `kernelsu` module → root not persistent, expected; see reboot note in Validation scope) |
 
 Raw evidence is retained off-repo (38 `.log` files + `SHA256SUMS.txt` +
 `verdict.md` + `verdict.sha256` = 41 files, not committed to this repo).
@@ -132,9 +134,16 @@ APK-bundled bytes does not.
   stream), `su` grant path, `/proc/modules` check, `ksud --version`
   (`3.3.1 (uapi: 5)`), Manager package version (`v3.3.1` / `32680`).
 - PENDING: Manager UI `Working` status (needs a user screenshot),
-  `resetprop` regressions, repeatability (single evidence run only),
-  reboot persistence (RAM-only root is expected to vanish on reboot;
-  not re-tested on this firmware).
+  `resetprop` regressions, repeatability (single evidence run only).
+- TESTED 2026-11-04 (read-only `adb` post-reboot check, evidence retained
+  off-repo at
+  `/mnt/240G_SSD/opencode_tmp/reboot_nopersist_20261104/reboot_persist_check.log`):
+  reboot persistence — NOT persistent, as expected for RAM-only LKM root.
+  New `boot_id` `2f39dbe6-446b-4928-a9af-79cd4895174d` (prior App-root
+  success boot `de00aae0-…`); `su` not found
+  (`/system/bin/sh: su: inaccessible or not found`), `Enforcing`, no
+  `kernelsu` line in `/proc/modules`; no new lastkmsg (still `#132–#136`),
+  `bootreason=reboot,shell` (clean reboot).
 - Release caution: this profile is `source: BUILTIN`, so merging this PR
   ships the candidate inside every release build. Since Phase 1 it resolves
   only on the exact `kernelReleases` string AND with the Settings >
