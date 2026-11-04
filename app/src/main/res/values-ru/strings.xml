@@ -101,7 +101,7 @@
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_builtin_unavailable">Встроенный payload для этой модели отсутствует в приложении, поэтому он не будет загружен из онлайн-ленты. Переустановите приложение или используйте профиль, опубликованный там.</string>
     <string name="repo_no_profile">Для этой модели и версии ядра нет совместимого payload</string>
-    <string name="repo_firmware_unsupported">Встроенный payload собран для прошивки %1$s, но это устройство сообщает %2$s. Смещения ядра зависят от прошивки, поэтому он не будет работать на другой сборке.</string>
+    <string name="repo_firmware_unsupported">Встроенный payload собран для одной из прошивок: %1$s, но это устройство сообщает %2$s. Смещения ядра зависят от прошивки, поэтому он не будет работать на другой сборке.</string>
     <string name="repo_downloading">Загрузка %1$s</string>
     <string name="repo_staging">Распаковывается встроенный %1$s</string>
     <string name="repo_staged_current">Встроенный %1$s уже проверен</string>
@@ -173,4 +173,8 @@
     </plurals>
     <string name="history_delete">Удалить</string>
     <string name="install_already_running">Установка уже выполняется. Дождитесь её завершения.</string>
+    <string name="repo_candidate_optin_required">Это устройство соответствует профилю-кандидату %1$s, ещё не допущенному к выпуску. Чтобы продолжить, включите профили-кандидаты в настройках.</string>
+    <string name="candidate_profiles">Профили-кандидаты</string>
+    <string name="candidate_profiles_description">Разрешить экспериментальные payload кандидатов. По умолчанию выключено.</string>
+    <string name="install_confirm_candidate_note">Это устройство соответствует ещё не допущенному профилю-кандидату. Продолжайте только для проверки.</string>
 </resources>

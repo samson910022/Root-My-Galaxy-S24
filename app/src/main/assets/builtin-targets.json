@@ -10,7 +10,15 @@
     "forkCommit": "e90759c5e4167f271ef46cc4a57835cf42a2ffc6",
     "note": "The profile is not published on the payloads main branch, so the app cannot resolve it from the online manifest. The exploit base comes from upstream PR #320 commit a311cb88c28204c3902af9450ae4077199e4d71d; the bundled bytes add the rt_mutex PI-guard fix from our fork (samson910022/Root-My-Galaxy-Payloads PR #7 code, PR #8 artifact, fork main@e90759c5e4167f271ef46cc4a57835cf42a2ffc6): sched fire/fired triage logs gated off by default (SLIDE_SCHED_DIAG), skip sched_setattr when waiter tid unpublished. Rebuilt with NDK r29 API 35 (make TARGET=e1q-S9210ZHS6DZG1 ANDROID_NDK_HOME=<ndk-r29> release), bit-identical across rebuilds. EXPERIMENTAL v3.3.0: ksud is the e1q Phase-D pair from Root-My-Galaxy-Payloads commit 8236c84301282b5415412d867ab71d4a739e0809, built with CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y and statically audited. The pre-fix bytes had two full-chain Shizuku-mode runs on SM-S9210 (2026-10-03 attempt 1/24, 2026-10-07 attempt 11/24); the PI-guard bytes in this manifest had one successful full-chain Shizuku-mode run on 2026-10-19 (attempt 15/24), with the Manager UI status captured; a later resetprop read/set/delete pass on the pinned ksud succeeded, so repeatability and reboot persistence remain unverified.",
     "schemaVersionRationale": "The online feed is owned upstream and pins remote artifacts by url; this file is owned by this repository and pins them by asset path plus digest, so the two are versioned independently rather than sharing one number that would describe two different shapes. Version 4 also carries fields the online feed has no use for: an exact kernelReleases gate, and a digest that replaces no upstream field.",
-    "requiresFreshP0SessionNote": "The upstream manifest entry sets requiresFreshP0Session to true and that value is preserved here verbatim, but the app does not implement it and the bundled payload does not enforce it either: src/targets/e1q-S9210ZHS6DZG1/target.h does not define APP_REQUIRE_FRESH_P0_SESSION, so src/preload.c takes the branch that retains a discovered P0 offset and injects it into the next child. The porting record documents the env as EXPLOIT_ATTEMPTS=24 and separately reports the golden run completing on attempt 5/48; it does not contain a supervisor-retained diagnostic, so it does not establish that the retention branch was actually exercised. Treat this field as upstream metadata, not as a behavioural contract."
+    "requiresFreshP0SessionNote": "The upstream manifest entry sets requiresFreshP0Session to true and that value is preserved here verbatim, but the app does not implement it and the bundled payload does not enforce it either: src/targets/e1q-S9210ZHS6DZG1/target.h does not define APP_REQUIRE_FRESH_P0_SESSION, so src/preload.c takes the branch that retains a discovered P0 offset and injects it into the next child. The porting record documents the env as EXPLOIT_ATTEMPTS=24 and separately reports the golden run completing on attempt 5/48; it does not contain a supervisor-retained diagnostic, so it does not establish that the retention branch was actually exercised. Treat this field as upstream metadata, not as a behavioural contract.",
+    "ezifCandidate": {
+      "payloadId": "e1q-S9210ZHU6EZIF",
+      "forkRepository": "https://github.com/samson910022/Root-My-Galaxy-Payloads",
+      "forkRef": "refs/heads/feature/e1q-S9210ZHU6EZIF-port",
+      "forkCommit": "58a677281ab2aa8ae43cfb15619628c2ab2e48b3",
+      "kernelsu": "v3.3.1 KDP (ksud-e1q-S9210ZHU6EZIF-kdp, 5065680 bytes)",
+      "note": "EZIF exploit rebuild plus v3.3.1 KDP pair, fork-only (not on BuSung-dev main). Validated/released snapshot is fork commit 58a6772; payloads PR #10 head has since moved with a different exploit artifact — #10 head results are not this APK's results. A v3.3.0 fallback pair and reference .ko ship alongside in the payloads repo but are not used by this profile. Single read-only post-install evidence collection only; Manager UI Working screenshot, resetprop regressions, repeatability and reboot persistence remain pending; on-device /data/adb/ksud (4,990,848 B) differs from the pinned 5,065,680 B ksud — daemon byte-identity unresolved (see docs/SM-S9210-EZIF-validation-20261102.md). Candidate: ships as BUILTIN once merged but resolves only on the exact kernelReleases string with the Settings candidate-profiles opt-in enabled (default off)."
+    }
   },
   "payloads": [
     {
@@ -30,6 +38,25 @@
         "assetPath": "payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp",
         "sha256": "8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049",
         "size": 4995304
+      }
+    },
+    {
+      "payloadId": "e1q-S9210ZHU6EZIF",
+      "displayName": "Galaxy S24 China | Kernel 6.1.162 (S9210ZHU6EZIF) [candidate: KernelSU v3.3.1]",
+      "source": "BUILTIN",
+      "models": ["SM-S9210"],
+      "kernelVersions": ["6.1.162"],
+      "kernelReleases": ["6.1.162-android14-11-34343818-abS9210ZHU6EZIF"],
+      "requiresFreshP0Session": true,
+      "exploit": {
+        "assetPath": "payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so",
+        "sha256": "7b68f38d9c3836c83cfc5af3af454036fe6d3f5f455c504df5670c44c22e30cb",
+        "size": 104128
+      },
+      "kernelsu": {
+        "assetPath": "payloads/e1q-S9210ZHU6EZIF/ksud-e1q-S9210ZHU6EZIF-kdp",
+        "sha256": "fde99b5a129e5714fe6f598cf8276c76d2cbaf1a7f4e6ce9ae69d5ebca0abe61",
+        "size": 5065680
       }
     }
   ]

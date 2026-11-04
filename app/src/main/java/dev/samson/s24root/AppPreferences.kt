@@ -33,6 +33,7 @@ object AppPreferences {
     private const val ACCENT_COLOR = "accent_color"
     private const val THEME_MODE = "theme_mode"
     private const val SHIZUKU_MODE = "shizuku_mode"
+    private const val CANDIDATE_PROFILES = "candidate_profiles"
     private const val CONSUMED_INSTALL_REQUEST = "consumed_install_request"
 
     fun accentColor(context: Context): AccentColor = AccentColor.fromStoredValue(
@@ -61,6 +62,20 @@ object AppPreferences {
     fun setShizukuMode(context: Context, enabled: Boolean) {
         prefs(context).edit()
             .putBoolean(SHIZUKU_MODE, enabled)
+            .apply()
+    }
+
+    /**
+     * Whether experimental candidate profiles may resolve. Defaults to false
+     * so a candidate bundled payload never runs unless the user opts in via
+     * Settings.
+     */
+    fun allowCandidateProfiles(context: Context): Boolean =
+        prefs(context).getBoolean(CANDIDATE_PROFILES, false)
+
+    fun setAllowCandidateProfiles(context: Context, enabled: Boolean) {
+        prefs(context).edit()
+            .putBoolean(CANDIDATE_PROFILES, enabled)
             .apply()
     }
 

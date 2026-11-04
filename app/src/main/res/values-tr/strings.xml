@@ -94,7 +94,7 @@
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_builtin_unavailable">Bu modele ait paket içindeki payload uygulamada yok, bu nedenle çevrimiçi akıştan alınmayacak. Uygulamayı yeniden yükleyin veya akışta yayınlanan bir profil kullanın.</string>
     <string name="repo_no_profile">Bu model ve kernel sürümünü destekleyen uyumlu payload bulunamadı</string>
-    <string name="repo_firmware_unsupported">Paket içindeki payload %1$s yazılımı için derlenmiştir, ancak bu cihaz %2$s bildiriyor. Çekirdek ofsetleri yazılıma özeldir, bu nedenle farklı bir derlemede çalışmaz.</string>
+    <string name="repo_firmware_unsupported">Paket içindeki payload şu yazılımlardan biri için derlenmiştir: %1$s, ancak bu cihaz %2$s bildiriyor. Çekirdek ofsetleri yazılıma özeldir, bu nedenle farklı bir derlemede çalışmaz.</string>
     <string name="repo_downloading">%1$s indiriliyor</string>
     <string name="repo_staging">Paket içindeki %1$s açılıyor</string>
     <string name="repo_staged_current">Paket içindeki %1$s zaten doğrulandı</string>
@@ -162,4 +162,8 @@
     </plurals>
     <string name="history_delete">Sil</string>
     <string name="install_already_running">Zaten bir kurulum çalışıyor. Bitmesini bekleyin.</string>
+    <string name="repo_candidate_optin_required">Bu cihaz, henüz yayına onaylanmamış aday profil %1$s ile eşleşiyor. Devam etmek için Ayarlar\'da aday profilleri etkinleştirin.</string>
+    <string name="candidate_profiles">Aday profiller</string>
+    <string name="candidate_profiles_description">Deneysel aday payload\'lara izin ver. Varsayılan olarak kapalı.</string>
+    <string name="install_confirm_candidate_note">Bu cihaz henüz onaylanmamış bir aday profille eşleşiyor. Yalnızca doğrulama için devam edin.</string>
 </resources>

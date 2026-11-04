@@ -29,7 +29,7 @@
     <string name="repo_staging">내장된 %1$s 압축 해제 중</string>
     <string name="repo_staged_current">내장된 %1$s은(는) 이미 검증되었습니다</string>
     <string name="repo_digest_mismatch">%1$s이(가) 내장 매니페스트의 다이제스트와 일치하지 않습니다</string>
-    <string name="repo_firmware_unsupported">내장 payload는 펌웨어 %1$s용으로 빌드되었지만 이 기기는 %2$s을(를) 보고합니다. 커널 오프셋은 펌웨어에 따라 다르므로 다른 빌드에서는 실행되지 않습니다.</string>
+    <string name="repo_firmware_unsupported">내장 payload는 펌웨어(%1$s 중 하나)용으로 빌드되었지만 이 기기는 %2$s을(를) 보고합니다. 커널 오프셋은 펌웨어에 따라 다르므로 다른 빌드에서는 실행되지 않습니다.</string>
     <string name="repo_builtin_unavailable">이 모델용 내장 payload가 앱에 없어서 온라인 피드에서 가져오지 않습니다. 앱을 다시 설치하거나 피드에 게시된 프로필을 사용하세요.</string>
     <string name="open_github">GitHub 열기</string>
     <string name="github_card_title">Root My Galaxy 알아보기</string>
@@ -76,4 +76,8 @@
     </plurals>
     <string name="history_delete">삭제</string>
     <string name="install_already_running">이미 설치가 진행 중입니다. 끝날 때까지 기다려 주세요.</string>
+    <string name="repo_candidate_optin_required">이 기기는 아직 릴리스 승인이 되지 않은 후보 프로필 %1$s과 일치합니다. 계속하려면 설정에서 후보 프로필을 활성화하세요.</string>
+    <string name="candidate_profiles">후보 프로필</string>
+    <string name="candidate_profiles_description">실험적인 후보 페이로드를 허용합니다. 기본값은 꺼짐.</string>
+    <string name="install_confirm_candidate_note">이 기기는 아직 승인되지 않은 후보 프로필과 일치합니다. 검증 목적으로만 계속하세요.</string>
 </resources>
