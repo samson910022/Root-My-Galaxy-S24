@@ -1,15 +1,26 @@
 # Root My Galaxy S24
 
 Unofficial build of [Root My Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy)
-targeting the **Galaxy S24 China, `SM-S9210`** (codename `e1q`) on firmware
-`S9210ZHS6DZG1`, kernel `6.1.145-android14-11-33419968-abS9210ZHS6DZG1`.
+targeting the **Galaxy S24 China, `SM-S9210`** (codename `e1q`) with two
+bundled profiles:
 
-The payload profile this build needs lives in
+- `S9210ZHS6DZG1` — kernel
+  `6.1.145-android14-11-33419968-abS9210ZHS6DZG1`, experimental KernelSU
+  v3.3.0 (pair with Manager `32601`).
+- `S9210ZHU6EZIF` — kernel
+  `6.1.162-android14-11-34343818-abS9210ZHU6EZIF`, **candidate** KernelSU
+  v3.3.1 (pair with Manager `32680`). It resolves only with the Settings >
+  Candidate profiles opt-in enabled (default off); validation is pending, see
+  [`docs/SM-S9210-EZIF-validation-20261102.md`](docs/SM-S9210-EZIF-validation-20261102.md).
+  It is not production-ready.
+
+The DZG1 payload profile lives in
 [Root-My-Galaxy-Payloads#320](https://github.com/BuSung-dev/Root-My-Galaxy-Payloads/pull/320),
 which is still open. Neither the manifest entry nor the artifacts are on that
-repository's `main` branch, so the app cannot discover or download them. This
-build therefore ships the two binaries inside the APK and verifies them against
-a manifest that ships alongside them.
+repository's `main` branch, so the app cannot discover or download them; the
+EZIF candidate profile is fork-only and likewise not on upstream `main`. This
+build therefore ships the binaries for both profiles inside the APK and
+verifies them against a manifest that ships alongside them.
 
 Every other device still goes through the upstream online support feed
 unchanged.
@@ -17,7 +28,9 @@ unchanged.
 ## Getting started
 
 The app needs Android 13 or newer (`minSdk` 33) and, for the bundled path,
-exactly the SM-S9210 firmware named above; any other profile is refused. The
+one of the two SM-S9210 kernel releases named above (the EZIF candidate
+additionally needs the Settings > Candidate profiles opt-in); any other
+release is refused. The
 recorded hardware validation used Shizuku as the transport — install and
 authorize Shizuku before selecting that mode. Download the signed APK from the
 [releases page](https://github.com/samson910022/Root-My-Galaxy-S24/releases),
@@ -29,9 +42,9 @@ install it, and read [Known limitations](#known-limitations) and
 | File | Size | SHA-256 |
 | --- | ---: | --- |
 | `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | 104128 | `1da7c8cd…15b9df` |
-| `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4995304 | `88748945…dc15049` (EXPERIMENTAL v3.3.0, see below) |
+| `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4995304 | `88748945…dc15049` (EXPERIMENTAL v3.3.0, Manager 32601, see below) |
 | `app/src/main/assets/payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so` | 104128 | `7b68f38d…22e30cb` (candidate, EZIF only) |
-| `app/src/main/assets/payloads/e1q-S9210ZHU6EZIF/ksud-e1q-S9210ZHU6EZIF-kdp` | 5065680 | `fde99b5a…ca0abe61` (candidate KernelSU v3.3.1, EZIF only) |
+| `app/src/main/assets/payloads/e1q-S9210ZHU6EZIF/ksud-e1q-S9210ZHU6EZIF-kdp` | 5065680 | `fde99b5a…ca0abe61` (candidate KernelSU v3.3.1, Manager 32680, EZIF only) |
 | `app/src/main/jniLibs/arm64-v8a/libcve43499root.so` | 26040 | `b6395159…94b5bb1f` |
 
 > EXPERIMENTAL: this is the e1q v3.3.0 Phase-D pair from Payloads commit
@@ -101,6 +114,13 @@ The online path verifies length only, as it always has, and matches on model
 plus numeric kernel version with no exact-release gate, because the upstream
 manifest publishes neither a digest nor a release field. Only the bundled path
 is digest-checked and release-gated.
+
+Each bundled profile enforces its own exact kernel-release match, and
+candidate profiles additionally require the Settings > Candidate profiles
+opt-in (off by default) — with the opt-in off a candidate behaves as absent.
+When the release matches no usable profile, the firmware-mismatch message
+lists every supported release for that model (stable profiles only with the
+opt-in off, all profiles with it on) instead of just the first.
 
 ## Build
 
