@@ -105,7 +105,7 @@
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_builtin_unavailable">O payload incluído para este modelo está ausente do aplicativo, então ele não será obtido do feed online. Reinstale o aplicativo ou use um perfil publicado lá.</string>
     <string name="repo_no_profile">Nenhum payload compatível suporta esse modelo e versão de kernel</string>
-    <string name="repo_firmware_unsupported">O payload incluído foi compilado para o firmware %1$s, mas este dispositivo informa %2$s. Os deslocamentos do kernel são específicos do firmware, então ele não será executado em outra compilação.</string>
+    <string name="repo_firmware_unsupported">O payload incluído foi compilado para um dos firmwares: %1$s, mas este dispositivo informa %2$s. Os deslocamentos do kernel são específicos do firmware, então ele não será executado em outra compilação.</string>
     <string name="repo_downloading">Baixando %1$s</string>
     <string name="repo_staging">Descompactando o %1$s incluído</string>
     <string name="repo_staged_current">O %1$s incluído já foi verificado</string>
@@ -169,4 +169,8 @@
     </plurals>
     <string name="history_delete">Excluir</string>
     <string name="install_already_running">Uma instalação já está em andamento. Aguarde ela terminar.</string>
+    <string name="repo_candidate_optin_required">Este dispositivo corresponde ao perfil candidato %1$s, ainda não aprovado para lançamento. Ative os perfis candidatos em Configurações para continuar.</string>
+    <string name="candidate_profiles">Perfis candidatos</string>
+    <string name="candidate_profiles_description">Permitir payloads candidatos experimentais. Desativado por padrão.</string>
+    <string name="install_confirm_candidate_note">Este dispositivo corresponde a um perfil candidato ainda não aprovado. Prossiga apenas para validação.</string>
 </resources>

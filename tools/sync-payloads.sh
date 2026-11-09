@@ -47,6 +47,30 @@ KSUD_SHA256=8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049
 EXPLOIT_SIZE=104128
 KSUD_SIZE=4995304
 
+# Second-profile pins: e1q-S9210ZHU6EZIF (KernelSU v3.3.1 candidate).
+# Published on the fork at samson910022/Root-My-Galaxy-Payloads commit
+# 58a677281ab2aa8ae43cfb15619628c2ab2e48b3
+# (feature/e1q-S9210ZHU6EZIF-port): EZIF exploit rebuild plus the v3.3.1 KDP
+# pair (a v3.3.0 fallback pair ships alongside in the payloads repo but this
+# profile does not use it). Both artifacts live only in the fork, so both
+# RAW_BASE values point there; do not use BuSung-dev for EZIF.
+# Verified 2026-11-04: both raw URLs return HTTP 200 at this commit with
+# matching SHA-256/size (see docs/SM-S9210-EZIF-validation-20261102.md).
+EZIF_PROFILE=e1q-S9210ZHU6EZIF
+EZIF_EXPLOIT_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads
+EZIF_EXPLOIT_SOURCE_COMMIT=58a677281ab2aa8ae43cfb15619628c2ab2e48b3
+EZIF_EXPLOIT_SHA256=7b68f38d9c3836c83cfc5af3af454036fe6d3f5f455c504df5670c44c22e30cb
+EZIF_EXPLOIT_SIZE=104128
+EZIF_KSUD_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads
+EZIF_KSUD_SOURCE_COMMIT=58a677281ab2aa8ae43cfb15619628c2ab2e48b3
+EZIF_KSUD_SHA256=fde99b5a129e5714fe6f598cf8276c76d2cbaf1a7f4e6ce9ae69d5ebca0abe61
+EZIF_KSUD_SIZE=5065680
+EZIF_ASSET_DIR=app/src/main/assets/payloads/e1q-S9210ZHU6EZIF
+EZIF_EXPLOIT_NAME=cve-2026-43499-app.so
+EZIF_KSUD_NAME=ksud-e1q-S9210ZHU6EZIF-kdp
+EZIF_EXPLOIT_UPSTREAM="artifacts/$EZIF_PROFILE/$EZIF_EXPLOIT_NAME"
+EZIF_KSUD_UPSTREAM="kernelsu/$EZIF_KSUD_NAME"
+
 fail() { printf 'sync-payloads: %s\n' "$*" >&2; exit 1; }
 note() { printf 'sync-payloads: %s\n' "$*"; }
 
@@ -64,26 +88,32 @@ cd "$root"
 # The manifest is the trust anchor, so its recorded digests are the ones the
 # assets are checked against rather than a second set of constants here.
 read_manifest() {
-  python3 - "$PROVENANCE" "$1" <<'PY'
+  python3 - "$PROVENANCE" "$1" "$2" <<'PY'
 import json, sys
 
-path, key = sys.argv[1], sys.argv[2]
+path, profile, key = sys.argv[1], sys.argv[2], sys.argv[3]
 with open(path, encoding="utf-8") as handle:
     doc = json.load(handle)
-match = [p for p in doc["payloads"] if p["payloadId"] == "e1q-S9210ZHS6DZG1"]
+match = [p for p in doc["payloads"] if p["payloadId"] == profile]
 if len(match) != 1:
-    sys.exit(f"{path}: expected exactly one e1q-S9210ZHS6DZG1 entry, found {len(match)}")
+    sys.exit(f"{path}: expected exactly one {profile} entry, found {len(match)}")
 entry = match[0][key]
 print(entry["sha256"], entry["size"], entry["assetPath"])
 PY
 }
 
-EXPLOIT_SHA256_MANIFEST=$(read_manifest exploit | cut -d' ' -f1)
-EXPLOIT_SIZE_MANIFEST=$(read_manifest exploit | cut -d' ' -f2)
-EXPLOIT_ASSET_PATH=$(read_manifest exploit | cut -d' ' -f3)
-KSUD_SHA256_MANIFEST=$(read_manifest kernelsu | cut -d' ' -f1)
-KSUD_SIZE_MANIFEST=$(read_manifest kernelsu | cut -d' ' -f2)
-KSUD_ASSET_PATH=$(read_manifest kernelsu | cut -d' ' -f3)
+EXPLOIT_SHA256_MANIFEST=$(read_manifest e1q-S9210ZHS6DZG1 exploit | cut -d' ' -f1)
+EXPLOIT_SIZE_MANIFEST=$(read_manifest e1q-S9210ZHS6DZG1 exploit | cut -d' ' -f2)
+EXPLOIT_ASSET_PATH=$(read_manifest e1q-S9210ZHS6DZG1 exploit | cut -d' ' -f3)
+KSUD_SHA256_MANIFEST=$(read_manifest e1q-S9210ZHS6DZG1 kernelsu | cut -d' ' -f1)
+KSUD_SIZE_MANIFEST=$(read_manifest e1q-S9210ZHS6DZG1 kernelsu | cut -d' ' -f2)
+KSUD_ASSET_PATH=$(read_manifest e1q-S9210ZHS6DZG1 kernelsu | cut -d' ' -f3)
+EZIF_EXPLOIT_SHA256_MANIFEST=$(read_manifest "$EZIF_PROFILE" exploit | cut -d' ' -f1)
+EZIF_EXPLOIT_SIZE_MANIFEST=$(read_manifest "$EZIF_PROFILE" exploit | cut -d' ' -f2)
+EZIF_EXPLOIT_ASSET_PATH=$(read_manifest "$EZIF_PROFILE" exploit | cut -d' ' -f3)
+EZIF_KSUD_SHA256_MANIFEST=$(read_manifest "$EZIF_PROFILE" kernelsu | cut -d' ' -f1)
+EZIF_KSUD_SIZE_MANIFEST=$(read_manifest "$EZIF_PROFILE" kernelsu | cut -d' ' -f2)
+EZIF_KSUD_ASSET_PATH=$(read_manifest "$EZIF_PROFILE" kernelsu | cut -d' ' -f3)
 
 # The manifest and this script must agree, or the check below would silently
 # compare the assets against the wrong expectations.
@@ -93,11 +123,25 @@ KSUD_ASSET_PATH=$(read_manifest kernelsu | cut -d' ' -f3)
 [ "$KSUD_SIZE_MANIFEST" = "$KSUD_SIZE" ] || fail "manifest ksud size differs from the script pin"
 [ "$EXPLOIT_ASSET_PATH" = "payloads/$PROFILE/$EXPLOIT_NAME" ] || fail "unexpected exploit assetPath"
 [ "$KSUD_ASSET_PATH" = "payloads/$PROFILE/$KSUD_NAME" ] || fail "unexpected ksud assetPath"
+[ "$EZIF_EXPLOIT_SHA256_MANIFEST" = "$EZIF_EXPLOIT_SHA256" ] || fail "manifest EZIF exploit digest differs from the script pin"
+[ "$EZIF_KSUD_SHA256_MANIFEST" = "$EZIF_KSUD_SHA256" ] || fail "manifest EZIF ksud digest differs from the script pin"
+[ "$EZIF_EXPLOIT_SIZE_MANIFEST" = "$EZIF_EXPLOIT_SIZE" ] || fail "manifest EZIF exploit size differs from the script pin"
+[ "$EZIF_KSUD_SIZE_MANIFEST" = "$EZIF_KSUD_SIZE" ] || fail "manifest EZIF ksud size differs from the script pin"
+[ "$EZIF_EXPLOIT_ASSET_PATH" = "payloads/$EZIF_PROFILE/$EZIF_EXPLOIT_NAME" ] || fail "unexpected EZIF exploit assetPath"
+[ "$EZIF_KSUD_ASSET_PATH" = "payloads/$EZIF_PROFILE/$EZIF_KSUD_NAME" ] || fail "unexpected EZIF ksud assetPath"
 
 verify() {
   local file=$1 size=$2 digest=$3 label=$4
   [ -f "$file" ] || fail "$label is missing: $file"
-  [ "$(stat -c %s "$file")" = "$size" ] || fail "$label is $(stat -c %s "$file") bytes, expected $size"
+  local actual_size
+  if actual_size=$(stat -c %s "$file" 2>/dev/null); then
+    :
+  elif actual_size=$(stat -f%z "$file" 2>/dev/null); then
+    :
+  else
+    actual_size=$(wc -c <"$file" | tr -d '[:space:]')
+  fi
+  [ "$actual_size" = "$size" ] || fail "$label is $actual_size bytes, expected $size"
   local got
   got=$(sha256sum "$file" | cut -d' ' -f1)
   [ "$got" = "$digest" ] || fail "$label digest $got, expected $digest"
@@ -105,6 +149,8 @@ verify() {
 
 verify "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
 verify "$ASSET_DIR/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
+verify "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
+verify "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME" "$EZIF_KSUD_SIZE" "$EZIF_KSUD_SHA256" "EZIF ksud"
 
 # Also prove the copy a commit would record is the same, so a tampered asset
 # cannot be blessed here and then committed from the index.
@@ -115,13 +161,15 @@ verify_index() {
   else
     fail "cannot read the staged $label from the index"
   fi
-  git diff --quiet -- "$PROVENANCE" "$ASSET_DIR" "$SCRIPT" ||
+  git diff --quiet -- "$PROVENANCE" "$ASSET_DIR" "$EZIF_ASSET_DIR" "$SCRIPT" ||
     fail "staged content differs from the worktree; commit or unstage first"
 }
 
 if $check_only; then
   verify_index "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SHA256" exploit
   verify_index "$ASSET_DIR/$KSUD_NAME" "$KSUD_SHA256" ksud
+  verify_index "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
+  verify_index "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME" "$EZIF_KSUD_SHA256" "EZIF ksud"
   note "assets match the manifest, in the worktree and in the index"
   exit 0
 fi
@@ -137,23 +185,33 @@ fetch() {
   local raw_base=$1 source_commit=$2 upstream=$3 destination=$4 size=$5 digest=$6 label=$7
   curl --fail --silent --show-error --location \
     --proto '=https' --proto-redir '=https' \
-    --retry 3 --connect-timeout 15 --max-time 300 \
+    --retry 3 --retry-all-errors --max-redirs 5 --connect-timeout 15 --max-time 300 \
     --output "$destination" \
     "$raw_base/$source_commit/$upstream" ||
     fail "$label download failed: $upstream"
   verify "$destination" "$size" "$digest" "$label (downloaded)"
 }
 
-# Fetch and verify both before the committed tree is touched. The two installs
-# remain separate operations, so a failure of the second could leave one
-# updated; re-running repairs it, and the manifest digests do not change in
-# between, so a partial state is detected rather than shipped.
-fetch "$EXPLOIT_RAW_BASE" "$EXPLOIT_SOURCE_COMMIT" "$EXPLOIT_UPSTREAM" "$work/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
-fetch "$KSUD_RAW_BASE" "$KSUD_SOURCE_COMMIT" "$KSUD_UPSTREAM" "$work/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
+# Fetch and verify both profiles before the committed tree is touched. The
+# installs remain separate operations, so a failure of a later one could leave
+# an earlier one updated; re-running repairs it, and the manifest digests do
+# not change in between, so a partial state is detected rather than shipped.
+# Temp names are profile-prefixed: both exploits share the same basename
+# (cve-2026-43499-app.so), so unprefixed $work names would collide and the
+# second fetch would clobber the first.
+fetch "$EXPLOIT_RAW_BASE" "$EXPLOIT_SOURCE_COMMIT" "$EXPLOIT_UPSTREAM" "$work/$PROFILE-$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
+fetch "$KSUD_RAW_BASE" "$KSUD_SOURCE_COMMIT" "$KSUD_UPSTREAM" "$work/$PROFILE-$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
+fetch "$EZIF_EXPLOIT_RAW_BASE" "$EZIF_EXPLOIT_SOURCE_COMMIT" "$EZIF_EXPLOIT_UPSTREAM" "$work/$EZIF_PROFILE-$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
+fetch "$EZIF_KSUD_RAW_BASE" "$EZIF_KSUD_SOURCE_COMMIT" "$EZIF_KSUD_UPSTREAM" "$work/$EZIF_PROFILE-$EZIF_KSUD_NAME" "$EZIF_KSUD_SIZE" "$EZIF_KSUD_SHA256" "EZIF ksud"
 
-install -m 0644 "$work/$EXPLOIT_NAME" "$ASSET_DIR/$EXPLOIT_NAME"
-install -m 0644 "$work/$KSUD_NAME" "$ASSET_DIR/$KSUD_NAME"
+mkdir -p "$ASSET_DIR" "$EZIF_ASSET_DIR"
+install -m 0644 "$work/$PROFILE-$EXPLOIT_NAME" "$ASSET_DIR/$EXPLOIT_NAME"
+install -m 0644 "$work/$PROFILE-$KSUD_NAME" "$ASSET_DIR/$KSUD_NAME"
+install -m 0644 "$work/$EZIF_PROFILE-$EZIF_EXPLOIT_NAME" "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME"
+install -m 0644 "$work/$EZIF_PROFILE-$EZIF_KSUD_NAME" "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME"
 
 verify "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
 verify "$ASSET_DIR/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
-note "synced $PROFILE exploit from samson910022/Root-My-Galaxy-Payloads@$EXPLOIT_SOURCE_COMMIT and ksud from BuSung-dev/Root-My-Galaxy-Payloads@$KSUD_SOURCE_COMMIT"
+verify "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
+verify "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME" "$EZIF_KSUD_SIZE" "$EZIF_KSUD_SHA256" "EZIF ksud"
+note "synced $PROFILE exploit from samson910022/Root-My-Galaxy-Payloads@$EXPLOIT_SOURCE_COMMIT and ksud from BuSung-dev/Root-My-Galaxy-Payloads@$KSUD_SOURCE_COMMIT; synced $EZIF_PROFILE exploit and ksud from samson910022/Root-My-Galaxy-Payloads@$EZIF_EXPLOIT_SOURCE_COMMIT"

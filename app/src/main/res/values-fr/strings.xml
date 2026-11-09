@@ -100,7 +100,7 @@
     <string name="artifact_kernelsu">KernelSU</string>
     <string name="repo_builtin_unavailable">La charge utile intégrée pour ce modèle est absente de l\'application et ne sera donc pas récupérée depuis le flux en ligne. Réinstallez l\'application ou utilisez un profil publié sur ce flux.</string>
     <string name="repo_no_profile">Aucune charge utile compatible ne prend en charge ce modèle et cette version de noyau</string>
-    <string name="repo_firmware_unsupported">La charge utile intégrée est compilée pour le firmware %1$s, mais cet appareil signale %2$s. Les décalages du noyau sont spécifiques au firmware, elle ne s\'exécutera donc pas sur une autre version.</string>
+    <string name="repo_firmware_unsupported">La charge utile intégrée est compilée pour l\'un des firmwares : %1$s, mais cet appareil signale %2$s. Les décalages du noyau sont spécifiques au firmware, elle ne s\'exécutera donc pas sur une autre version.</string>
     <string name="repo_downloading">Téléchargement de %1$s</string>
     <string name="repo_staging">Décompactage de la version intégrée de %1$s</string>
     <string name="repo_staged_current">La version intégrée de %1$s est déjà vérifiée</string>
@@ -168,4 +168,8 @@
     </plurals>
     <string name="history_delete">Supprimer</string>
     <string name="install_already_running">Une installation est déjà en cours. Attendez qu\'elle se termine.</string>
+    <string name="repo_candidate_optin_required">Cet appareil correspond au profil candidat %1$s, pas encore validé pour la publication. Activez les profils candidats dans les réglages pour continuer.</string>
+    <string name="candidate_profiles">Profils candidats</string>
+    <string name="candidate_profiles_description">Autoriser les payloads candidats expérimentaux. Désactivé par défaut.</string>
+    <string name="install_confirm_candidate_note">Cet appareil correspond à un profil candidat non encore validé. Ne continuez que pour la validation.</string>
 </resources>
