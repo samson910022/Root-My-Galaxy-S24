@@ -125,6 +125,15 @@ class PayloadRepository(
         if (isCandidateProfile(profile) && !AppPreferences.allowCandidateProfiles(context)) {
             error(context.getString(R.string.repo_candidate_optin_required, profile.profileId))
         }
+        if (
+            isCandidateProfile(profile) &&
+            profile.candidateFlavour != AppPreferences.candidateFlavour(context).storedValue
+        ) {
+            error(
+                "Bundled candidate profile ${profile.profileId} does not match the " +
+                    "selected candidate flavour; refusing to acquire.",
+            )
+        }
         val snapshot = deviceSnapshot()
         if (profile.passesFirmwareGate(snapshot)) return
         error(

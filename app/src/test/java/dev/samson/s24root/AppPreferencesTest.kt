@@ -13,6 +13,12 @@ class AppPreferencesTest {
     }
 
     @Test
+    fun fromStoredValueRoundTripsBothKnownValues() {
+        assertEquals(CandidateFlavour.KernelSu, CandidateFlavour.fromStoredValue("kernelsu"))
+        assertEquals(CandidateFlavour.KernelSuNext, CandidateFlavour.fromStoredValue("kernelsu-next"))
+    }
+
+    @Test
     fun storedValuesCoverExactlyTheKnownCandidateFlavours() {
         // The manifest parser, TargetProfile and resolveProfile all validate
         // against KNOWN_CANDIDATE_FLAVOURS; the enum must stay in lockstep.

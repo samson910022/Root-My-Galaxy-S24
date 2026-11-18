@@ -48,10 +48,17 @@ install the KernelSU-Next Manager (`KernelSU_Next_v3.4.2_33355-release.apk` from
 [the v3.4.2 release](https://github.com/KernelSU-Next/KernelSU-Next/releases/tag/v3.4.2),
 package `com.rifsxd.ksunext`); with the flavour `KernelSU v3.3.1` install the
 KernelSU Manager (versionCode `32680`, from the KernelSU release matching this
-build). The app's “Open KernelSU Manager” affordance points at whichever
-manager your candidate flavour pairs with. Note that payload resolution
-prefers stable profiles regardless of the flavour: pairing the two is your
-responsibility, and a mismatch shows up as the manager reporting “not installed”.
+build).
+
+The app's “Open KernelSU Manager” affordance is **not** flavour-complete today.
+With `kernelsu-next` selected it points at the KernelSU-Next Manager
+(`com.rifsxd.ksunext`, 33355); with the default `kernelsu` flavour it still
+links the KernelSU Manager built for the stable DZG1 profile (versionCode
+`32601`), not the `32680` build the EZIF candidate pairs with — install Manager
+`32680` manually for the EZIF candidate. The same caveat applies to payload
+resolution: stable profiles win regardless of the flavour preference, so
+pairing the flavour with the profile that actually resolves is your
+responsibility; a mismatch shows up as the manager reporting “not installed”.
 
 ## Getting started
 

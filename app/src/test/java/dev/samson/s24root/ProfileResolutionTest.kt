@@ -418,6 +418,37 @@ class ProfileResolutionTest {
     }
 
     @Test
+    fun resolutionIsIndependentOfBundledProfileOrder() {
+        // The v3.3.1 candidate is listed before the Next candidate in the
+        // fixture (and in the shipped manifest); shuffling must not change
+        // which profile resolves for a given flavour.
+        val ezifForward = bundled() + candidateProfile() + nextCandidateProfile()
+        val ezifReversed = bundled() + nextCandidateProfile() + candidateProfile()
+        for (flavour in listOf("kernelsu", "kernelsu-next")) {
+            val forward = resolveProfile(
+                snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+                bundled = ezifForward,
+                remote = { remote("SM-S9210") },
+                allowCandidates = true,
+                candidateFlavour = flavour,
+            )
+            val reversed = resolveProfile(
+                snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+                bundled = ezifReversed,
+                remote = { remote("SM-S9210") },
+                allowCandidates = true,
+                candidateFlavour = flavour,
+            )
+            assertTrue(forward is Resolution.Found)
+            assertTrue(reversed is Resolution.Found)
+            assertEquals(
+                (forward as Resolution.Found).profile.profileId,
+                (reversed as Resolution.Found).profile.profileId,
+            )
+        }
+    }
+
+    @Test
     fun stableResolutionIsUnaffectedByTheCandidateFlavourPreference() {
         val resolution = resolveProfile(
             snapshot = snapshot("SM-S9210", S9210_RELEASE),

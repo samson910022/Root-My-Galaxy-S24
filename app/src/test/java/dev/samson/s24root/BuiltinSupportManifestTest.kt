@@ -302,6 +302,7 @@ class BuiltinSupportManifestTest {
         val ezifKsud = ezif.kernelSu as BundledArtifact
         assertEquals(EZIF_EXPLOIT_DIGEST, ezifExploit.sha256)
         assertEquals(104128L, ezifExploit.size)
+        assertEquals("payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so", ezifExploit.assetPath)
         assertEquals(EZIF_KSUD_DIGEST, ezifKsud.sha256)
         assertEquals(5065680L, ezifKsud.size)
         assertEquals("kernelsu", ezif.candidateFlavour)

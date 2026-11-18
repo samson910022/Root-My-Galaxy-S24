@@ -80,6 +80,18 @@ kotlin {
     }
 }
 
+// The shipped-manifest test hash-verifies the APK-bundled payloads, but Gradle
+// does not treat src/main/assets as a unit-test input, so a local incremental
+// asset edit could leave :app:testDebugUnitTest green from the build cache
+// while the asset bytes had drifted. CI runs tools/sync-payloads.sh --check
+// (offline, both worktree and git index) ahead of this, but re-running the
+// tests on asset changes keeps the digest gate honest everywhere.
+// `matching` + `configureEach` because AGP registers the unit-test task
+// during afterEvaluate, after this script is first evaluated.
+tasks.matching { it.name == "testDebugUnitTest" }.configureEach {
+    inputs.dir("src/main/assets")
+}
+
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2026.05.01"))
     implementation("androidx.activity:activity-compose:1.13.0")
