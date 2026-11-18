@@ -51,8 +51,8 @@ KernelSU Manager (versionCode `32680`, from the KernelSU release matching this
 build).
 
 The app's “Open KernelSU Manager” affordance is **not** flavour-complete today.
-With `kernelsu-next` selected it points at the KernelSU-Next Manager
-(`com.rifsxd.ksunext`, 33355); with the default `kernelsu` flavour it still
+With the opt-in on and `kernelsu-next` selected it points at the KernelSU-Next
+Manager (`com.rifsxd.ksunext`, 33355); with the default `kernelsu` flavour it still
 links the KernelSU Manager built for the stable DZG1 profile (versionCode
 `32601`), not the `32680` build the EZIF candidate pairs with — install Manager
 `32680` manually for the EZIF candidate. The same caveat applies to payload
