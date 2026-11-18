@@ -23,9 +23,10 @@ bundled profiles:
   and [`docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md`](docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md).
   It is not production-ready.
 
-The DZG1 payload profile lives in
+The DZG1 payload profile lived in
 [Root-My-Galaxy-Payloads#320](https://github.com/BuSung-dev/Root-My-Galaxy-Payloads/pull/320),
-which is still open. Neither the manifest entry nor the artifacts are on that
+which was closed unmerged on 2026-11-16; the payload ships bundled in this
+APK. Neither the manifest entry nor the artifacts are on that
 repository's `main` branch, so the app cannot discover or download them; the
 candidate profiles are not on upstream `main` either. This
 build therefore ships the binaries for the three profiles inside the APK and
@@ -239,7 +240,7 @@ rule, and verifies the result.
 `./tools/sync-payloads.sh` pins all payload artifacts by immutable commit. The
 original payloads fork disappeared in November 2026; the pins were repointed
 on 2026-11-19 to byte-identical bytes in `samson910022/Root-My-Galaxy-Payloads-Next`:
-the shared EZIF exploit and the DZG1 exploit to `e3a578d` / `c1a3f93`, the
+the DZG1 exploit to `e3a578d`, the shared EZIF/Next exploit to `c1a3f93`, the
 EZIF v3.3.1 ksud to `f91d730`, the DZG1 ksud stays on `BuSung-dev` `8236c84`
 (unchanged), and the new KernelSU-Next v3.4.2 pair (module + ksud) to the
 dedicated `pair/e1q-S9210ZHU6EZIF-ksun342` branch at `c1a3f93`. Byte-identity

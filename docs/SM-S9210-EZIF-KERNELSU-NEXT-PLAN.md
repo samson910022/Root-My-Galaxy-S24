@@ -110,7 +110,7 @@ Android 17 / One UI 9.0) completed the full chain with
 `ksud-next-generic-kdp` (Next 3.4.2, no-patch-text module): module load,
 `ksud start: SUCCESS`, `su -c id` → `uid=0(root) … u:r:ksu:s0`,
 `su -v` → `3.4.2:KernelSU`
-(`docs/GZIF-validation-summary-20261117.md` §6 run8). The same record shows
+(`../Root-My-Galaxy-Payloads-Next/docs/GZIF-validation-summary-20261117.md` §6 run8 (this document lives in the sibling `Root-My-Galaxy-Payloads-Next` checkout, not in this repo)). The same record shows
 both stock (vanilla) and non-Samsung-patched modules **panic at
 `init_module()`**, and that only the Samsung-patched no-patch-text builds
 load cleanly. The generic daemon was also the fallback after a KMI-name
@@ -189,11 +189,15 @@ nothing (`c6af7dc`).
      exploit, vendored here because the fork is gone).
    The app pins both artifacts there by that commit SHA. The committed
    APK assets remain the source of truth; `tools/sync-payloads.sh` only
-   refreshes them. Note: the EZIF v3.3.1 candidate's own refresh path
-   (fork `58a67728…`) is now dead; its `--check` still verifies the
-   committed bytes offline, and a new public host for those exact bytes
-   does not exist (Payloads-Next main carries a *different* exploit
-   rebuild, `efc8b49c…`). Flagged in the PR; not repointed.
+   refreshes them. On 2026-11-19 the remaining dead refresh pins were
+   repointed to byte-identical copies in `Root-My-Galaxy-Payloads-Next`
+   (DZG1 exploit → `e3a578d`; shared EZIF/Next exploit → `c1a3f93`; EZIF
+   v3.3.1 ksud → `f91d730` on `main`; DZG1 ksud stays on `BuSung-dev`);
+   byte-identity was verified by SHA-256, a full `./tools/sync-payloads.sh`
+   pass now completes end to end, and `--check` remains fully offline
+   (CI runs `--check` only). Payloads-Next `main` still carries a
+   *different* exploit rebuild (`efc8b49c…`) and was not substituted for
+   any pinned payload.
 5. **Manager**: the app documents and queries the **official** KernelSU-Next
    Manager, `KernelSU_Next_v3.4.2_33355-release.apk` (versionCode `33355`),
    package `com.rifsxd.ksunext` (namespace in the v3.4.2 manager sources);

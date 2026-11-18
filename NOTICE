@@ -46,7 +46,7 @@ in them is available at:
   KernelSU base (userspace/ for ksud, kernel/ for the kernel module)
     https://github.com/tiann/KernelSU at commits
     932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e (v3.3.0, DZG1 pair) and
-    0c0fdb96 (v3.3.1, EZIF candidate)
+    0c0fdb960178fa12d80d6cbcfdcb6ad8be6a865d (v3.3.1, EZIF candidate)
   KernelSU-Next base (userspace/ for ksud, kernel/ for the module)
     https://github.com/KernelSU-Next/KernelSU-Next at tag v3.4.2,
     commit 4c706b5938665866ebe16944a481a7b91e3396af

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Refreshes the bundled SM-S9210 payload from the payloads repository.
 #
-# The exploit profile comes from the samson910022/Root-My-Galaxy-Payloads fork
-# at a pinned commit: upstream PR #320 code plus the rt_mutex PI-guard fix.
+# The exploit profile comes from samson910022/Root-My-Galaxy-Payloads-Next at a
+# pinned commit (the byte-identical successor of the fork copy): upstream
+# PR #320 code plus the rt_mutex PI-guard fix.
 # The KernelSU v3.3.0 e1q binary comes from the separately pinned Phase-D commit
 # in BuSung-dev/Root-My-Galaxy-Payloads because Payloads later reverted it from
 # main pending broader hardware acceptance. Full-chain app/Shizuku runs
@@ -270,4 +271,4 @@ verify "$ASSET_DIR/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
 verify "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
 verify "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME" "$EZIF_KSUD_SIZE" "$EZIF_KSUD_SHA256" "EZIF ksud"
 verify "$EZIF_NEXT_ASSET_DIR/$EZIF_NEXT_KSUD_NAME" "$EZIF_NEXT_KSUD_SIZE" "$EZIF_NEXT_KSUD_SHA256" "EZIF next ksud"
-note "synced $PROFILE exploit from samson910022/Root-My-Galaxy-Payloads@$EXPLOIT_SOURCE_COMMIT and ksud from BuSung-dev/Root-My-Galaxy-Payloads@$KSUD_SOURCE_COMMIT; synced $EZIF_PROFILE exploit and ksud from samson910022/Root-My-Galaxy-Payloads-Next@$EZIF_EXPLOIT_SOURCE_COMMIT and ksud from samson910022/Root-My-Galaxy-Payloads-Next@$EZIF_KSUD_SOURCE_COMMIT; synced $EZIF_NEXT_PROFILE from samson910022/Root-My-Galaxy-Payloads-Next@$EZIF_NEXT_SOURCE_COMMIT"
+note "synced $PROFILE exploit from samson910022/Root-My-Galaxy-Payloads-Next@$EXPLOIT_SOURCE_COMMIT; ksud from BuSung-dev/Root-My-Galaxy-Payloads@$KSUD_SOURCE_COMMIT; synced $EZIF_PROFILE exploit from samson910022/Root-My-Galaxy-Payloads-Next@$EZIF_EXPLOIT_SOURCE_COMMIT, ksud from samson910022/Root-My-Galaxy-Payloads-Next@$EZIF_KSUD_SOURCE_COMMIT; synced $EZIF_NEXT_PROFILE from samson910022/Root-My-Galaxy-Payloads-Next@$EZIF_NEXT_SOURCE_COMMIT"

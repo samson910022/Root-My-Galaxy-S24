@@ -25,10 +25,11 @@ in the README, the removal of the advanced-mode UI, and the helper rebuild.
 
 ## Bundled binaries
 
-The exploit payload is rebuilt from our fork main@e90759c5e4167f271ef46cc4a57835cf42a2ffc6
+The exploit payload is rebuilt from the fork main@e90759c5e4167f271ef46cc4a57835cf42a2ffc6
 (samson910022/Root-My-Galaxy-Payloads PRs #7 code and #8 artifact: PR #320
 commit `a311cb88c28204c3902af9450ae4077199e4d71d` plus the rt_mutex PI-guard
-fix), with NDK r29 API 35, bit-identical across rebuilds.
+fix; the fork disappeared in November 2026 and the refresh pin was repointed —
+see the table below), with NDK r29 API 35, bit-identical across rebuilds.
 The helper is compiled from that commit's source and then patched, as described
 below (from `a311cb88`'s `src/su_daemon.c`, untouched by the PI-guard fix). The bundled KernelSU loader is a separate Phase-D artifact from commit
 `8236c84301282b5415412d867ab71d4a739e0809` (see its provenance below).
@@ -90,7 +91,6 @@ attributions are in [NOTICE](NOTICE) and [LICENSES/](LICENSES/).
 
 ### KernelSU loader (EZIF candidate, KernelSU v3.3.1)
 
-
 The EZIF v3.3.1 candidate for `S9210ZHU6EZIF` is built from KernelSU `v3.3.1`,
 commit `0c0fdb96`, with the Samsung KDP/RKP/DEFEX patch set
 (`KernelSU-v3.3.1-samsung-kdp-rkp-defex.patch`, carried by the
@@ -98,7 +98,8 @@ commit `0c0fdb96`, with the Samsung KDP/RKP/DEFEX patch set
 `CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y`, and `KSU_VERSION 33333`. The module has
 vermagic `6.1.162-android14-11-34343818-abS9210ZHU6EZIF SMP preempt mod_unload
 modversions aarch64`, size 432656, SHA-256
-`af640cda` (see `docs/SM-S9210-S9210ZHU6EZIF.md` and the audit record
+`af640cda` (see `../Root-My-Galaxy-Payloads-Next/docs/SM-S9210-S9210ZHU6EZIF.md`
+and the audit record
 `docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md`); the paired `ksud` is
 5065680 bytes, SHA-256
 `fde99b5a129e5714fe6f598cf8276c76d2cbaf1a7f4e6ce9ae69d5ebca0abe61`,

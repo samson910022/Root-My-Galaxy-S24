@@ -40,7 +40,7 @@ https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads-Next/c1a3
 ```
 
 Note: at the audit instant (2026-11-19 ~03:00 UTC) the raw CDN served 503
-for the ~4.3 MB daemon; it recovered later the same day (all three pin URLs
+for the ~4.3 MB daemon; it recovered later the same day (all pin URLs
 returned 200 with matching sizes), which is what the full
 `./tools/sync-payloads.sh` pass ran against after the pins were repointed
 to this branch. `tools/sync-payloads.sh` retries 503s with `--retry-all-errors`,
