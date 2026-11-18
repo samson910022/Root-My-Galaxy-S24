@@ -165,5 +165,12 @@
     <string name="repo_candidate_optin_required">Bu cihaz, henüz yayına onaylanmamış aday profil %1$s ile eşleşiyor. Devam etmek için Ayarlar\'da aday profilleri etkinleştirin.</string>
     <string name="candidate_profiles">Aday profiller</string>
     <string name="candidate_profiles_description">Deneysel aday payload\'lara izin ver. Varsayılan olarak kapalı.</string>
+    <string name="candidate_flavour_title">Aday profiller için yönetici</string>
+    <string name="candidate_flavour_description">Yalnızca doğrulama için.</string>
+    <string name="candidate_flavour_kernelsu">KernelSU v3.3.1</string>
+    <string name="candidate_flavour_kernelsu_next">KernelSU-Next v3.4.2</string>
+    <string name="install_tap_manager_next">KernelSU-Next Manager\'ı yüklemek için dokunun</string>
+    <string name="install_tap_open_manager_next">KernelSU-Next Manager\'ı açmak için dokunun</string>
+    <string name="install_tap_start_next">KernelSU-Next yüklemek için dokunun</string>
     <string name="install_confirm_candidate_note">Bu cihaz henüz onaylanmamış bir aday profille eşleşiyor. Yalnızca doğrulama için devam edin.</string>
 </resources>

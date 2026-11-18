@@ -158,6 +158,7 @@ class MainActivity : ComponentActivity() {
     private var themeMode by mutableStateOf(AppThemeMode.System)
     private var shizukuMode by mutableStateOf(false)
     private var candidateProfiles by mutableStateOf(false)
+    private var candidateFlavour by mutableStateOf(CandidateFlavour.KernelSu)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -167,6 +168,7 @@ class MainActivity : ComponentActivity() {
         themeMode = AppPreferences.themeMode(this)
         shizukuMode = AppPreferences.shizukuMode(this)
         candidateProfiles = AppPreferences.allowCandidateProfiles(this)
+        candidateFlavour = AppPreferences.candidateFlavour(this)
         setContent {
             RootMyGalaxyTheme(accentColor = accentColor, themeMode = themeMode) {
                 RootApp(
@@ -175,6 +177,7 @@ class MainActivity : ComponentActivity() {
                     themeMode = themeMode,
                     shizukuMode = shizukuMode,
                     candidateProfiles = candidateProfiles,
+                    candidateFlavour = candidateFlavour,
                     onAccentColorChanged = { color ->
                         AppPreferences.setAccentColor(this, color)
                         accentColor = color
@@ -190,6 +193,10 @@ class MainActivity : ComponentActivity() {
                     onCandidateProfilesChanged = { enabled ->
                         AppPreferences.setAllowCandidateProfiles(this, enabled)
                         candidateProfiles = enabled
+                    },
+                    onCandidateFlavourChanged = { flavour ->
+                        AppPreferences.setCandidateFlavour(this, flavour)
+                        candidateFlavour = flavour
                     },
                     openInstaller = {
                         startActivity(
@@ -231,22 +238,53 @@ private val languageOptions = listOf(
     LanguageOption(R.string.language_uzbek, "uz"),
 )
 
+/** Which KernelSU-family manager pairs with the candidate profiles. */
+private data class KernelSuManagerRef(
+    val packageName: String,
+    val url: String,
+    val isKernelSuNext: Boolean,
+)
+
 private const val KERNEL_SU_MANAGER_URL =
     "https://github.com/tiann/KernelSU/releases/download/v3.3.0/KernelSU_v3.3.0_32601-release.apk"
 private const val KERNEL_SU_MANAGER_PACKAGE = "me.weishu.kernelsu"
+private const val KERNEL_SU_NEXT_MANAGER_URL =
+    "https://github.com/KernelSU-Next/KernelSU-Next/releases/download/v3.4.2/KernelSU_Next_v3.4.2_33355-release.apk"
+private const val KERNEL_SU_NEXT_MANAGER_PACKAGE = "com.rifsxd.ksunext"
 private const val KERNEL_SU_HOME_URL = "https://kernelsu.org/"
 private const val SHIZUKU_MANAGER_PACKAGE = "moe.shizuku.manager"
 private const val SHIZUKU_MANAGER_URL = "https://github.com/thedjchi/Shizuku/releases/"
 
-private fun isKernelSuManagerInstalled(context: Context): Boolean =
-    context.packageManager.getLaunchIntentForPackage(KERNEL_SU_MANAGER_PACKAGE) != null
+/**
+ * The manager the "open manager" affordance offers.
+ *
+ * The Settings flavour preference alone decides this — independently of
+ * which profile resolution selects. With the opt-in on and flavour set to
+ * kernelsu-next, the affordance targets the KernelSU-Next manager even on
+ * a device whose payload resolves to the tiann build (stable profiles win
+ * resolution regardless of flavour, see ProfileResolution), so pairing the
+ * two is the user's responsibility. Payload resolution filters candidates
+ * by flavour separately. Default (opt-in off, or flavour kernelsu) keeps
+ * the tiann reference unchanged.
+ */
+private fun currentManagerRef(context: Context): KernelSuManagerRef =
+    if (AppPreferences.allowCandidateProfiles(context) &&
+        AppPreferences.candidateFlavour(context) == CandidateFlavour.KernelSuNext
+    ) {
+        KernelSuManagerRef(KERNEL_SU_NEXT_MANAGER_PACKAGE, KERNEL_SU_NEXT_MANAGER_URL, isKernelSuNext = true)
+    } else {
+        KernelSuManagerRef(KERNEL_SU_MANAGER_PACKAGE, KERNEL_SU_MANAGER_URL, isKernelSuNext = false)
+    }
 
-private fun openKernelSuManager(context: Context) {
-    val launch = context.packageManager.getLaunchIntentForPackage(KERNEL_SU_MANAGER_PACKAGE)
+private fun isKernelSuManagerInstalled(context: Context, ref: KernelSuManagerRef): Boolean =
+    context.packageManager.getLaunchIntentForPackage(ref.packageName) != null
+
+private fun openKernelSuManager(context: Context, ref: KernelSuManagerRef) {
+    val launch = context.packageManager.getLaunchIntentForPackage(ref.packageName)
     if (launch != null) {
         context.startActivity(launch)
     } else {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(KERNEL_SU_MANAGER_URL)))
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(ref.url)))
     }
 }
 
@@ -282,10 +320,12 @@ private fun RootApp(
     themeMode: AppThemeMode,
     shizukuMode: Boolean,
     candidateProfiles: Boolean,
+    candidateFlavour: CandidateFlavour,
     onAccentColorChanged: (AccentColor) -> Unit,
     onThemeModeChanged: (AppThemeMode) -> Unit,
     onShizukuModeChanged: (Boolean) -> Unit,
     onCandidateProfilesChanged: (Boolean) -> Unit,
+    onCandidateFlavourChanged: (CandidateFlavour) -> Unit,
     openInstaller: () -> Unit,
 ) {
     val installState by installViewModel.state.collectAsStateWithLifecycle()
@@ -418,6 +458,7 @@ private fun RootApp(
                     themeMode = themeMode,
                     shizukuMode = shizukuMode,
                     candidateProfiles = candidateProfiles,
+                    candidateFlavour = candidateFlavour,
                     updateStatus = updateStatus,
                     onCheckForUpdate = checkForUpdate,
                     onStartDownload = startDownload,
@@ -425,6 +466,7 @@ private fun RootApp(
                     onThemeModeChanged = onThemeModeChanged,
                     onShizukuModeChanged = onShizukuModeChanged,
                     onCandidateProfilesChanged = onCandidateProfilesChanged,
+                    onCandidateFlavourChanged = onCandidateFlavourChanged,
                 )
             }
         }
@@ -670,7 +712,10 @@ private fun InstallStatusCard(installState: InstallUiState, onInstall: () -> Uni
     val view = LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
     val uriHandler = LocalUriHandler.current
-    val managerInstalled = remember(installState) { isKernelSuManagerInstalled(context) }
+    val managerRef = currentManagerRef(context)
+    val managerInstalled = remember(installState, managerRef) {
+        isKernelSuManagerInstalled(context, managerRef)
+    }
     Card(
         onClick = {
             clickHaptic(view)
@@ -678,9 +723,9 @@ private fun InstallStatusCard(installState: InstallUiState, onInstall: () -> Uni
                 installState.busy -> Unit
                 installState.phase == InstallPhase.Installed -> {
                     if (managerInstalled) {
-                        openKernelSuManager(context)
+                        openKernelSuManager(context, managerRef)
                     } else {
-                        uriHandler.openUri(KERNEL_SU_MANAGER_URL)
+                        uriHandler.openUri(managerRef.url)
                     }
                 }
                 else -> onInstall()
@@ -744,17 +789,32 @@ private fun InstallStatusCard(installState: InstallUiState, onInstall: () -> Uni
                     text = when (installState.phase) {
                         InstallPhase.Installed -> stringResource(
                             if (managerInstalled) {
-                                R.string.install_tap_open_manager
+                                if (managerRef.isKernelSuNext) {
+                                    R.string.install_tap_open_manager_next
+                                } else {
+                                    R.string.install_tap_open_manager
+                                }
                             } else {
-                                R.string.install_tap_manager
+                                if (managerRef.isKernelSuNext) {
+                                    R.string.install_tap_manager_next
+                                } else {
+                                    R.string.install_tap_manager
+                                }
                             },
                         )
                         InstallPhase.Failed -> stringResource(R.string.install_tap_retry)
-                        else -> stringResource(R.string.install_tap_start)
+                        else -> stringResource(
+                            if (managerRef.isKernelSuNext) {
+                                R.string.install_tap_start_next
+                            } else {
+                                R.string.install_tap_start
+                            },
+                        )
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.86f),
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -1419,6 +1479,7 @@ private fun SettingsPage(
     themeMode: AppThemeMode,
     shizukuMode: Boolean,
     candidateProfiles: Boolean,
+    candidateFlavour: CandidateFlavour,
     updateStatus: UpdateStatus,
     onCheckForUpdate: () -> Unit,
     onStartDownload: (UpdateInfo) -> Unit,
@@ -1426,6 +1487,7 @@ private fun SettingsPage(
     onThemeModeChanged: (AppThemeMode) -> Unit,
     onShizukuModeChanged: (Boolean) -> Unit,
     onCandidateProfilesChanged: (Boolean) -> Unit,
+    onCandidateFlavourChanged: (CandidateFlavour) -> Unit,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -1434,8 +1496,10 @@ private fun SettingsPage(
     var showColorDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showShizukuMissingDialog by remember { mutableStateOf(false) }
+    var showFlavourDialog by remember { mutableStateOf(false) }
     var languageMenuTop by remember { mutableStateOf(32.dp) }
     var colorMenuTop by remember { mutableStateOf(32.dp) }
+    var flavourMenuTop by remember { mutableStateOf(32.dp) }
     val density = LocalDensity.current
     val currentLanguageTag = AppPreferences.languageTag(context)
 
@@ -1493,6 +1557,20 @@ private fun SettingsPage(
                 onAccentColorChanged(colors[index])
             },
             onDismiss = { showColorDialog = false },
+        )
+    }
+
+    if (showFlavourDialog) {
+        val flavours = CandidateFlavour.entries
+        SideChoiceMenu(
+            choices = flavours.map { flavourLabel(it) },
+            selectedIndex = flavours.indexOf(candidateFlavour).coerceAtLeast(0),
+            topOffset = flavourMenuTop,
+            onSelected = { index ->
+                showFlavourDialog = false
+                onCandidateFlavourChanged(flavours[index])
+            },
+            onDismiss = { showFlavourDialog = false },
         )
     }
 
@@ -1578,12 +1656,32 @@ private fun SettingsPage(
                     title = stringResource(R.string.candidate_profiles),
                     description = stringResource(R.string.candidate_profiles_description),
                     checked = candidateProfiles,
-                    position = SettingsCardPosition.Bottom,
+                    position = if (candidateProfiles) {
+                        SettingsCardPosition.Middle
+                    } else {
+                        SettingsCardPosition.Bottom
+                    },
                     onCheckedChange = { enabled ->
                         clickHaptic(view)
                         onCandidateProfilesChanged(enabled)
                     },
                 )
+                if (candidateProfiles) {
+                    SettingsCard(
+                        modifier = Modifier.onGloballyPositioned { coordinates ->
+                            flavourMenuTop = with(density) { coordinates.positionInWindow().y.toDp() }
+                        },
+                        icon = Icons.Rounded.Science,
+                        title = stringResource(R.string.candidate_flavour_title),
+                        description = stringResource(R.string.candidate_flavour_description),
+                        value = flavourLabel(candidateFlavour),
+                        position = SettingsCardPosition.Bottom,
+                        onClick = {
+                            clickHaptic(view)
+                            showFlavourDialog = true
+                        },
+                    )
+                }
             }
         }
         item { SectionLabel(stringResource(R.string.about)) }
@@ -2084,7 +2182,9 @@ private fun SideChoiceMenu(
                                     clickHaptic(view)
                                     closeMenu { onSelected(index) }
                                 },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .semantics { role = Role.RadioButton },
                                 shape = if (selected) {
                                     MaterialTheme.shapes.extraLarge
                                 } else {
@@ -2141,6 +2241,12 @@ private fun languageLabel(tag: String): String =
 private fun languageMatches(option: LanguageOption, currentTag: String): Boolean {
     if (option.tag.isEmpty()) return currentTag.isEmpty()
     return currentTag == option.tag || currentTag.startsWith("$option.tag-")
+}
+
+@Composable
+private fun flavourLabel(flavour: CandidateFlavour): String = when (flavour) {
+    CandidateFlavour.KernelSu -> stringResource(R.string.candidate_flavour_kernelsu)
+    CandidateFlavour.KernelSuNext -> stringResource(R.string.candidate_flavour_kernelsu_next)
 }
 
 @Composable

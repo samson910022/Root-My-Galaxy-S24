@@ -79,5 +79,12 @@
     <string name="repo_candidate_optin_required">이 기기는 아직 릴리스 승인이 되지 않은 후보 프로필 %1$s과 일치합니다. 계속하려면 설정에서 후보 프로필을 활성화하세요.</string>
     <string name="candidate_profiles">후보 프로필</string>
     <string name="candidate_profiles_description">실험적인 후보 페이로드를 허용합니다. 기본값은 꺼짐.</string>
+    <string name="candidate_flavour_title">후보 프로필 관리자</string>
+    <string name="candidate_flavour_description">검증 목적으로만 사용합니다.</string>
+    <string name="candidate_flavour_kernelsu">KernelSU v3.3.1</string>
+    <string name="candidate_flavour_kernelsu_next">KernelSU-Next v3.4.2</string>
+    <string name="install_tap_manager_next">눌러서 KernelSU-Next 매니저 설치하기</string>
+    <string name="install_tap_open_manager_next">눌러서 KernelSU-Next 매니저 열기</string>
+    <string name="install_tap_start_next">눌러서 KernelSU-Next 설치</string>
     <string name="install_confirm_candidate_note">이 기기는 아직 승인되지 않은 후보 프로필과 일치합니다. 검증 목적으로만 계속하세요.</string>
 </resources>

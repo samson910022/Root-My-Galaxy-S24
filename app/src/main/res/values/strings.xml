@@ -143,6 +143,13 @@
     <string name="shizuku_mode_description">Use Shizuku to run the payload. This can improve reliability.</string>
     <string name="candidate_profiles">Candidate profiles</string>
     <string name="candidate_profiles_description">Allow experimental candidate payloads. Off by default.</string>
+    <string name="candidate_flavour_title">Candidate manager flavour</string>
+    <string name="candidate_flavour_description">Validation only.</string>
+    <string name="candidate_flavour_kernelsu">KernelSU v3.3.1</string>
+    <string name="candidate_flavour_kernelsu_next">KernelSU-Next v3.4.2</string>
+    <string name="install_tap_manager_next">Tap to install KernelSU-Next Manager</string>
+    <string name="install_tap_open_manager_next">Tap to open KernelSU-Next Manager</string>
+    <string name="install_tap_start_next">Tap to install KernelSU-Next</string>
     <string name="shizuku_not_running_title">Shizuku is not running</string>
     <string name="shizuku_not_running_body">Start the Shizuku service with adb or root and grant this app permission, then enable this option.</string>
     <string name="action_download_shizuku">Download Shizuku</string>
