@@ -39,11 +39,12 @@ https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads-Next/c1a3
 https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads-Next/c1a3f9332922431764fa00bc306e184a3d8e4d91/artifacts/e1q-S9210ZHU6EZIF-next/cve-2026-43499-app.so
 ```
 
-Note: as of 2026-11-19 the ~4.3 MB daemon's raw URL still serves 503 (the
-570,584-byte `.ko` and the exploit are 200). The contents API serves the
-bytes (sizes verified), `tools/sync-payloads.sh` retries 503s with
-`--retry-all-errors`, and `--check` works offline; a refresh will only work
-once raw recovers or another host is arranged.
+Note: at the audit instant (2026-11-19 ~03:00 UTC) the raw CDN served 503
+for the ~4.3 MB daemon; it recovered later the same day (all three pin URLs
+returned 200 with matching sizes), which is what the full
+`./tools/sync-payloads.sh` pass ran against after the pins were repointed
+to this branch. `tools/sync-payloads.sh` retries 503s with `--retry-all-errors`,
+and `--check` works offline.
 
 ## Version receipts (both halves, agreeing)
 
@@ -142,18 +143,19 @@ For reference, the KernelSU v3.3.1 pair for the same target audited at
 
 ## Fork disappearance note
 
-`samson910022/Root-My-Galaxy-Payloads` (raw 503, repo unresolvable under
+`samson910022/Root-My-Galaxy-Payloads` (raw 404/503, repo unresolvable under
 both owner accounts) was the original pin for the EZIF v3.3.1 pair and the
 DZG1 exploit. It disappeared after the 2026-11-04 verification recorded in
-the EZIF validation doc. Consequences:
+the EZIF validation doc. Consequences, and how they were resolved on
+2026-11-19 (a full `./tools/sync-payloads.sh` pass now completes end to end and
+leaves the tree unchanged):
 
-- the EZIF v3.3.1 EZIF/DZG1 profiles' **refresh** path is broken in
-  `tools/sync-payloads.sh` (their `--check` still verifies the committed
-  bytes, and CI uses `--check` only);
 - Payloads-Next `main` carries a *different* exploit rebuild
   (`efc8b49c…`), not a substitute;
-- this Next profile vendors the shared exploit bytes itself
-  (`artifacts/e1q-S9210ZHU6EZIF-next/`, `7b68f38d…`), so its refresh path
-  is intact via the pin above.
-
-Do not repoint any existing pin at different bytes.
+- the DZG1 exploit pin was repointed to `e3a578d` (byte-identical, verified
+  by SHA-256), the shared EZIF/Next exploit to `c1a3f93` (this branch),
+  the EZIF v3.3.1 ksud to `f91d730` (`main`, byte-identical, verified),
+  the DZG1 ksud stays on `BuSung-dev` `8236c84` (unchanged), and the new
+  Next pair is pinned at `c1a3f93` (this branch);
+- `--check` was and remains fully offline; CI uses `--check` only;
+- the fork remains gone; do not repoint anything at different bytes.

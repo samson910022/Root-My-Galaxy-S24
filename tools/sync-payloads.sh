@@ -7,7 +7,15 @@
 # in BuSung-dev/Root-My-Galaxy-Payloads because Payloads later reverted it from
 # main pending broader hardware acceptance. Full-chain app/Shizuku runs
 # succeeded on 2026-10-03, 2026-10-07, and 2026-10-19 (the last with the
-# PI-guard bytes); see the validation records.
+# PI-guard bytes); see the validation records. The EZIF pins below were
+# repointed on 2026-11-19 after the samson910022/Root-My-Galaxy-Payloads
+# fork disappeared: the ksud now pins to samson910022/Root-My-Galaxy-Payloads-Next
+# commit f91d73015902813158c89da7c957ee9aa7dfc139 (the main-branch commit
+# that carries the byte-identical fde99b5a... ksud) and the exploit pins to
+# pair/e1q-S9210ZHU6EZIF-ksun342 commit c1a3f9332922431764fa00bc306e184a3d8e4d91
+# (artifacts/e1q-S9210ZHU6EZIF-next/cve-2026-43499-app.so, the same 7b68f38d...
+# bytes, re-vendored there for exactly this reason). Byte-identity with the
+# previous pins was verified by SHA-256 before this repoint.
 #
 # Both artifacts are fetched by immutable commit rather than by branch or ref,
 # and both are verified against the digests in the bundled manifest, so a
@@ -22,8 +30,8 @@ SCRIPT=tools/sync-payloads.sh
 PROVENANCE=app/src/main/assets/builtin-targets.json
 ASSET_DIR=app/src/main/assets/payloads/e1q-S9210ZHS6DZG1
 PROFILE=e1q-S9210ZHS6DZG1
-EXPLOIT_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads
-EXPLOIT_SOURCE_COMMIT=e90759c5e4167f271ef46cc4a57835cf42a2ffc6
+EXPLOIT_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads-Next
+EXPLOIT_SOURCE_COMMIT=e3a578d3342e266b6f26434147abe2697f350a0a
 KSUD_RAW_BASE=https://raw.githubusercontent.com/BuSung-dev/Root-My-Galaxy-Payloads
 # The e1q v3.3.0 pair is recorded in Payloads Phase D and was reverted from
 # main before its first successful app/Shizuku run (2026-10-03). Keep the
@@ -37,7 +45,11 @@ EXPLOIT_UPSTREAM="artifacts/$PROFILE/$EXPLOIT_NAME"
 KSUD_UPSTREAM="kernelsu/$KSUD_NAME"
 # e1q exploit with the PI-guard fix, built from the fork at
 # samson910022/Root-My-Galaxy-Payloads commit e90759c (upstream PR #320 code
-# plus the PI-guard fix). Pinned by commit because the fork's main has moved on.
+# plus the PI-guard fix). The fork disappeared in November 2026; the pin was
+# repointed on 2026-11-19 to samson910022/Root-My-Galaxy-Payloads-Next commit
+# e3a578d3342e266b6f26434147abe2697f350a0a, whose
+# artifacts/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so carries byte-identical
+# bytes (1da7c8cd...), verified by SHA-256.
 EXPLOIT_SHA256=1da7c8cd12d1125453fcd9e14a458296a62e37530257d152c9d8f9a26415b9df
 # EXPERIMENTAL v3.3.0 e1q Phase-D pair from Payloads commit 8236c84.
 # It uses CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y, passed static audit, and has three
@@ -48,28 +60,53 @@ EXPLOIT_SIZE=104128
 KSUD_SIZE=4995304
 
 # Second-profile pins: e1q-S9210ZHU6EZIF (KernelSU v3.3.1 candidate).
-# Published on the fork at samson910022/Root-My-Galaxy-Payloads commit
-# 58a677281ab2aa8ae43cfb15619628c2ab2e48b3
-# (feature/e1q-S9210ZHU6EZIF-port): EZIF exploit rebuild plus the v3.3.1 KDP
-# pair (a v3.3.0 fallback pair ships alongside in the payloads repo but this
-# profile does not use it). Both artifacts live only in the fork, so both
-# RAW_BASE values point there; do not use BuSung-dev for EZIF.
-# Verified 2026-11-04: both raw URLs return HTTP 200 at this commit with
-# matching SHA-256/size (see docs/SM-S9210-EZIF-validation-20261102.md).
+# Originally pinned to the fork samson910022/Root-My-Galaxy-Payloads commit
+# 58a677281ab2aa8ae43cfb15619628c2ab2e48b3 (feature/e1q-S9210ZHU6EZIF-port);
+# the fork disappeared in November 2026, so the pins were repointed to byte-
+# identical copies: the exploit to the pair branch c1a3f93 (that branch
+# re-vendored the same 7b68f38d... bytes under artifacts/e1q-S9210ZHU6EZIF-next/)
+# and the ksud to the Root-My-Galaxy-Payloads-Next main commit
+# f91d73015902813158c89da7c957ee9aa7dfc139 (byte-identical fde99b5a...).
+# Do not use BuSung-dev for EZIF.
+# Verified 2026-11-19: both raw URLs return HTTP 200 with matching
+# SHA-256/size at these commits (see docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md
+# for the repoint record; the fork pins' historical record lives in
+# docs/SM-S9210-EZIF-validation-20261102.md).
 EZIF_PROFILE=e1q-S9210ZHU6EZIF
-EZIF_EXPLOIT_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads
-EZIF_EXPLOIT_SOURCE_COMMIT=58a677281ab2aa8ae43cfb15619628c2ab2e48b3
+EZIF_EXPLOIT_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads-Next
+EZIF_EXPLOIT_SOURCE_COMMIT=c1a3f9332922431764fa00bc306e184a3d8e4d91
 EZIF_EXPLOIT_SHA256=7b68f38d9c3836c83cfc5af3af454036fe6d3f5f455c504df5670c44c22e30cb
 EZIF_EXPLOIT_SIZE=104128
-EZIF_KSUD_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads
-EZIF_KSUD_SOURCE_COMMIT=58a677281ab2aa8ae43cfb15619628c2ab2e48b3
+EZIF_KSUD_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads-Next
+EZIF_KSUD_SOURCE_COMMIT=f91d73015902813158c89da7c957ee9aa7dfc139
 EZIF_KSUD_SHA256=fde99b5a129e5714fe6f598cf8276c76d2cbaf1a7f4e6ce9ae69d5ebca0abe61
 EZIF_KSUD_SIZE=5065680
 EZIF_ASSET_DIR=app/src/main/assets/payloads/e1q-S9210ZHU6EZIF
 EZIF_EXPLOIT_NAME=cve-2026-43499-app.so
 EZIF_KSUD_NAME=ksud-e1q-S9210ZHU6EZIF-kdp
-EZIF_EXPLOIT_UPSTREAM="artifacts/$EZIF_PROFILE/$EZIF_EXPLOIT_NAME"
+EZIF_EXPLOIT_UPSTREAM="artifacts/e1q-S9210ZHU6EZIF-next/$EZIF_EXPLOIT_NAME"
 EZIF_KSUD_UPSTREAM="kernelsu/$EZIF_KSUD_NAME"
+
+# Third-profile pins: e1q-S9210ZHU6EZIF-next (KernelSU-Next v3.4.2 candidate).
+# Built by ksu-build.yml run 44374096436 from the v3.4.2 tag (4c706b59,
+# versionCode 33355) with CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y, and committed on
+# the dedicated branch pair/e1q-S9210ZHU6EZIF-ksun342 of
+# samson910022/Root-My-Galaxy-Payloads-Next at commit
+# c1a3f9332922431764fa00bc306e184a3d8e4d91. The branch is self-contained: it
+# carries the module, the daemon, and the shared exploit bytes re-vendored at
+# artifacts/e1q-S9210ZHU6EZIF-next/ (identical to the EZIF profile's copy,
+# verified by SHA-256). Ships as BUILTIN behind the Settings candidate
+# opt-in with candidateFlavour=kernelsu-next; no hardware validation yet.
+EZIF_NEXT_PROFILE=e1q-S9210ZHU6EZIF-next
+EZIF_NEXT_RAW_BASE=https://raw.githubusercontent.com/samson910022/Root-My-Galaxy-Payloads-Next
+EZIF_NEXT_SOURCE_COMMIT=c1a3f9332922431764fa00bc306e184a3d8e4d91
+EZIF_NEXT_KSUD_SHA256=d97d3ba464e188fb280177860e006bfa92d48a09e3c7600eee06d906e032f866
+EZIF_NEXT_KSUD_SIZE=4309840
+EZIF_NEXT_ASSET_DIR=app/src/main/assets/payloads/e1q-S9210ZHU6EZIF-next
+EZIF_NEXT_KSUD_NAME=ksud-next-e1q-S9210ZHU6EZIF-kdp
+EZIF_NEXT_KSUD_UPSTREAM="kernelsu/$EZIF_NEXT_KSUD_NAME"
+EZIF_NEXT_EXPLOIT_UPSTREAM="artifacts/e1q-S9210ZHU6EZIF-next/$EZIF_EXPLOIT_NAME"
+EZIF_NEXT_ASSET_PATH=payloads/e1q-S9210ZHU6EZIF-next/ksud-next-e1q-S9210ZHU6EZIF-kdp
 
 fail() { printf 'sync-payloads: %s\n' "$*" >&2; exit 1; }
 note() { printf 'sync-payloads: %s\n' "$*"; }
@@ -114,6 +151,12 @@ EZIF_EXPLOIT_ASSET_PATH=$(read_manifest "$EZIF_PROFILE" exploit | cut -d' ' -f3)
 EZIF_KSUD_SHA256_MANIFEST=$(read_manifest "$EZIF_PROFILE" kernelsu | cut -d' ' -f1)
 EZIF_KSUD_SIZE_MANIFEST=$(read_manifest "$EZIF_PROFILE" kernelsu | cut -d' ' -f2)
 EZIF_KSUD_ASSET_PATH=$(read_manifest "$EZIF_PROFILE" kernelsu | cut -d' ' -f3)
+EZIF_NEXT_EXPLOIT_SHA256_MANIFEST=$(read_manifest "$EZIF_NEXT_PROFILE" exploit | cut -d' ' -f1)
+EZIF_NEXT_EXPLOIT_SIZE_MANIFEST=$(read_manifest "$EZIF_NEXT_PROFILE" exploit | cut -d' ' -f2)
+EZIF_NEXT_EXPLOIT_ASSET_PATH=$(read_manifest "$EZIF_NEXT_PROFILE" exploit | cut -d' ' -f3)
+EZIF_NEXT_KSUD_SHA256_MANIFEST=$(read_manifest "$EZIF_NEXT_PROFILE" kernelsu | cut -d' ' -f1)
+EZIF_NEXT_KSUD_SIZE_MANIFEST=$(read_manifest "$EZIF_NEXT_PROFILE" kernelsu | cut -d' ' -f2)
+EZIF_NEXT_KSUD_ASSET_PATH=$(read_manifest "$EZIF_NEXT_PROFILE" kernelsu | cut -d' ' -f3)
 
 # The manifest and this script must agree, or the check below would silently
 # compare the assets against the wrong expectations.
@@ -129,6 +172,12 @@ EZIF_KSUD_ASSET_PATH=$(read_manifest "$EZIF_PROFILE" kernelsu | cut -d' ' -f3)
 [ "$EZIF_KSUD_SIZE_MANIFEST" = "$EZIF_KSUD_SIZE" ] || fail "manifest EZIF ksud size differs from the script pin"
 [ "$EZIF_EXPLOIT_ASSET_PATH" = "payloads/$EZIF_PROFILE/$EZIF_EXPLOIT_NAME" ] || fail "unexpected EZIF exploit assetPath"
 [ "$EZIF_KSUD_ASSET_PATH" = "payloads/$EZIF_PROFILE/$EZIF_KSUD_NAME" ] || fail "unexpected EZIF ksud assetPath"
+[ "$EZIF_NEXT_EXPLOIT_SHA256_MANIFEST" = "$EZIF_EXPLOIT_SHA256" ] || fail "manifest EZIF next exploit digest differs from the shared EZIF exploit digest"
+[ "$EZIF_NEXT_EXPLOIT_SIZE_MANIFEST" = "$EZIF_EXPLOIT_SIZE" ] || fail "manifest EZIF next exploit size differs from the shared EZIF exploit size"
+[ "$EZIF_NEXT_EXPLOIT_ASSET_PATH" = "payloads/$EZIF_PROFILE/$EZIF_EXPLOIT_NAME" ] || fail "unexpected EZIF next exploit assetPath (must share the EZIF exploit asset)"
+[ "$EZIF_NEXT_KSUD_SHA256_MANIFEST" = "$EZIF_NEXT_KSUD_SHA256" ] || fail "manifest EZIF next ksud digest differs from the script pin"
+[ "$EZIF_NEXT_KSUD_SIZE_MANIFEST" = "$EZIF_NEXT_KSUD_SIZE" ] || fail "manifest EZIF next ksud size differs from the script pin"
+[ "$EZIF_NEXT_KSUD_ASSET_PATH" = "$EZIF_NEXT_ASSET_PATH" ] || fail "unexpected EZIF next ksud assetPath"
 
 verify() {
   local file=$1 size=$2 digest=$3 label=$4
@@ -151,6 +200,7 @@ verify "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
 verify "$ASSET_DIR/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
 verify "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
 verify "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME" "$EZIF_KSUD_SIZE" "$EZIF_KSUD_SHA256" "EZIF ksud"
+verify "$EZIF_NEXT_ASSET_DIR/$EZIF_NEXT_KSUD_NAME" "$EZIF_NEXT_KSUD_SIZE" "$EZIF_NEXT_KSUD_SHA256" "EZIF next ksud"
 
 # Also prove the copy a commit would record is the same, so a tampered asset
 # cannot be blessed here and then committed from the index.
@@ -161,7 +211,7 @@ verify_index() {
   else
     fail "cannot read the staged $label from the index"
   fi
-  git diff --quiet -- "$PROVENANCE" "$ASSET_DIR" "$EZIF_ASSET_DIR" "$SCRIPT" ||
+  git diff --quiet -- "$PROVENANCE" "$ASSET_DIR" "$EZIF_ASSET_DIR" "$EZIF_NEXT_ASSET_DIR" "$SCRIPT" ||
     fail "staged content differs from the worktree; commit or unstage first"
 }
 
@@ -170,6 +220,7 @@ if $check_only; then
   verify_index "$ASSET_DIR/$KSUD_NAME" "$KSUD_SHA256" ksud
   verify_index "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
   verify_index "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME" "$EZIF_KSUD_SHA256" "EZIF ksud"
+  verify_index "$EZIF_NEXT_ASSET_DIR/$EZIF_NEXT_KSUD_NAME" "$EZIF_NEXT_KSUD_SHA256" "EZIF next ksud"
   note "assets match the manifest, in the worktree and in the index"
   exit 0
 fi
@@ -203,15 +254,20 @@ fetch "$EXPLOIT_RAW_BASE" "$EXPLOIT_SOURCE_COMMIT" "$EXPLOIT_UPSTREAM" "$work/$P
 fetch "$KSUD_RAW_BASE" "$KSUD_SOURCE_COMMIT" "$KSUD_UPSTREAM" "$work/$PROFILE-$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
 fetch "$EZIF_EXPLOIT_RAW_BASE" "$EZIF_EXPLOIT_SOURCE_COMMIT" "$EZIF_EXPLOIT_UPSTREAM" "$work/$EZIF_PROFILE-$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
 fetch "$EZIF_KSUD_RAW_BASE" "$EZIF_KSUD_SOURCE_COMMIT" "$EZIF_KSUD_UPSTREAM" "$work/$EZIF_PROFILE-$EZIF_KSUD_NAME" "$EZIF_KSUD_SIZE" "$EZIF_KSUD_SHA256" "EZIF ksud"
+fetch "$EZIF_NEXT_RAW_BASE" "$EZIF_NEXT_SOURCE_COMMIT" "$EZIF_NEXT_EXPLOIT_UPSTREAM" "$work/$EZIF_NEXT_PROFILE-$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF next exploit"
+fetch "$EZIF_NEXT_RAW_BASE" "$EZIF_NEXT_SOURCE_COMMIT" "$EZIF_NEXT_KSUD_UPSTREAM" "$work/$EZIF_NEXT_PROFILE-$EZIF_NEXT_KSUD_NAME" "$EZIF_NEXT_KSUD_SIZE" "$EZIF_NEXT_KSUD_SHA256" "EZIF next ksud"
 
-mkdir -p "$ASSET_DIR" "$EZIF_ASSET_DIR"
+mkdir -p "$ASSET_DIR" "$EZIF_ASSET_DIR" "$EZIF_NEXT_ASSET_DIR"
 install -m 0644 "$work/$PROFILE-$EXPLOIT_NAME" "$ASSET_DIR/$EXPLOIT_NAME"
 install -m 0644 "$work/$PROFILE-$KSUD_NAME" "$ASSET_DIR/$KSUD_NAME"
 install -m 0644 "$work/$EZIF_PROFILE-$EZIF_EXPLOIT_NAME" "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME"
 install -m 0644 "$work/$EZIF_PROFILE-$EZIF_KSUD_NAME" "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME"
+install -m 0644 "$work/$EZIF_NEXT_PROFILE-$EZIF_EXPLOIT_NAME" "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME"
+install -m 0644 "$work/$EZIF_NEXT_PROFILE-$EZIF_NEXT_KSUD_NAME" "$EZIF_NEXT_ASSET_DIR/$EZIF_NEXT_KSUD_NAME"
 
 verify "$ASSET_DIR/$EXPLOIT_NAME" "$EXPLOIT_SIZE" "$EXPLOIT_SHA256" exploit
 verify "$ASSET_DIR/$KSUD_NAME" "$KSUD_SIZE" "$KSUD_SHA256" ksud
 verify "$EZIF_ASSET_DIR/$EZIF_EXPLOIT_NAME" "$EZIF_EXPLOIT_SIZE" "$EZIF_EXPLOIT_SHA256" "EZIF exploit"
 verify "$EZIF_ASSET_DIR/$EZIF_KSUD_NAME" "$EZIF_KSUD_SIZE" "$EZIF_KSUD_SHA256" "EZIF ksud"
-note "synced $PROFILE exploit from samson910022/Root-My-Galaxy-Payloads@$EXPLOIT_SOURCE_COMMIT and ksud from BuSung-dev/Root-My-Galaxy-Payloads@$KSUD_SOURCE_COMMIT; synced $EZIF_PROFILE exploit and ksud from samson910022/Root-My-Galaxy-Payloads@$EZIF_EXPLOIT_SOURCE_COMMIT"
+verify "$EZIF_NEXT_ASSET_DIR/$EZIF_NEXT_KSUD_NAME" "$EZIF_NEXT_KSUD_SIZE" "$EZIF_NEXT_KSUD_SHA256" "EZIF next ksud"
+note "synced $PROFILE exploit from samson910022/Root-My-Galaxy-Payloads@$EXPLOIT_SOURCE_COMMIT and ksud from BuSung-dev/Root-My-Galaxy-Payloads@$KSUD_SOURCE_COMMIT; synced $EZIF_PROFILE exploit and ksud from samson910022/Root-My-Galaxy-Payloads-Next@$EZIF_EXPLOIT_SOURCE_COMMIT and ksud from samson910022/Root-My-Galaxy-Payloads-Next@$EZIF_KSUD_SOURCE_COMMIT; synced $EZIF_NEXT_PROFILE from samson910022/Root-My-Galaxy-Payloads-Next@$EZIF_NEXT_SOURCE_COMMIT"

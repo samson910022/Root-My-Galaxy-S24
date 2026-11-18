@@ -27,12 +27,18 @@ Plan history:
    The patch-text pair is not used.
 
 4. 2026-11-19 the original payloads fork (`samson910022/Root-My-Galaxy-Payloads`)
-   was found gone (raw 503, repo unresolvable). The pair branch
-   `pair/e1q-S9210ZHU6EZIF-ksun342` in `Root-My-Galaxy-Payloads-Next`
-   is now the pin host; the pair commit is
-   `c1a3f9332922431764fa00bc306e184a3d8e4d91`. The EZIF v3.3.1
-   candidate's refresh path is broken with it (documented in the PR);
-   `--check` is unaffected.
+   was found gone (raw 503/404, repo unresolvable under both owner accounts).
+   The pair branch `pair/e1q-S9210ZHU6EZIF-ksun342` in
+   `Root-My-Galaxy-Payloads-Next` is the pin host for the Next pair; the
+   pair commit is `c1a3f9332922431764fa00bc306e184a3d8e4d91`.
+5. 2026-11-19 the refresh pins in `tools/sync-payloads.sh` were repointed to
+   byte-identical copies in `Root-My-Galaxy-Payloads-Next` (verified by
+   SHA-256): the DZG1 exploit to `e3a578d` (byte-identical to the fork pin),
+   the shared EZIF/Next exploit to `c1a3f93`, the EZIF v3.3.1 ksud to
+   `f91d730` (`main`), the DZG1 ksud stays on `BuSung-dev` `8236c84`
+   (unchanged), and the new KernelSU-Next v3.4.2 pair is pinned at
+   `c1a3f93`. A full `./tools/sync-payloads.sh` pass now completes end to end
+   and leaves the tree unchanged; the EZIF v3.3.1 refresh path is restored.
 
 ## Objective
 
@@ -295,7 +301,12 @@ opt-in" generically.
 - `tools/sync-payloads.sh`: new `EZIF_NEXT_*` pin block (Payloads-Next raw base,
   `pair/e1q-S9210ZHU6EZIF-ksun342` immutable commit `c1a3f9332922431764fa00bc306e184a3d8e4d91`, sha256/size),
   manifest-agreement asserts, `verify`/`verify_index`/fetch/install lines;
-  `--check` stays offline.
+  `--check` stays offline. In addition, the *dead* refresh pins for the
+  existing profiles were repointed to byte-identical copies in
+  `Root-My-Galaxy-Payloads-Next` (DZG1 exploit → `e3a578d`; shared EZIF
+  exploit → `c1a3f93`; EZIF v3.3.1 ksud → `f91d730` on `main`; DZG1 ksud
+  unchanged on `BuSung-dev`) — verified by SHA-256 before the repoint,
+  and a full `./tools/sync-payloads.sh` pass now completes end to end.
 - `docs/SM-S9210-EZIF-KERNELSU-NEXT-PLAN.md` (this file), plus
   `docs/SM-S9210-EZIF-NEXT-validation-YYYYMMDD.md` written **after** the
   hardware run, not now. A short audit record
@@ -333,12 +344,12 @@ commit. Nothing merges before the final all-green multi-subagent review.
   3. `gh run download --repo samson910022/Root-My-Galaxy-Payloads-Next 44374096436 -n pair-module-kernelsu-next-e1q-S9210ZHU6EZIF -n pair-ksud-kernelsu-next-e1q-S9210ZHU6EZIF -D /mnt/240G_SSD/opencode_tmp/pairs/e1q-ksun342` (exact names; no wildcard segment).
   4. Verify `vermagic` is exactly `6.1.162-android14-11-34343818-abS9210ZHU6EZIF SMP preempt mod_unload modversions aarch64`; `tools/verify_pair.py --module <ko> --daemon <ksud> --release …` exits 0; `kernelsu/tools/extract_target_symvers.py` + `audit_module_against_target.py --manual-relocation` vs retained `/mnt/240G_SSD/opencode_tmp/EZIF_work/vmlinux.elf`: zero missing, zero CRC mismatch, zero `__versions` bytes; confirm the build log shows `CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y`; daemon version receipts agree with tag (3.4.2 / versionCode derived from tag = 33355).
   5. The bad-news case is handled: the original payloads fork disappeared
-     (raw 503), so the pair was committed to
+     (raw 404/503), so the pair was committed to
      `pair/e1q-S9210ZHU6EZIF-ksun342` on `samson910022/Root-My-Galaxy-Payloads-Next`
      (`c1a3f9332922431764fa00bc306e184a3d8e4d91`; carries the module, the
      daemon and the shared exploit bytes under
-     `artifacts/e1q-S9210ZHU6EZIF-next/`). Record the commit SHA in the
-     app manifest provenance and `tools/sync-payloads.sh`.
+     `artifacts/e1q-S9210ZHU6EZIF-next/`). The commit SHA is recorded in the
+     app manifest provenance and `tools/sync-payloads.sh` (`syncRepointed`).
   6. Write `docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md` with all outputs (CI run id, vermagic, no-patch-text config line, verify_pair/audit results, receipts, fork-disappearance note, pin commit SHA).
   Review: `code-reviewer` (audit transcript vs. claimed gates). Commit (S24 repo, doc only).
 - **Phase 2a** — app data layer: manifest entry + parser field + resolver

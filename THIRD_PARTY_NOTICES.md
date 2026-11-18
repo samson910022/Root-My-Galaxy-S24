@@ -35,8 +35,11 @@ below (from `a311cb88`'s `src/su_daemon.c`, untouched by the PI-guard fix). The 
 
 | Artifact | Upstream path |
 | --- | --- |
-| `assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | `artifacts/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` |
+| `assets/payloads/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` | `artifacts/e1q-S9210ZHS6DZG1/cve-2026-43499-app.so` (byte-identical, refresh pin repointed 2026-11-19) |
 | `assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | `kernelsu/ksud-e1q-S9210ZHS6DZG1-kdp` |
+| `assets/payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so` | `artifacts/e1q-S9210ZHU6EZIF-next/cve-2026-43499-app.so` (re-vendored copy; refresh pin repointed 2026-11-19) |
+| `assets/payloads/e1q-S9210ZHU6EZIF/ksud-e1q-S9210ZHU6EZIF-kdp` | `kernelsu/ksud-e1q-S9210ZHU6EZIF-kdp` (`main` branch; refresh pin repointed 2026-11-19) |
+| `assets/payloads/e1q-S9210ZHU6EZIF-next/ksud-next-e1q-S9210ZHU6EZIF-kdp` | `kernelsu/ksud-next-e1q-S9210ZHU6EZIF-kdp` (pair branch, KernelSU-Next v3.4.2) |
 | `jniLibs/arm64-v8a/libcve43499root.so` | built from `src/su_daemon.c` |
 
 The helper is checked in unstripped (26,040 bytes, SHA-256
@@ -44,6 +47,36 @@ The helper is checked in unstripped (26,040 bytes, SHA-256
 strips it to 21,480 bytes, SHA-256
 `1818103f4345b9049741fbdc1b5379f9cc48a69a3e3f5cc07c69c51f145278fe`, inside
 the APK.
+
+### KernelSU-Next loader (EZIF Next candidate, KernelSU-Next v3.4.2)
+
+The EZIF Next candidate (`e1q-S9210ZHU6EZIF-next`) ships the pair built by
+`ksu-build.yml` (run 44374096436, `publish=false`,
+`pair_no_patch_text=true`) from KernelSU-Next `v3.4.2`, tag commit
+`4c706b5938665866ebe16944a481a7b91e3396af`, with the Samsung KDP/RKP/DEFEX
+patch set (`KernelSU-Next-v3.4.2-samsung-kdp-rkp-defex.patch`, carried by the
+`pair/e1q-S9210ZHU6EZIF-ksun342` branch of `samson910022/Root-My-Galaxy-Payloads-Next`),
+`CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y`. KernelSU-Next is a fork of KernelSU; the
+loader is GPL-3.0-or-later and the embedded kernel module is GPL-2.0-only, per
+KernelSU-Next's tree (`LICENSE`, `kernel/`). The module has vermagic
+`6.1.162-android14-11-34343818-abS9210ZHU6EZIF SMP preempt mod_unload modversions
+aarch64`, size 570584, SHA-256
+`02f05aabd32e5bcfb17ab98b4888f9dafb487695da1dda8e1f7de78a0a2e73f5`, and an
+empty `__versions` section; the paired `ksud` is 4309840 bytes, SHA-256
+`d97d3ba464e188fb280177860e006bfa92d48a09e3c7600eee06d906e032f866`, reports
+`3.4.2 (uapi: 5)` (versionCode `33355`) and embeds the
+`android14-6.1_kernelsu.ko` asset. The exact provenance, the static audit
+against the recovered EZIF `vmlinux.elf`, and the run identifiers are recorded
+in [`docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md`](docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md).
+Corresponding Source for this pair is available at:
+
+  KernelSU-Next base (userspace/ for `ksud`, kernel/ for the module)
+    https://github.com/KernelSU-Next/KernelSU-Next at tag v3.4.2,
+    commit 4c706b5938665866ebe16944a481a7b91e3396af
+  Samsung patch set and build record
+    https://github.com/samson910022/Root-My-Galaxy-Payloads-Next at commit
+    c1a3f9332922431764fa00bc306e184a3d8e4d91
+    (branch pair/e1q-S9210ZHU6EZIF-ksun342)
 
 ### Exploit payload
 
@@ -55,8 +88,21 @@ commit `2fb9d24e1408f5567bbeb5d7fa2d36ce808c5a1a`, which is recorded alongside
 the licence in this repository. The MIT-licensed components and all other
 attributions are in [NOTICE](NOTICE) and [LICENSES/](LICENSES/).
 
-### KernelSU loader
+### KernelSU loader (EZIF candidate, KernelSU v3.3.1)
 
+
+The EZIF v3.3.1 candidate for `S9210ZHU6EZIF` is built from KernelSU `v3.3.1`,
+commit `0c0fdb96`, with the Samsung KDP/RKP/DEFEX patch set
+(`KernelSU-v3.3.1-samsung-kdp-rkp-defex.patch`, carried by the
+`migrate/merge-our-customizations` branch of `samson910022/Root-My-Galaxy-Payloads-Next`),
+`CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y`, and `KSU_VERSION 33333`. The module has
+vermagic `6.1.162-android14-11-34343818-abS9210ZHU6EZIF SMP preempt mod_unload
+modversions aarch64`, size 432656, SHA-256
+`af640cda` (see `docs/SM-S9210-S9210ZHU6EZIF.md` and the audit record
+`docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md`); the paired `ksud` is
+5065680 bytes, SHA-256
+`fde99b5a129e5714fe6f598cf8276c76d2cbaf1a7f4e6ce9ae69d5ebca0abe61`,
+reports `3.3.1 (uapi: 5)` and embeds the `android14-6.1_kernelsu.ko` asset.
 `ksud-e1q-S9210ZHS6DZG1-kdp` is the EXPERIMENTAL e1q Phase-D pair recorded in
 `BuSung-dev/Root-My-Galaxy-Payloads` commit
 `8236c84301282b5415412d867ab71d4a739e0809`; Payloads main later reverted it in
@@ -93,7 +139,7 @@ The earlier device test (2026-09-11) covered the v3.2.5 loader
 `67b49cad…ee542`). Pair v3.3.0 with Manager `32601`; a 3.2.5 Manager reports
 version skew.
 
-KernelSU is licensed under two different GNU GPL versions depending on the
+KernelSU and KernelSU-Next are licensed under two different GNU GPL versions depending on the
 part, and neither is the Apache-2.0 licence covering this repository. The
 `ksud` userspace loader is GPL-3.0-or-later (used here under GPL-3.0), and the
 kernel module embedded inside `ksud` (`android14-6.1_kernelsu.ko`) is
