@@ -26,6 +26,19 @@ class TargetProfileTest {
         assertFalse(profile.matches(snapshot("SM-S938N", "6.6.102-android15-8-build")))
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsAnUnknownCandidateFlavour() {
+        TargetProfile(
+            profileId = "candidate",
+            displayName = "candidate",
+            models = setOf("SM-S931B"),
+            kernelVersions = setOf("6.6.98"),
+            exploit = RemoteArtifact("https://example.invalid/exploit", 1),
+            kernelSu = RemoteArtifact("https://example.invalid/ksud", 1),
+            candidateFlavour = "bogus",
+        )
+    }
+
     private fun snapshot(
         model: String,
         kernelRelease: String,

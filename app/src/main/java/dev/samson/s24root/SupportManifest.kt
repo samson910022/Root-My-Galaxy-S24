@@ -59,6 +59,14 @@ data class TargetProfile(
      * different release must not silently reuse them.
      */
     val kernelReleases: Set<String> = emptySet(),
+    /**
+     * Which superuser-manager flavour this profile pairs with, when it is a
+     * candidate. Flavour selection is only meaningful with the candidate
+     * opt-in enabled; it deterministically picks between same-firmware
+     * candidates. Absent means [FLAVOUR_KERNELSU], which is what stable and
+     * online profiles always are.
+     */
+    val candidateFlavour: String = FLAVOUR_KERNELSU,
 ) {
     init {
         require(models.isNotEmpty()) { "Payload must support at least one model" }
@@ -74,6 +82,9 @@ data class TargetProfile(
             require(kernelReleases.isNotEmpty() && kernelReleases.none { it.isBlank() }) {
                 "A bundled payload must pin at least one exact kernel release"
             }
+        }
+        require(candidateFlavour in KNOWN_CANDIDATE_FLAVOURS) {
+            "Unknown candidate flavour: $candidateFlavour"
         }
     }
 
@@ -107,6 +118,16 @@ data class TargetProfile(
 
     val supportedKernelReleases: String
         get() = kernelReleases.sorted().joinToString()
+
+    companion object {
+        /** The KernelSU (tiann) manager flavour. The default everywhere. */
+        const val FLAVOUR_KERNELSU = "kernelsu"
+
+        /** The KernelSU-Next manager flavour, for opt-in candidate profiles. */
+        const val FLAVOUR_KERNELSU_NEXT = "kernelsu-next"
+
+        internal val KNOWN_CANDIDATE_FLAVOURS = setOf(FLAVOUR_KERNELSU, FLAVOUR_KERNELSU_NEXT)
+    }
 }
 
 /**
@@ -198,6 +219,10 @@ data class BuiltinSupportManifest(
                             models = payload.getJSONArray("models").strings(),
                             kernelVersions = payload.getJSONArray("kernelVersions").strings(),
                             kernelReleases = kernelReleases,
+                            candidateFlavour = payload.optString(
+                                "candidateFlavour",
+                                TargetProfile.FLAVOUR_KERNELSU,
+                            ),
                             exploit = payload.bundledArtifact("exploit"),
                             kernelSu = payload.bundledArtifact("kernelsu"),
                         ),

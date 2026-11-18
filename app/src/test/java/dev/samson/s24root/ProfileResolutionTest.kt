@@ -47,6 +47,17 @@ private fun candidateProfile() = TargetProfile(
     kernelSu = BundledArtifact("payloads/e/ksud", "8874894560e46dd3ab711386f07c3d89635bdaae0e02a806878555bdbdc15049", 4995304),
 )
 
+private fun nextCandidateProfile() = TargetProfile(
+    profileId = "e1q-S9210ZHU6EZIF-next",
+    displayName = "Galaxy S24 China [candidate: KernelSU-Next v3.4.2]",
+    models = setOf("SM-S9210"),
+    kernelVersions = setOf("6.1.162"),
+    kernelReleases = setOf(EZIF_RELEASE),
+    exploit = BundledArtifact("payloads/e/cve.so", "2dc137cc1dca72f896ee16347f3137dd0c521ecdee56e1922fb58e733e9b4059", 104128),
+    kernelSu = BundledArtifact("payloads/n/ksud-next", "d97d3ba464e188fb280177860e006bfa92d48a09e3c7600eee06d906e032f866", 4309840),
+    candidateFlavour = "kernelsu-next",
+)
+
 private fun remote(vararg models: String) = models.map { model ->
     TargetProfile(
         profileId = "remote-$model",
@@ -270,6 +281,152 @@ class ProfileResolutionTest {
         assertTrue(resolution is Resolution.Found)
         assertEquals("e1q-S9210ZHS6DZG1", (resolution as Resolution.Found).profile.profileId)
         assertEquals(0, remoteLoads)
+    }
+
+    @Test
+    fun optedInResolutionWithTheFlavourArgumentOmittedUsesTheKernelSuDefault() {
+        var remoteLoads = 0
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+            bundled = bundled() + candidateProfile() + nextCandidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+            allowCandidates = true,
+        )
+        assertTrue(resolution is Resolution.Found)
+        assertEquals("e1q-S9210ZHU6EZIF", (resolution as Resolution.Found).profile.profileId)
+        assertEquals(0, remoteLoads)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun anUnknownFlavourFailsFastRatherThanResolvingSilently() {
+        resolveProfile(
+            snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+            bundled = bundled(),
+            remote = { remote("SM-S9210") },
+            candidateFlavour = "bogus",
+        )
+    }
+
+    @Test
+    fun nextCandidateResolvesWhenOptedInAndFlavourIsKernelSuNext() {
+        var remoteLoads = 0
+        // Fixture order matters: candidateProfile() must precede
+        // nextCandidateProfile() (as the shipped manifest orders them) for
+        // the flavour filter to be observable at all — an unfiltered
+        // resolver picks the v3.3.1 candidate, failing this test.
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+            bundled = bundled() + candidateProfile() + nextCandidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+            allowCandidates = true,
+            candidateFlavour = "kernelsu-next",
+        )
+        assertTrue(resolution is Resolution.Found)
+        assertEquals("e1q-S9210ZHU6EZIF-next", (resolution as Resolution.Found).profile.profileId)
+        assertEquals(0, remoteLoads)
+    }
+
+    @Test
+    fun optedInDefaultKernelSuFlavourStillResolvesTheV331Candidate() {
+        var remoteLoads = 0
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+            bundled = bundled() + candidateProfile() + nextCandidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+            allowCandidates = true,
+            candidateFlavour = "kernelsu",
+        )
+        assertTrue(resolution is Resolution.Found)
+        assertEquals("e1q-S9210ZHU6EZIF", (resolution as Resolution.Found).profile.profileId)
+        assertEquals(0, remoteLoads)
+    }
+
+    @Test
+    fun optInOffWithNextFlavourPreferenceReportsTheNextCandidateId() {
+        var remoteLoads = 0
+        // Fixture order matters, as in
+        // nextCandidateResolvesWhenOptedInAndFlavourIsKernelSuNext: the
+        // v3.3.1 candidate must be listed first for the opt-in-off probe
+        // filter to be observable — an unfiltered probe reports the v3.3.1
+        // id and this test goes red.
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+            bundled = bundled() + candidateProfile() + nextCandidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+            candidateFlavour = "kernelsu-next",
+        )
+        assertTrue(resolution is Resolution.Failed)
+        val failure = (resolution as Resolution.Failed).failure
+        assertTrue("expected CandidateRequiresOptIn, got $failure", failure is ResolutionFailure.CandidateRequiresOptIn)
+        assertEquals("e1q-S9210ZHU6EZIF-next", (failure as ResolutionFailure.CandidateRequiresOptIn).profileId)
+        assertEquals(0, remoteLoads)
+    }
+
+    @Test
+    fun optInOffWithDefaultKernelSuPreferenceStillReportsTheV331CandidateId() {
+        var remoteLoads = 0
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", EZIF_RELEASE),
+            bundled = bundled() + candidateProfile() + nextCandidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+        )
+        assertTrue(resolution is Resolution.Failed)
+        val failure = (resolution as Resolution.Failed).failure
+        assertTrue("expected CandidateRequiresOptIn, got $failure", failure is ResolutionFailure.CandidateRequiresOptIn)
+        assertEquals("e1q-S9210ZHU6EZIF", (failure as ResolutionFailure.CandidateRequiresOptIn).profileId)
+        assertEquals(0, remoteLoads)
+    }
+
+    @Test
+    fun unknownFirmwareWithOptInListsBothEzifReleasesOnce() {
+        // Both EZIF candidates share the exact same release string; the
+        // wrong-firmware message must list it once, not twice. It also pins
+        // the full-list semantics: the DZG1 stable release must still appear
+        // even though the preference asked for the Next flavour.
+        var remoteLoads = 0
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", UNKNOWN_S9210_RELEASE),
+            bundled = bundled() + candidateProfile() + nextCandidateProfile(),
+            remote = {
+                remoteLoads++
+                remote("SM-S9210")
+            },
+            allowCandidates = true,
+            candidateFlavour = "kernelsu-next",
+        )
+        assertTrue(resolution is Resolution.Failed)
+        val releases = (resolution as Resolution.Failed).failure
+        assertTrue(releases is ResolutionFailure.WrongFirmware)
+        val text = (releases as ResolutionFailure.WrongFirmware).supportedReleases
+        assertEquals(listOf(S9210_RELEASE, EZIF_RELEASE).sorted().joinToString(), text)
+        assertEquals(0, remoteLoads)
+    }
+
+    @Test
+    fun stableResolutionIsUnaffectedByTheCandidateFlavourPreference() {
+        val resolution = resolveProfile(
+            snapshot = snapshot("SM-S9210", S9210_RELEASE),
+            bundled = bundled() + candidateProfile() + nextCandidateProfile(),
+            remote = { remote("SM-S9210") },
+            candidateFlavour = "kernelsu-next",
+        )
+        assertTrue(resolution is Resolution.Found)
+        assertEquals("e1q-S9210ZHS6DZG1", (resolution as Resolution.Found).profile.profileId)
     }
 
     @Test

@@ -69,6 +69,7 @@ class PayloadRepository(
                 loadBuiltinTargets(),
                 ::loadTargets,
                 allowCandidates = AppPreferences.allowCandidateProfiles(context),
+                candidateFlavour = AppPreferences.candidateFlavour(context).storedValue,
             )
         ) {
             is Resolution.Found -> resolution.profile
