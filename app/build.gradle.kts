@@ -12,8 +12,8 @@ android {
         applicationId = "dev.samson.s24root"
         minSdk = 33
         targetSdk = 36
-        versionCode = 18
-        versionName = "0.3.4-s24.1"
+        versionCode = 19
+        versionName = "0.3.5-s24.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Self-update is intentionally off. The updater downloads a release APK,
