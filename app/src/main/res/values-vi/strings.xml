@@ -165,5 +165,12 @@
     <string name="repo_candidate_optin_required">Thiết bị này khớp với hồ sơ ứng viên %1$s, chưa được chấp thuận phát hành. Hãy bật hồ sơ ứng viên trong Cài đặt để tiếp tục.</string>
     <string name="candidate_profiles">Hồ sơ ứng viên</string>
     <string name="candidate_profiles_description">Cho phép payload ứng viên thử nghiệm. Mặc định tắt.</string>
+    <string name="candidate_flavour_title">Trình quản lý cho hồ sơ ứng viên</string>
+    <string name="candidate_flavour_description">Chỉ dùng để kiểm chứng.</string>
+    <string name="candidate_flavour_kernelsu">KernelSU v3.3.1</string>
+    <string name="candidate_flavour_kernelsu_next">KernelSU-Next v3.4.2</string>
+    <string name="install_tap_manager_next">Chạm để cài đặt KernelSU-Next Manager</string>
+    <string name="install_tap_open_manager_next">Chạm để mở KernelSU-Next Manager</string>
+    <string name="install_tap_start_next">Chạm để cài đặt KernelSU-Next</string>
     <string name="install_confirm_candidate_note">Thiết bị này khớp với hồ sơ ứng viên chưa được phê duyệt. Chỉ tiếp tục để kiểm chứng.</string>
 </resources>

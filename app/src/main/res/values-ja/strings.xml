@@ -78,5 +78,12 @@
     <string name="repo_candidate_optin_required">このデバイスは候補プロファイル%1$sに一致しますが、まだリリース承認されていません。続行するには設定で候補プロファイルを有効にしてください。</string>
     <string name="candidate_profiles">候補プロファイル</string>
     <string name="candidate_profiles_description">実験的な候補ペイロードを許可する。既定ではオフ。</string>
+    <string name="candidate_flavour_title">候補プロファイルのマネージャー</string>
+    <string name="candidate_flavour_description">検証目的のみ。</string>
+    <string name="candidate_flavour_kernelsu">KernelSU v3.3.1</string>
+    <string name="candidate_flavour_kernelsu_next">KernelSU-Next v3.4.2</string>
+    <string name="install_tap_manager_next">タップしてKernelSU-Next Managerをインストール</string>
+    <string name="install_tap_open_manager_next">タップしてKernelSU-Next Managerを開く</string>
+    <string name="install_tap_start_next">タップしてKernelSU-Nextをインストール</string>
     <string name="install_confirm_candidate_note">このデバイスは未承認の候補プロファイルに一致します。検証目的でのみ続行してください。</string>
 </resources>

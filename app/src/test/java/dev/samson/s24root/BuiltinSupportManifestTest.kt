@@ -13,12 +13,14 @@ private const val KSUD_DIGEST = "8874894560e46dd3ab711386f07c3d89635bdaae0e02a80
 private const val EZIF_RELEASE = "6.1.162-android14-11-34343818-abS9210ZHU6EZIF"
 private const val EZIF_EXPLOIT_DIGEST = "7b68f38d9c3836c83cfc5af3af454036fe6d3f5f455c504df5670c44c22e30cb"
 private const val EZIF_KSUD_DIGEST = "fde99b5a129e5714fe6f598cf8276c76d2cbaf1a7f4e6ce9ae69d5ebca0abe61"
+private const val EZIF_NEXT_KSUD_DIGEST = "d97d3ba464e188fb280177860e006bfa92d48a09e3c7600eee06d906e032f866"
 
 private fun bundledManifestJson(
     exploit: String = """{"assetPath":"payloads/p/cve.so","sha256":"$S9210_DIGEST","size":104128}""",
     kernelSu: String = """{"assetPath":"payloads/p/ksud","sha256":"$KSUD_DIGEST","size":4995304}""",
     kernelReleases: String = """"kernelReleases":["$S9210_RELEASE"],""",
     profileId: String = "e1q-S9210ZHS6DZG1",
+    candidateFlavour: String? = null,
 ) = """
     {
       "schemaVersion": 4,
@@ -31,7 +33,7 @@ private fun bundledManifestJson(
           "kernelVersions": ["6.1.145"],
           $kernelReleases
           "exploit": $exploit,
-          "kernelsu": $kernelSu
+          "kernelsu": $kernelSu${if (candidateFlavour == null) "" else ",\n          \"candidateFlavour\": \"$candidateFlavour\""}
         }
       ]
     }
@@ -275,7 +277,7 @@ class BuiltinSupportManifestTest {
         val shipped = locate("src/main/assets/builtin-targets.json")
         assertNotNull("could not locate the bundled manifest from ${File(".").absolutePath}", shipped)
         val manifest = BuiltinSupportManifest.parse(shipped!!.readBytes())
-        assertEquals(2, manifest.targets.size)
+        assertEquals(3, manifest.targets.size)
         val byId = manifest.targets.associateBy { it.profileId }
         val dzg1 = byId["e1q-S9210ZHS6DZG1"]
         assertNotNull("missing e1q-S9210ZHS6DZG1 entry", dzg1)
@@ -283,6 +285,7 @@ class BuiltinSupportManifestTest {
         assertEquals(setOf("6.1.145"), dzg1.kernelVersions)
         assertEquals(S9210_RELEASE, dzg1.supportedKernelReleases)
         assertTrue(dzg1.bundled)
+        assertEquals("kernelsu", dzg1.candidateFlavour)
         val dzg1Exploit = dzg1.exploit as BundledArtifact
         val dzg1Ksud = dzg1.kernelSu as BundledArtifact
         assertEquals(S9210_DIGEST, dzg1Exploit.sha256)
@@ -299,8 +302,25 @@ class BuiltinSupportManifestTest {
         val ezifKsud = ezif.kernelSu as BundledArtifact
         assertEquals(EZIF_EXPLOIT_DIGEST, ezifExploit.sha256)
         assertEquals(104128L, ezifExploit.size)
+        assertEquals("payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so", ezifExploit.assetPath)
         assertEquals(EZIF_KSUD_DIGEST, ezifKsud.sha256)
         assertEquals(5065680L, ezifKsud.size)
+        assertEquals("kernelsu", ezif.candidateFlavour)
+        val ezifNext = byId["e1q-S9210ZHU6EZIF-next"]
+        assertNotNull("missing e1q-S9210ZHU6EZIF-next entry", ezifNext)
+        assertEquals(setOf("SM-S9210"), ezifNext!!.models)
+        assertEquals(setOf("6.1.162"), ezifNext.kernelVersions)
+        assertEquals(EZIF_RELEASE, ezifNext.supportedKernelReleases)
+        assertTrue(ezifNext.bundled)
+        assertEquals("kernelsu-next", ezifNext.candidateFlavour)
+        val nextExploit = ezifNext.exploit as BundledArtifact
+        val nextKsud = ezifNext.kernelSu as BundledArtifact
+        assertEquals(EZIF_EXPLOIT_DIGEST, nextExploit.sha256)
+        assertEquals(104128L, nextExploit.size)
+        // The exploit bytes are shared with the v3.3.1 candidate on purpose.
+        assertEquals("payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so", nextExploit.assetPath)
+        assertEquals(EZIF_NEXT_KSUD_DIGEST, nextKsud.sha256)
+        assertEquals(4309840L, nextKsud.size)
         for (profile in manifest.targets) {
             assertTrue(profile.bundled)
             for (artifact in listOf(profile.exploit, profile.kernelSu)) {
@@ -310,6 +330,102 @@ class BuiltinSupportManifestTest {
                 assertEquals(bundled.size, file.length())
                 assertEquals(bundled.sha256, sha256OrNull(file))
             }
+        }
+    }
+
+    @Test
+    fun candidateFlavourDefaultsToKernelSuWhenAbsent() {
+        val manifest = BuiltinSupportManifest.parse(bundledManifestJson())
+        assertEquals("kernelsu", manifest.targets.single().candidateFlavour)
+    }
+
+    @Test
+    fun candidateFlavourIsParsedWhenPresent() {
+        val manifest = BuiltinSupportManifest.parse(
+            bundledManifestJson(
+                profileId = "e1q-S9210ZHU6EZIF-next",
+                candidateFlavour = "kernelsu-next",
+            ),
+        )
+        assertEquals("kernelsu-next", manifest.targets.single().candidateFlavour)
+    }
+
+    @Test
+    fun unknownCandidateFlavourFailsClosed() {
+        // An unknown flavour must take down parsing, not resolve silently:
+        // the caller treats a missing or malformed bundled manifest as
+        // fail-closed for the reserved model.
+        val parse = {
+            BuiltinSupportManifest.parse(
+                bundledManifestJson(candidateFlavour = "bogus"),
+            )
+        }
+        try {
+            parse()
+            throw AssertionError("expected IllegalArgumentException for an unknown candidateFlavour")
+        } catch (_: IllegalArgumentException) {
+            // expected
+        }
+    }
+
+    @Test
+    fun explicitNullCandidateFlavourFallsBackToKernelSu() {
+        // org.json's optString keeps the documented default for an explicit
+        // JSON null, so a null flavour degrades to the tested default
+        // rather than crashing parsing. Pins the org.json:20250517 test
+        // double; device libcore may instead coerce an explicit null to the
+        // literal "null", which makes TargetProfile.init fail closed — both
+        // paths refuse the reserved model.
+        fun json() = """
+            {
+              "schemaVersion": 4,
+              "payloads": [
+                {
+                  "payloadId": "e1q-S9210ZHU6EZIF-next",
+                  "displayName": "Galaxy S24 China",
+                  "source": "BUILTIN",
+                  "models": ["SM-S9210"],
+                  "kernelVersions": ["6.1.162"],
+                  "kernelReleases": ["6.1.162-android14-11-34343818-abS9210ZHU6EZIF"],
+                  "candidateFlavour": null,
+                  "exploit": {"assetPath":"payloads/e/cve.so","sha256":"$S9210_DIGEST","size":104128},
+                  "kernelsu": {"assetPath":"payloads/e/ksud","sha256":"$KSUD_DIGEST","size":4995304}
+                }
+              ]
+            }
+        """.trimIndent().toByteArray()
+        val manifest = BuiltinSupportManifest.parse(json())
+        assertEquals("kernelsu", manifest.targets.single().candidateFlavour)
+    }
+
+    @Test
+    fun emptyCandidateFlavourFailsClosed() {
+        // An empty string is not a known flavour, so the profile init
+        // require rejects it and parsing fails rather than resolving against
+        // an empty flavour.
+        fun json(flavour: String) = """
+            {
+              "schemaVersion": 4,
+              "payloads": [
+                {
+                  "payloadId": "e1q-S9210ZHU6EZIF-next",
+                  "displayName": "Galaxy S24 China",
+                  "source": "BUILTIN",
+                  "models": ["SM-S9210"],
+                  "kernelVersions": ["6.1.162"],
+                  "kernelReleases": ["6.1.162-android14-11-34343818-abS9210ZHU6EZIF"],
+                  "candidateFlavour": "$flavour",
+                  "exploit": {"assetPath":"payloads/e/cve.so","sha256":"$S9210_DIGEST","size":104128},
+                  "kernelsu": {"assetPath":"payloads/e/ksud","sha256":"$KSUD_DIGEST","size":4995304}
+                }
+              ]
+            }
+        """.trimIndent().toByteArray()
+        try {
+            BuiltinSupportManifest.parse(json(""))
+            throw AssertionError("expected IllegalArgumentException for an empty candidateFlavour")
+        } catch (_: IllegalArgumentException) {
+            // expected
         }
     }
 

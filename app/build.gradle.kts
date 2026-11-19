@@ -12,8 +12,8 @@ android {
         applicationId = "dev.samson.s24root"
         minSdk = 33
         targetSdk = 36
-        versionCode = 18
-        versionName = "0.3.4-s24.1"
+        versionCode = 19
+        versionName = "0.3.5-s24.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Self-update is intentionally off. The updater downloads a release APK,
@@ -78,6 +78,18 @@ kotlin {
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
         )
     }
+}
+
+// The shipped-manifest test hash-verifies the APK-bundled payloads, but Gradle
+// does not treat src/main/assets as a unit-test input, so a local incremental
+// asset edit could leave :app:testDebugUnitTest green from the build cache
+// while the asset bytes had drifted. CI runs tools/sync-payloads.sh --check
+// (offline, both worktree and git index) ahead of this, but re-running the
+// tests on asset changes keeps the digest gate honest everywhere.
+// `matching` + `configureEach` because AGP registers the unit-test task
+// during afterEvaluate, after this script is first evaluated.
+tasks.matching { it.name == "testDebugUnitTest" }.configureEach {
+    inputs.dir("src/main/assets")
 }
 
 dependencies {

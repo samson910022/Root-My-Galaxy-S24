@@ -35,7 +35,7 @@ internal sealed interface ResolutionFailure {
  * matching device without opt-in gets [ResolutionFailure.CandidateRequiresOptIn]
  * instead of silently running an unaccepted payload.
  */
-internal val CANDIDATE_PROFILE_IDS = setOf("e1q-S9210ZHU6EZIF")
+internal val CANDIDATE_PROFILE_IDS = setOf("e1q-S9210ZHU6EZIF", "e1q-S9210ZHU6EZIF-next")
 
 internal fun isCandidateProfile(profile: TargetProfile): Boolean =
     profile.profileId in CANDIDATE_PROFILE_IDS
@@ -60,8 +60,22 @@ internal fun resolveProfile(
     bundled: List<TargetProfile>,
     remote: () -> List<TargetProfile>,
     allowCandidates: Boolean = false,
+    candidateFlavour: String = TargetProfile.FLAVOUR_KERNELSU,
 ): Resolution {
-    val (candidates, stable) = bundled.partition(::isCandidateProfile)
+    // A caller reaching this with an unknown flavour is a programming error,
+    // not a device state — the manifest parser and TargetProfile.init both
+    // fail closed on bogus values, so fail fast here too rather than
+    // resolving silently against a flavour nothing ships.
+    require(candidateFlavour in TargetProfile.KNOWN_CANDIDATE_FLAVOURS) {
+        "Unknown candidate flavour: $candidateFlavour"
+    }
+    // Two candidates may share one firmware image (the KernelSU and the
+    // KernelSU-Next EZIF pair); the opt-in alone cannot say which is wanted.
+    // The flavour preference decides, deterministically, in both the opt-in
+    // branch and the opt-in-off probe so the reported profileId always names
+    // the profile the preference selects.
+    val (allCandidates, stable) = bundled.partition(::isCandidateProfile)
+    val candidates = allCandidates.filter { it.candidateFlavour == candidateFlavour }
     stable.firstOrNull { it.passesFirmwareGate(snapshot) }?.let {
         return Resolution.Found(it)
     }

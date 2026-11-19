@@ -1,7 +1,7 @@
 # Root My Galaxy S24
 
 Unofficial build of [Root My Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy)
-targeting the **Galaxy S24 China, `SM-S9210`** (codename `e1q`) with two
+targeting the **Galaxy S24 China, `SM-S9210`** (codename `e1q`) with three
 bundled profiles:
 
 - `S9210ZHS6DZG1` — kernel
@@ -13,23 +13,62 @@ bundled profiles:
   Candidate profiles opt-in enabled (default off); validation is pending, see
   [`docs/SM-S9210-EZIF-validation-20261102.md`](docs/SM-S9210-EZIF-validation-20261102.md).
   It is not production-ready.
+- `S9210ZHU6EZIF-next` — kernel
+  `6.1.162-android14-11-34343818-abS9210ZHU6EZIF`, **candidate** KernelSU-Next
+  v3.4.2 (pair with Manager `33355`). It resolves only with the Settings >
+  Candidate profiles opt-in enabled **and** the Settings > Candidate manager
+  flavour preference set to `KernelSU-Next v3.4.2`. It shares the EZIF
+  exploit bytes; hardware-validated in a single evidence pass on
+  2026-11-19 (module Live, `u:r:ksu:s0`, SELinux Enforcing,
+  `ksud 3.4.2 (uapi: 5)`) — see
+  [`docs/SM-S9210-EZIF-NEXT-validation-20261119.md`](docs/SM-S9210-EZIF-NEXT-validation-20261119.md),
+  plus [`docs/SM-S9210-EZIF-KERNELSU-NEXT-PLAN.md`](docs/SM-S9210-EZIF-KERNELSU-NEXT-PLAN.md)
+  and [`docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md`](docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md).
+  It is not production-ready.
 
-The DZG1 payload profile lives in
+The DZG1 payload profile lived in
 [Root-My-Galaxy-Payloads#320](https://github.com/BuSung-dev/Root-My-Galaxy-Payloads/pull/320),
-which is still open. Neither the manifest entry nor the artifacts are on that
+which was closed unmerged on 2026-11-16; the payload ships bundled in this
+APK. Neither the manifest entry nor the artifacts are on that
 repository's `main` branch, so the app cannot discover or download them; the
-EZIF candidate profile is fork-only and likewise not on upstream `main`. This
-build therefore ships the binaries for both profiles inside the APK and
-verifies them against a manifest that ships alongside them.
+candidate profiles are not on upstream `main` either. This
+build therefore ships the binaries for the three profiles inside the APK and
+verifies them against a manifest that ships alongside them. The original
+payloads fork (`samson910022/Root-My-Galaxy-Payloads`) disappeared in
+November 2026; the refresh pins in `tools/sync-payloads.sh` were repointed to
+byte-identical copies in `samson910022/Root-My-Galaxy-Payloads-Next`
+(verified by SHA-256) — see
+[`docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md`](docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md).
 
 Every other device still goes through the upstream online support feed
 unchanged.
 
+## Pairing a candidate with its manager
+
+Candidates are not interchangeable across manager flavours. With the Settings >
+Candidate profiles opt-in on and the flavour set to `KernelSU-Next v3.4.2`,
+install the KernelSU-Next Manager (`KernelSU_Next_v3.4.2_33355-release.apk` from
+[the v3.4.2 release](https://github.com/KernelSU-Next/KernelSU-Next/releases/tag/v3.4.2),
+package `com.rifsxd.ksunext`); with the flavour `KernelSU v3.3.1` install the
+KernelSU Manager (versionCode `32680`, from the KernelSU release matching this
+build).
+
+The app's “Open KernelSU Manager” affordance is **not** flavour-complete today.
+With the opt-in on and `kernelsu-next` selected it points at the KernelSU-Next
+Manager (`com.rifsxd.ksunext`, 33355); with the default `kernelsu` flavour it still
+links the KernelSU Manager built for the stable DZG1 profile (versionCode
+`32601`), not the `32680` build the EZIF candidate pairs with — install Manager
+`32680` manually for the EZIF candidate. The same caveat applies to payload
+resolution: stable profiles win regardless of the flavour preference, so
+pairing the flavour with the profile that actually resolves is your
+responsibility; a mismatch shows up as the manager reporting “not installed”.
+
 ## Getting started
 
 The app needs Android 13 or newer (`minSdk` 33) and, for the bundled path,
-one of the two SM-S9210 kernel releases named above (the EZIF candidate
-additionally needs the Settings > Candidate profiles opt-in); any other
+one of the two SM-S9210 kernel releases named above (the EZIF candidates
+additionally need the Settings > Candidate profiles opt-in and, for the Next
+pair, the KernelSU-Next flavour selection); any other
 release is refused. The
 recorded hardware validation used Shizuku as the transport — install and
 authorize Shizuku before selecting that mode. Download the signed APK from the
@@ -45,7 +84,11 @@ install it, and read [Known limitations](#known-limitations) and
 | `app/src/main/assets/payloads/e1q-S9210ZHS6DZG1/ksud-e1q-S9210ZHS6DZG1-kdp` | 4995304 | `88748945…dc15049` (EXPERIMENTAL v3.3.0, Manager 32601, see below) |
 | `app/src/main/assets/payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so` | 104128 | `7b68f38d…22e30cb` (candidate, EZIF only) |
 | `app/src/main/assets/payloads/e1q-S9210ZHU6EZIF/ksud-e1q-S9210ZHU6EZIF-kdp` | 5065680 | `fde99b5a…ca0abe61` (candidate KernelSU v3.3.1, Manager 32680, EZIF only) |
+| `app/src/main/assets/payloads/e1q-S9210ZHU6EZIF-next/ksud-next-e1q-S9210ZHU6EZIF-kdp` | 4309840 | `d97d3ba4…f866` (candidate KernelSU-Next v3.4.2, Manager 33355, EZIF only, not device-validated) |
 | `app/src/main/jniLibs/arm64-v8a/libcve43499root.so` | 26040 | `b6395159…94b5bb1f` |
+
+The two EZIF candidates intentionally share the exploit asset
+`payloads/e1q-S9210ZHU6EZIF/cve-2026-43499-app.so`; only their loaders differ.
 
 > EXPERIMENTAL: this is the e1q v3.3.0 Phase-D pair from Payloads commit
 > `8236c843` (KernelSU `932014a`, `KSU_VERSION 32601`), built for exact
@@ -118,6 +161,10 @@ is digest-checked and release-gated.
 Each bundled profile enforces its own exact kernel-release match, and
 candidate profiles additionally require the Settings > Candidate profiles
 opt-in (off by default) — with the opt-in off a candidate behaves as absent.
+Two candidates may pin the same firmware (the EZIF KernelSU v3.3.1 pair and
+the EZIF KernelSU-Next v3.4.2 pair); the Settings > Candidate manager flavour
+preference (KernelSU v3.3.1 by default) deterministically picks between them,
+in resolution and in the “Open KernelSU Manager” affordance.
 When the release matches no usable profile, the firmware-mismatch message
 lists every supported release for that model (stable profiles only with the
 opt-in off, all profiles with it on) instead of just the first.
@@ -186,7 +233,7 @@ Unit tests:
 
 ## Verifying and refreshing the vendored binaries
 
-Neither binary is compiled by Gradle, so both are checked explicitly. CI runs
+None of the bundled binaries is compiled by Gradle, so they are checked explicitly. CI runs
 these two commands on every push.
 
 ```sh
@@ -200,33 +247,58 @@ a tampered binary cannot be blessed and then committed. A full
 `tools/helper-marker-removal.patch`, rebuilds it with the payloads Makefile's
 rule, and verifies the result.
 
-`./tools/sync-payloads.sh` fetches the exploit payload from the
-`samson910022/Root-My-Galaxy-Payloads` fork at pinned commit `e90759c`
-(based on the open PR #320 head plus the rt_mutex PI-guard fix) and the
+`./tools/sync-payloads.sh` pins all payload artifacts by immutable commit. The
+original payloads fork disappeared in November 2026; the pins were repointed
+on 2026-11-19 to byte-identical bytes in `samson910022/Root-My-Galaxy-Payloads-Next`:
+the DZG1 exploit to `e3a578d`, the shared EZIF/Next exploit to `c1a3f93`, the
+EZIF v3.3.1 ksud to `f91d730`, the DZG1 ksud stays on `BuSung-dev` `8236c84`
+(unchanged), and the new KernelSU-Next v3.4.2 pair (module + ksud) to the
+dedicated `pair/e1q-S9210ZHU6EZIF-ksun342` branch at `c1a3f93`. Byte-identity
+with the previous fork-era pins was verified by SHA-256 before the repoint,
+and a full `./tools/sync-payloads.sh` pass now completes end to end (it
+re-installs byte-identical bytes, so the tree is left unchanged). `--check`
+is fully offline and is what CI runs; a `raw.githubusercontent.com` fetch may
+503 briefly after a push, and the script retries transient 503s.
+
+`./tools/sync-payloads.sh` fetches the exploit payload from
+`samson910022/Root-My-Galaxy-Payloads-Next` at pinned commit `e3a578d`
+(the byte-identical successor of the fork pin `e90759c`, verified by
+SHA-256) and the
 experimental v3.3.0 `ksud` from `BuSung-dev/Root-My-Galaxy-Payloads` at pinned
 commit `8236c84`. It verifies both against the manifest before installing them;
 the v3.3.0 binary is not currently published on Payloads `main` because broader
 acceptance checks remain pending. The second (candidate) profile,
-`e1q-S9210ZHU6EZIF` (EZIF / KernelSU v3.3.1), is fetched from the same fork at
-pinned commit `58a67728` (`feature/e1q-S9210ZHU6EZIF-port`, fork-only) —
-that snapshot is the validated/released one for this PR even though Payloads
-PR #10 head has since moved; it resolves only with the Settings
+`e1q-S9210ZHU6EZIF` (EZIF / KernelSU v3.3.1), is fetched from
+`samson910022/Root-My-Galaxy-Payloads-Next`: the exploit at pinned commit
+`c1a3f93` and the ksud at pinned commit `f91d730` (`main`) — byte-identical to
+the previous fork pins `58a67728` (`feature/e1q-S9210ZHU6EZIF-port`), verified by
+SHA-256 before the repoint; it resolves only with the Settings
 candidate-profiles opt-in enabled (default off);
 see `docs/SM-S9210-EZIF-validation-20261102.md` for its validation scope.
+The third (candidate) profile, `e1q-S9210ZHU6EZIF-next` (EZIF / KernelSU-Next
+v3.4.2), is fetched from the same pair branch at pinned commit `c1a3f93`; see
+[Pairing a candidate with its manager](#pairing-a-candidate-with-its-manager).
 
-Refreshing the assets (the default mode) needs both repositories to stay
-publicly readable at those commits. The pinned exploit is not on upstream
-`main` (or any upstream branch): `BuSung-dev/Root-My-Galaxy-Payloads` `main`
-does not contain the file, and the head of open PR #320 (`a311cb88`) has
-different, pre-fix bytes. The fork is the source `sync-payloads.sh` currently
-uses; if it is removed or made private, the script cannot refetch the exploit
-until `EXPLOIT_RAW_BASE` is repointed at another copy. `--check` is unaffected:
+Refreshing the assets (the default mode) needs the payloads repositories to
+stay publicly readable at those commits. The pinned exploit is on
+`samson910022/Root-My-Galaxy-Payloads-Next` at pinned commits (byte-identical
+re-vendored copies after the original fork disappeared); `BuSung-dev` still
+serves the v3.3.0 `ksud` at `8236c84`. `--check` is unaffected:
 it is fully offline and compares the worktree copy and the Git index against
 `app/src/main/assets/builtin-targets.json`.
 
 ## Known limitations
 
 - Root is RAM-only. A reboot removes it.
+- The `e1q-S9210ZHU6EZIF-next` candidate was hardware-validated in a single
+  evidence collection on 2026-11-19 on SM-S9210 — one boot, one pass (module
+  `Live`, `u:r:ksu:s0`, `ksud 3.4.2 (uapi: 5)`; see
+  [`docs/SM-S9210-EZIF-NEXT-validation-20261119.md`](docs/SM-S9210-EZIF-NEXT-validation-20261119.md)).
+  It ships with the same exploit bytes as the v3.3.1 candidate and a
+  KernelSU-Next v3.4.2 loader pair. It remains gated behind the candidate
+  opt-in plus the KernelSU-Next flavour selection, repeatability and
+  byte-identity of the running daemon are unmeasured, it is RAM-only and
+  cleared on reboot, and it is not a substitute for the v3.3.1 candidate.
 - The default transport is the standalone one, which was **not** the transport
   the porting record validated: those runs mirrored the Shizuku-mode
   `LD_PRELOAD` invocation. Prefer Shizuku mode. The standalone path also hands
@@ -294,6 +366,11 @@ it is fully offline and compares the worktree copy and the Git index against
   `THIRD_PARTY_NOTICES.md`.
 
 ## Licensing and attribution
+
+This build also bundles a KernelSU-Next v3.4.2 loader pair for the candidate
+`e1q-S9210ZHU6EZIF-next` profile, under the same GPL-3.0-or-later (loader) and
+GPL-2.0-only (embedded module) terms; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+and the Corresponding Source pointers there.
 
 This repository is a derivative work of
 [Root My Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy) and is not

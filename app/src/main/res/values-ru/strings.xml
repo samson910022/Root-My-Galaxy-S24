@@ -176,5 +176,12 @@
     <string name="repo_candidate_optin_required">Это устройство соответствует профилю-кандидату %1$s, ещё не допущенному к выпуску. Чтобы продолжить, включите профили-кандидаты в настройках.</string>
     <string name="candidate_profiles">Профили-кандидаты</string>
     <string name="candidate_profiles_description">Разрешить экспериментальные payload кандидатов. По умолчанию выключено.</string>
+    <string name="candidate_flavour_title">Менеджер для профилей-кандидатов</string>
+    <string name="candidate_flavour_description">Только для проверки.</string>
+    <string name="candidate_flavour_kernelsu">KernelSU v3.3.1</string>
+    <string name="candidate_flavour_kernelsu_next">KernelSU-Next v3.4.2</string>
+    <string name="install_tap_manager_next">Нажмите, чтобы установить KernelSU-Next Manager</string>
+    <string name="install_tap_open_manager_next">Нажмите, чтобы открыть KernelSU-Next Manager</string>
+    <string name="install_tap_start_next">Нажмите, чтобы установить KernelSU-Next</string>
     <string name="install_confirm_candidate_note">Это устройство соответствует ещё не допущенному профилю-кандидату. Продолжайте только для проверки.</string>
 </resources>

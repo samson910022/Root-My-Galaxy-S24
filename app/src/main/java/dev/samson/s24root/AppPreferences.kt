@@ -28,12 +28,23 @@ enum class AppThemeMode(val storedValue: String) {
     }
 }
 
+enum class CandidateFlavour(val storedValue: String) {
+    KernelSu("kernelsu"),
+    KernelSuNext("kernelsu-next");
+
+    companion object {
+        fun fromStoredValue(value: String?): CandidateFlavour =
+            entries.firstOrNull { it.storedValue == value } ?: KernelSu
+    }
+}
+
 object AppPreferences {
     private const val PREFERENCES = "appearance"
     private const val ACCENT_COLOR = "accent_color"
     private const val THEME_MODE = "theme_mode"
     private const val SHIZUKU_MODE = "shizuku_mode"
     private const val CANDIDATE_PROFILES = "candidate_profiles"
+    private const val CANDIDATE_FLAVOUR = "candidate_flavour"
     private const val CONSUMED_INSTALL_REQUEST = "consumed_install_request"
 
     fun accentColor(context: Context): AccentColor = AccentColor.fromStoredValue(
@@ -76,6 +87,20 @@ object AppPreferences {
     fun setAllowCandidateProfiles(context: Context, enabled: Boolean) {
         prefs(context).edit()
             .putBoolean(CANDIDATE_PROFILES, enabled)
+            .apply()
+    }
+
+    /**
+     * Which flavour of superuser manager a candidate profile pairs with.
+     * Only meaningful with [allowCandidateProfiles] on; defaults to
+     * [CandidateFlavour.KernelSu] so the tested candidate stays the default.
+     */
+    fun candidateFlavour(context: Context): CandidateFlavour =
+        CandidateFlavour.fromStoredValue(prefs(context).getString(CANDIDATE_FLAVOUR, null))
+
+    fun setCandidateFlavour(context: Context, flavour: CandidateFlavour) {
+        prefs(context).edit()
+            .putString(CANDIDATE_FLAVOUR, flavour.storedValue)
             .apply()
     }
 

@@ -15,26 +15,50 @@ conveys the third-party components listed below under their own licences.
 
 This product bundles KernelSU (https://github.com/tiann/KernelSU) in object
 form: the "ksud" userspace loader (GPL-3.0-or-later, used here under GPL-3.0)
-and the kernel module embedded in it (GPL-2.0-only). The loader and module are
-built from KernelSU v3.3.0, commit
+and the kernel module embedded in it (GPL-2.0-only). The DZG1 loader and
+module are built from KernelSU v3.3.0, commit
 932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e, with the Samsung KDP/RKP/DEFEX
 patch set (kernelsu/patches/KernelSU-v3.3.0-samsung-kdp-rkp-defex.patch,
 2026-10-01) and CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y; the build record is
 Root-My-Galaxy-Payloads commit 8236c84301282b5415412d867ab71d4a739e0809.
-The full GPL-3.0 and GPL-2.0 texts ship with this notice
+The EZIF v3.3.1 candidate loader and module are built from KernelSU v3.3.1,
+commit 0c0fdb96 (module 432656 bytes; ksud 5065680 bytes), with the Samsung
+KDP/RKP/DEFEX patch set (KernelSU-v3.3.1-samsung-kdp-rkp-defex.patch) and
+CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y.
+This product also bundles KernelSU-Next (https://github.com/KernelSU-Next/KernelSU-Next)
+in object form for the EZIF Next candidate (e1q-S9210ZHU6EZIF-next): the
+"ksud" userspace loader (GPL-3.0-or-later) and the kernel module embedded in
+it (GPL-2.0-only), built from KernelSU-Next v3.4.2, tag commit
+4c706b5938665866ebe16944a481a7b91e3396af, with the Samsung
+KDP/RKP/DEFEX patch set (KernelSU-Next-v3.4.2-samsung-kdp-rkp-defex.patch)
+and CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT=y; the build record is
+samson910022/Root-My-Galaxy-Payloads-Next commit
+c1a3f9332922431764fa00bc306e184a3d8e4d91 (branch pair/e1q-S9210ZHU6EZIF-ksun342),
+which also carries the loader and module bytes. The full GPL-3.0 and GPL-2.0
+texts ship with this notice
 (LICENSES/GPL-3.0.txt and LICENSES/GPL-2.0.txt; also packaged inside the APK
 at assets/licenses/LICENSE-GPL-3.0.txt and
 assets/licenses/LICENSE-GPL-2.0.txt).
 
-Corresponding Source for the bundled loader and the kernel module embedded in
-it is available at:
+Corresponding Source for the bundled loaders and the kernel modules embedded
+in them is available at:
 
   KernelSU base (userspace/ for ksud, kernel/ for the kernel module)
-    https://github.com/tiann/KernelSU at commit
-    932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e
-  Samsung patch set and build record
+    https://github.com/tiann/KernelSU at commits
+    932014ab5b2c9b74a3d11e2ec4d17dd10fc9442e (v3.3.0, DZG1 pair) and
+    0c0fdb960178fa12d80d6cbcfdcb6ad8be6a865d (v3.3.1, EZIF candidate)
+  KernelSU-Next base (userspace/ for ksud, kernel/ for the module)
+    https://github.com/KernelSU-Next/KernelSU-Next at tag v3.4.2,
+    commit 4c706b5938665866ebe16944a481a7b91e3396af
+  Samsung patch sets and build records
     https://github.com/BuSung-dev/Root-My-Galaxy-Payloads at commit
-    8236c84301282b5415412d867ab71d4a739e0809
+    8236c84301282b5415412d867ab71d4a739e0809 (v3.3.0)
+    https://github.com/samson910022/Root-My-Galaxy-Payloads-Next at commit
+    c1a3f9332922431764fa00bc306e184a3d8e4d91
+    (branch pair/e1q-S9210ZHU6EZIF-ksun342; v3.4.2 pair)
+    https://github.com/samson910022/Root-My-Galaxy-Payloads-Next
+    (migrate/merge-our-customizations branch carries
+    KernelSU-v3.3.1-samsung-kdp-rkp-defex.patch)
 
 If you received a binary distribution of this software and cannot obtain the
 Corresponding Source from those locations, request it via

@@ -64,5 +64,12 @@
     <string name="repo_candidate_optin_required">此设备匹配候选配置 %1$s，该配置尚未获准发布。如需继续，请在设置中启用候选配置。</string>
     <string name="candidate_profiles">候选配置</string>
     <string name="candidate_profiles_description">允许实验性候选 payload。默认关闭。</string>
+    <string name="candidate_flavour_title">候选配置管理器</string>
+    <string name="candidate_flavour_description">仅用于验证。</string>
+    <string name="candidate_flavour_kernelsu">KernelSU v3.3.1</string>
+    <string name="candidate_flavour_kernelsu_next">KernelSU-Next v3.4.2</string>
+    <string name="install_tap_manager_next">点击安装 KernelSU-Next Manager</string>
+    <string name="install_tap_open_manager_next">点击打开 KernelSU-Next Manager</string>
+    <string name="install_tap_start_next">点击安装 KernelSU-Next</string>
     <string name="install_confirm_candidate_note">此设备匹配尚未获准发布的候选配置，仅建议为验证目的继续。</string>
 </resources>

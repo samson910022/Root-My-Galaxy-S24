@@ -4,6 +4,7 @@
 
     <queries>
         <package android:name="me.weishu.kernelsu" />
+        <package android:name="com.rifsxd.ksunext" />
         <package android:name="moe.shizuku.manager" />
     </queries>
 

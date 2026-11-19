@@ -171,5 +171,12 @@
     <string name="repo_candidate_optin_required">Cet appareil correspond au profil candidat %1$s, pas encore validé pour la publication. Activez les profils candidats dans les réglages pour continuer.</string>
     <string name="candidate_profiles">Profils candidats</string>
     <string name="candidate_profiles_description">Autoriser les payloads candidats expérimentaux. Désactivé par défaut.</string>
+    <string name="candidate_flavour_title">Gestionnaire pour les profils candidats</string>
+    <string name="candidate_flavour_description">Uniquement pour la validation.</string>
+    <string name="candidate_flavour_kernelsu">KernelSU v3.3.1</string>
+    <string name="candidate_flavour_kernelsu_next">KernelSU-Next v3.4.2</string>
+    <string name="install_tap_manager_next">Appuyez pour installer KernelSU-Next Manager</string>
+    <string name="install_tap_open_manager_next">Appuyez pour ouvrir KernelSU-Next Manager</string>
+    <string name="install_tap_start_next">Appuyez pour installer KernelSU-Next</string>
     <string name="install_confirm_candidate_note">Cet appareil correspond à un profil candidat non encore validé. Ne continuez que pour la validation.</string>
 </resources>
