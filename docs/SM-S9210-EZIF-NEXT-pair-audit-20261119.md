@@ -3,7 +3,9 @@
 > Companion to [`SM-S9210-EZIF-KERNELSU-NEXT-PLAN.md`](SM-S9210-EZIF-KERNELSU-NEXT-PLAN.md).
 > This records how the KernelSU-Next late-load pair for the candidate profile
 > `e1q-S9210ZHU6EZIF-next` was built and what was verified about it.
-> It is **not** a hardware validation record; no phone has loaded this pair.
+> It is **not** a hardware validation record. Note (2026-11-19, later):
+> the pair has since been hardware-validated once on SM-S9210 — see
+> [`SM-S9210-EZIF-NEXT-validation-20261119.md`](SM-S9210-EZIF-NEXT-validation-20261119.md).
 
 ## What was built
 
@@ -128,10 +130,13 @@ For reference, the KernelSU v3.3.1 pair for the same target audited at
 
 ## What this does NOT establish
 
-- No phone has loaded this pair. Hardware behaviour of the module
-  (`init_module()` outcome, KDP/RKP/DEFEX interaction), the manager UI
-  status, `resetprop`, module reload across a userspace restart, and
-  repeatability are all unmeasured.
+- As of the 2026-11-19 record (see
+  [`SM-S9210-EZIF-NEXT-validation-20261119.md`](SM-S9210-EZIF-NEXT-validation-20261119.md)),
+  one phone has loaded this pair once — the KDP credential-install path and
+  `u:r:ksu:s0` were observed, and `ksud 3.4.2 (uapi: 5)` reported itself.
+  The rest of the originally scoped gap still stands: the manager UI status,
+  `resetprop`, module reload across a userspace restart, and repeatability
+  are unmeasured. Byte-identity of the running daemon remains unresolved.
 - Reboot persistence is absent by design (late-load, RAM-only).
 - CVE-2026-43499 reliability on this firmware remains weakly measured:
   the 2026-11-02/03 record captures a single bootstrap-root success

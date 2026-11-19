@@ -1,5 +1,10 @@
 # SM-S9210 EZIF temporary root via CVE-2026-43499 with KernelSU-Next as the superuser manager (plan)
 
+> **Status (2026-11-19):** the acceptance hardware step this plan called for
+> has been met once on SM-S9210 — see
+> [`SM-S9210-EZIF-NEXT-validation-20261119.md`](SM-S9210-EZIF-NEXT-validation-20261119.md).
+> This plan document otherwise stands as originally written.
+
 Status: implementation plan, produced 2026-11-19; amended after plan
 review (stale KernelSU-Next state table; missing no-patch-text decision).
 Not device-verified. The Android APK shipped from this branch does **not**

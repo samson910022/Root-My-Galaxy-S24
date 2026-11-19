@@ -18,8 +18,11 @@ bundled profiles:
   v3.4.2 (pair with Manager `33355`). It resolves only with the Settings >
   Candidate profiles opt-in enabled **and** the Settings > Candidate manager
   flavour preference set to `KernelSU-Next v3.4.2`. It shares the EZIF
-  exploit bytes and has never been run on hardware; see
-  [`docs/SM-S9210-EZIF-KERNELSU-NEXT-PLAN.md`](docs/SM-S9210-EZIF-KERNELSU-NEXT-PLAN.md)
+  exploit bytes; hardware-validated in a single evidence pass on
+  2026-11-19 (module Live, `u:r:ksu:s0`, SELinux Enforcing,
+  `ksud 3.4.2 (uapi: 5)`) — see
+  [`docs/SM-S9210-EZIF-NEXT-validation-20261119.md`](docs/SM-S9210-EZIF-NEXT-validation-20261119.md),
+  plus [`docs/SM-S9210-EZIF-KERNELSU-NEXT-PLAN.md`](docs/SM-S9210-EZIF-KERNELSU-NEXT-PLAN.md)
   and [`docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md`](docs/SM-S9210-EZIF-NEXT-pair-audit-20261119.md).
   It is not production-ready.
 
@@ -287,13 +290,15 @@ it is fully offline and compares the worktree copy and the Git index against
 ## Known limitations
 
 - Root is RAM-only. A reboot removes it.
-- The `e1q-S9210ZHU6EZIF-next` candidate is **not hardware-validated on any
-  device**. It ships with the same exploit bytes as the v3.3.1 candidate but a
-  KernelSU-Next v3.4.2 loader pair that has never been loaded on SM-S9210 (the
-  Next 3.4.2 late-load path itself was validated on SM-S9180 GZIF, a different
-  firmware and kernel). It is gated behind the candidate opt-in plus the
-  KernelSU-Next flavour selection, and it is not a substitute for the v3.3.1
-  candidate.
+- The `e1q-S9210ZHU6EZIF-next` candidate was hardware-validated in a single
+  evidence collection on 2026-11-19 on SM-S9210 — one boot, one pass (module
+  `Live`, `u:r:ksu:s0`, `ksud 3.4.2 (uapi: 5)`; see
+  [`docs/SM-S9210-EZIF-NEXT-validation-20261119.md`](docs/SM-S9210-EZIF-NEXT-validation-20261119.md)).
+  It ships with the same exploit bytes as the v3.3.1 candidate and a
+  KernelSU-Next v3.4.2 loader pair. It remains gated behind the candidate
+  opt-in plus the KernelSU-Next flavour selection, repeatability and
+  byte-identity of the running daemon are unmeasured, it is RAM-only and
+  cleared on reboot, and it is not a substitute for the v3.3.1 candidate.
 - The default transport is the standalone one, which was **not** the transport
   the porting record validated: those runs mirrored the Shizuku-mode
   `LD_PRELOAD` invocation. Prefer Shizuku mode. The standalone path also hands
